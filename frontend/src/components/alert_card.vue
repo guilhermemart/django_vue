@@ -1,12 +1,37 @@
 <template>
-  <div class="box has-background-white">  
-    
+  <div class="card">
+  <nav class="breadcrumb is-right" aria-label="breadcrumbs">
+  <ul>
+    <li v-if="thumb_up"><button class="button" @click="invert_thumb_up()" >thumbup_on </button></li>
+    <li v-else><button class="button" @click="invert_thumb_up()">thumbup_off </button></li>
+    <li v-if="thumb_down"><button class="button" @click="invert_thumb_down()" >thumbdown_on </button></li>
+    <li v-else><button class="button" @click="invert_thumb_down()">thumbdown_off </button></li>
+    <li><button class="button" @click="insert_notes()">notes {{modal}}</button></li>
+  </ul>
+</nav>
+    <div class="card-content">
+        <div class="media">
+          <div class="media-left">
+            <figure class="image">
+              <img src="../assets/logo.png" alt="Placeholder image">
+            </figure>
+          </div>
+          <div class="media-content is-right">
+            <alert_card_box/>
+            <alert_card_box/>
+            <alert_card_box/>
+            <alert_card_box/>
+          </div>
+        </div>
+    </div>
+
+  </div><!-- card antigo
     <div class="has-text-right mb-4">
-      <b-button v-if= "get_thumb_up() == 'true'" size="is-small" icon-right="thumb-up" class="is-floating-right" rounded inverted type= 'is-success' @click="invert_thumb_up()" /> 
-      <b-button v-else size="is-small" icon-right="thumb-up" class="is-floating-right"  rounded inverted  @click="invert_thumb_up()"/> 
-      <b-button v-if= "get_thumb_down() == 'true'" size="is-small" icon-right="thumb-down" class="is-floating-left" rounded inverted  type= 'is-danger' @click="invert_thumb_down()"/> 
-      <b-button v-else size="is-small" icon-right="thumb-down" class="is-floating-left"  rounded inverted  @click="invert_thumb_down()" /> 
-      <b-button size="is-small" icon-right="message" class="is-observation" rounded inverted 
+      <button v-if= "get_thumb_up() == 'true'" size="is-small" icon-right="thumb-up" class="is-floating-right" rounded inverted type= 'is-success' @click="invert_thumb_up()" />
+      <button v-else size="is-small" icon-right="thumb-up" class="is-floating-right"  rounded inverted  @click="invert_thumb_up()"/>
+      <button v-if= "get_thumb_down() == 'true'" size="is-small" icon-right="thumb-down" class="is-floating-left" rounded inverted  type= 'is-danger' @click="invert_thumb_down()"/>
+      <button v-else size="is-small" icon-right="thumb-down" class="is-floating-left"  rounded inverted  @click="invert_thumb_down()" />
+      <button size="is-small" icon-right="message" class="is-observation" rounded inverted
       :type="{'is-link':Alert.notes,'is-dark':!Alert.notes}" @click="insertObservation()" /> 
       
     </div>
@@ -25,8 +50,8 @@
         <span class="has-text-grey-light is-custom-size">ID: {{ Object.values(this.Alert._id)[0] }}</span>
       </div>
       <div class="column is-3">
-        <AlertCardBox :Label="'Data'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleDateString('pt-BR')"/>
-        <AlertCardBox :Label="'Hora'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleTimeString('pt-BR')"/>
+        <alert_card_box :Label="'Data'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleDateString('pt-BR')"/>
+        <alert_card_box :Label="'Hora'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleTimeString('pt-BR')"/>
 
         
       </div>
@@ -75,7 +100,7 @@
           </section>
         </div>
         </b-modal>
-  </div>
+  </div>-->
  
 </template>
 
@@ -125,153 +150,43 @@ img {
 </style>
 <script>
 import axios from 'axios'
-import AlertCardBox from "@/components/AlertCardBox.vue";
+import alert_card_box from "@/components/alert_card_box.vue";
 
 export default {
   props: {
-    Alert: Object,
+    //Alert: Object,
   },
   data() {
     return {
-        IsImageModalActive: false,
-        thumb_up: this.Alert.thumb_up,  // Object.assign({},this.thumb_up),  // associando variaveis que vem do banco de dados
-        thumb_down: this.Alert.thumb_down,  // Object.assign({},this.thumb_up), // a variaveis locais
-        add: this.Alert.imageUrl,
-        showObservationModal:false,
-        notes:'',
-        ip: process.env.VUE_APP_IP,
-        
+        thumb_up: false,
+        thumb_down: true,
+        modal: true
         }
-},
-  computed: {
-        continuous_out_of_time: function (){  // fica verificando se estourou o tempo limite de observação
-            return this.out_of_time()
-        },
   },
   components: {
-    AlertCardBox,
+    alert_card_box,
   },
-  
   methods: {
-    get_ip(){
-      return process.env.VUE_APP_IP
-    },
-    get_libera_audio_epis(){  //navbar --> botão que permite liberar/bloquear audio
-      if(localStorage.habilita_audio_epis==true || localStorage.habilita_audio_epis=='true'){
-        return true
-      }
-      else{
-        return false
-      }
-    },
-    get_libera_audio_red(){  //navbar --> botão que permite liberar/bloquear audio
-      if(localStorage.habilita_audio_red==true || localStorage.habilita_audio_red=='true'){
-        return true
-      }
-      else{
-        return false
-      }
-    },
-    out_of_time(){  // alerta chegou e não atualizou a pagina ainda (<15s) (ocyan)
-      if(this.get_delta_time() < 15000 && this.Alert.alerts[0].toString() != '0' && (this.thumb_up=='false'||this.thumb_up==false) && (this.thumb_down=='false'||this.thumb_down==false)  ){       
-          if(this.get_libera_audio_epis()){    // variavel acessivel no navbar, inicialmente no login = true
-          this.Play_audio(1);
-          }
-          console.log("Alerta Sonoro emitido epis")
-            // ocyan pediu para tirar alerta por tempo
-          return "" //Atenção, classificar alerta!"  // alertar
-      }
-      else if(this.get_delta_time() < 15000 && this.Alert.alerts[1].toString() != '0' &&(this.thumb_up=='false'||this.thumb_up==false) && (this.thumb_down=='false'||this.thumb_down==false)  ){       
-          if(this.get_libera_audio_red()){    // variavel acessivel no navbar, inicialmente no login = true
-          this.Play_audio(1);
-          }
-          console.log("Alerta Sonoro emitido red zone")
-            // ocyan pediu para tirar alerta por tempo
-          return "" //Atenção, classificar alerta!"  // alertar
-      }
-      else{
-          return "" //Date.now().toString()  + " " + delta_timer.toString() + " " + (Date.now()-delta_timer).toString()
-      }
-    },
-    get_delta_time(){
-      return Date.now()-parseInt(this.Alert.timestamp);
-    },
-    company(){
-      return localStorage.harpiaCompany
-    },
-    is_notes_Empty(){
-      return this.notes.lenght > 0
-    },
-    insertObservation(){
-      this.notes=''
-      this.showObservationModal=!this.showObservationModal
-    },
-    insertNotes(){      
-      
-      axios.get('http://'+ this.get_ip() +':8085/insertNotes/'+this.notes+'/'+localStorage.harpiaUser +'/'+Object.values(this.Alert._id)[0]+'/ocyan')
-        this.updateFirebase(this.thumb_up)
-        this.insertObservation()
-        window.location.reload()
-      
-    },
-    Play_audio(vol){
-        var audio = new Audio(require("../assets/beep-12.wav"));
-        audio.volume = vol
-        audio.play()
-        return audio
-    },
-    GetLicenseKey() {
-        return localStorage.harpiaPassword
-    },
-    update_alert_db(){  // troca o endereço da imagem no db e sua localização (no backend)
-        // de acordo com thumb_up / thumb_down setados em true ou false o add no database muda
-      
-        return axios.get('http://' + this.get_ip() + ':8085/alerts/update/' + this.GetLicenseKey() + '/' + Object.values(this.Alert._id)[0] +"/"+ this.thumb_up+"/"+ this.thumb_down)
-    },
-
-  
-    invert_thumb_up() {  
-        if (this.thumb_up == false || this.thumb_up == 'false') {  // false false ou false true
-            this.thumb_up = 'true'
-            this.thumb_down = 'false'     // protecao pra nao gerar estado true true          
-            this.update_alert_db()/* .then(()=>{ this.updateFirebase(this.get_thumb_up) */
-            return false            
-        } 
-        else {  // true false
-            this.thumb_up = 'false'
-            this.update_alert_db()/* .then(()=>{ this.updateFirebase(this.get_thumb_up) */
-             return true
-           
+    invert_thumb_up(){
+        this.thumb_up = !this.thumb_up
+        if(this.thumb_up){
+            this.thumb_down = false
         }
-        
-    },
-    get_thumb_up() {
         return this.thumb_up
     },
-    invert_thumb_down() {  
-        if (this.thumb_down == false || this.thumb_down == 'false') {  // retorna o estado anterior
-            this.thumb_down = 'true'       // usado para não salvar a imagem do alerta 2x
-            this.thumb_up = 'false'   // protecao para nao acontecer true true nos thumbs
-            this.update_alert_db()/* .then(()=>{ this.updateFirebase(this.get_thumb_up) */
-            return false            
-        } 
-        else {
-            this.thumb_down = 'false'
-            this.update_alert_db()/* .then(()=>{ this.updateFirebase(this.get_thumb_up) */
-            return true            
-        }        
-    },
-    get_thumb_down() {
+    invert_thumb_down(){
+        this.thumb_down = !this.thumb_down
+        if(this.thumb_down){
+            this.thumb_up = false
+        }
         return this.thumb_down
     },
-    // inserir try except
-    get_alert_image() {
-      return 'http://' + this.get_ip() + ':8085/alerts/image/' + this.GetLicenseKey() + '/' + Object.values(this.Alert._id)[0]
-    },
-},
-created(){
-  // se tiver alerta novo play audio
-  this.out_of_time();
-}
+    insert_notes(){
+        this.modal = !this.modal
+    }
+  },
+  computed: {
+
+  }
 }
 </script>

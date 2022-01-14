@@ -1,4 +1,10 @@
 <template>
+<p> teste </p>
+<div class="column is-6" v-for="alert in GetCurrentPageAlerts" v-bind:key="alert['_id']['$oid']" >
+
+
+
+                                </div>
     <div>
         <iframe src="../assets/beep-12.wav" allow="autoplay" id="audio" style="display: none"></iframe>
         <section class="hero has-background-grey-lighter is-fullheight-with-navbar">
