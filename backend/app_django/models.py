@@ -110,3 +110,67 @@ class User(AbstractBaseUser, PermissionsMixin):
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
+class category(models.Model):
+    name = models.CharField(max_length=255)
+    # slug é tipo um nome mas que pode ser ajustado pra url
+    slug = models.SlugField()
+
+    class Meta:
+        ordering = ('name',)
+    
+    def __str__(self):
+        return self.name
+
+    def get_absolute_url(self):
+        return f'/{self.slug}/'
+
+class alert(models.Model):
+    # uma categoria pode ter multiplos alertas
+    alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.Cascade)
+    identificador = models.CharField(max_length=255)
+    slug = models.SlugField()
+    timestamp = models.IntegerField()
+    date_added = models.DateTimeField(auto_now_add=True),
+    description = models.TextField(blank=True, null=True)
+    quantidade = models.IntegerField()
+    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    firebase_image_url = models.SlugField()
+    class Meta:
+        ordering = ('-date_added',)
+    
+    def __str__(self):
+        return self.identificador
+
+    def get_absolute_url(self):
+        return f'/{self.category.slug}/{self.slug}/'
+    
+    def get_image(self):
+        if self.image:
+            return 'http://127.0.0.1:8000' + self.image.url
+        return ''
+    
+    def get_thumbnail(self):
+        if self.thumbnail:
+            return 'http://127.0.0.1:8000' + self.thumbnail.url
+        else:
+            if self.image:
+                self.thumbnail = self.make_thumbnail(self.image)
+                self.save()
+
+                return 'http://127.0.0.1:8000' + self.thumbnail.url
+            else:
+                return ''
+    
+    def make_thumbnail(self, image, size=(300, 200)):
+        img = Image.open(image)
+        img.convert('RGB')
+        img.thumbnail(size)
+
+        thumb_io = BytesIO()
+        img.save(thumb_io, 'JPEG', quality=85)
+
+        thumbnail = File(thumb_io, name=image.name)
+
+        return thumbnail

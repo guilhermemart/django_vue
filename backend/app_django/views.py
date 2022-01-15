@@ -1,10 +1,16 @@
-from django.shortcuts import render
-from django.http import JsonResponse
-from .get_alerts import get_alerts_by_page
-# Create your views here.
+from django.db.models import Q
+from django.http import Http404
+
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+
+from .models import alert
+from .serializers import alert_serializer
 
 
-def alerts(request):  # essa funcao será chamada no vue e posteriormente no django/index
-    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':  # se o request vem do vue
-        return JsonResponse({'msg': 'teste do alerts no vue'})
-    return render(request, '../templates/alerts.html', {'msg': 'teste do alerts no django'})
+class latest_alerts_list(APIView):
+    def get(self, request, page):
+        alertas = alert.objects.all()[6*(page-1):6*page]
+        serializer = alert_serializer(alertas, many=True)
+        return Response(serializer.data)
