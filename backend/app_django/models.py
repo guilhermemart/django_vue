@@ -81,7 +81,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ),
     )
     date_joined = models.DateTimeField(_('date joined'), default=timezone.now)
-
+    company = models.CharField(_('company'), max_length=150, blank=True)
     objects = UserManager()
 
     EMAIL_FIELD = 'email'
@@ -107,9 +107,13 @@ class User(AbstractBaseUser, PermissionsMixin):
         """Return the short name for the user."""
         return self.first_name
 
+    def get_company(self):
+        return self.company
+
     def email_user(self, subject, message, from_email=None, **kwargs):
         """Send an email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
+
 
 class category(models.Model):
     name = models.CharField(max_length=255)
@@ -125,18 +129,22 @@ class category(models.Model):
     def get_absolute_url(self):
         return f'/{self.slug}/'
 
+
 class alert(models.Model):
     # uma categoria pode ter multiplos alertas
-    alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.Cascade)
+    alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.CASCADE)
     identificador = models.CharField(max_length=255)
     slug = models.SlugField()
     timestamp = models.IntegerField()
-    date_added = models.DateTimeField(auto_now_add=True),
+    date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True)
-    quantidade = models.IntegerField()
-    image = models.ImageField(upload_to='uploads/', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/', blank=True, null=True)
+    quantidade = models.IntegerField(default=1)
+    thumb_up = models.BooleanField(default=False)
+    thumb_down = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='uploads/sauron_imagens/n_avaliadas', blank=True, null=True)
+    thumbnail = models.ImageField(upload_to='uploads/sauron_thumbnails/', blank=True, null=True)
     firebase_image_url = models.SlugField()
+
     class Meta:
         ordering = ('-date_added',)
     
@@ -144,7 +152,7 @@ class alert(models.Model):
         return self.identificador
 
     def get_absolute_url(self):
-        return f'/{self.category.slug}/{self.slug}/'
+        return f'/{self.alert_category.slug}/{self.slug}/'
     
     def get_image(self):
         if self.image:
@@ -162,15 +170,12 @@ class alert(models.Model):
                 return 'http://127.0.0.1:8000' + self.thumbnail.url
             else:
                 return ''
-    
+
     def make_thumbnail(self, image, size=(300, 200)):
         img = Image.open(image)
         img.convert('RGB')
         img.thumbnail(size)
-
         thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=85)
-
+        img.save(thumb_io, 'PNG', quality=85)
         thumbnail = File(thumb_io, name=image.name)
-
         return thumbnail
