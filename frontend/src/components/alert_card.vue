@@ -13,6 +13,7 @@
             <div class="media">
               <div class="media-left">
                 <figure class="image">
+                  <!--img src "imagem aqui" -->
                   <img src="../assets/logo.png" alt="Placeholder image">
                 </figure>
                 Alert id: {{Alert.id}}

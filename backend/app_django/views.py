@@ -33,7 +33,7 @@ class create_alert(APIView):
         path = "media/uploads/sauron_imagens/n_avaliadas/example.png"
         absol_path = os.path.join(DIR, "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
         fields = request.data
-        categoria=category.objects.all()[0]
+        categoria = category.objects.all()[0]
         with open(path, 'rb') as f:
             image = ImageFile(f)
             alerta_to_create = alert(
