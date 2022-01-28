@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-
+APP_BASE_DIR = Path(__file__).resolve().parent
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -45,13 +45,7 @@ INSTALLED_APPS = [
     'djoser',
     'backend.app_django'
 ]
-
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080", "http://127.0.0.1:8080",
-    "http://localhost:8081", "http://127.0.0.1:8081",
-    "http://localhost:8082", "http://127.0.0.1:8082",
-    "http://localhost:8083", "http://127.0.0.1:8083"
-]
+CORS_ALLOW_ALL_ORIGINS = True
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -134,6 +128,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media/'
 

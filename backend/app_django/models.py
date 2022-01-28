@@ -9,6 +9,8 @@ from django.utils.translation import gettext_lazy as _
 from PIL import Image
 from io import BytesIO
 from django.core.files import File
+from datetime import datetime
+from pathlib import Path
 
 
 class UserManager(BaseUserManager):
@@ -116,9 +118,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 class category(models.Model):
-    name = models.CharField(max_length=255)
+    name = models.CharField(default="Nonconformity", max_length=255)
     # slug é tipo um nome mas que pode ser ajustado pra url
-    slug = models.SlugField()
+    slug = models.SlugField(default="Nonconformity")
 
     class Meta:
         ordering = ('name',)
@@ -133,17 +135,20 @@ class category(models.Model):
 class alert(models.Model):
     # uma categoria pode ter multiplos alertas
     alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.CASCADE)
-    identificador = models.CharField(max_length=255)
-    slug = models.SlugField()
-    timestamp = models.IntegerField()
+    identificador = models.CharField(default=int(datetime.now().timestamp() * 1000), max_length=255)
+    slug = models.SlugField(default=f"alerta_{int(datetime.now().timestamp() * 1000)}")
+    timestamp = models.IntegerField(default=int(datetime.now().timestamp()))
     date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True)
     quantidade = models.IntegerField(default=1)
     thumb_up = models.BooleanField(default=False)
     thumb_down = models.BooleanField(default=False)
-    image = models.ImageField(upload_to='uploads/sauron_imagens/n_avaliadas', blank=True, null=True)
-    thumbnail = models.ImageField(upload_to='uploads/sauron_thumbnails/', blank=True, null=True)
-    firebase_image_url = models.SlugField()
+    # imagem precisa ter campo maior pq as pastas contam
+    image = models.ImageField(upload_to='uploads/sauron_imagens/n_avaliadas', blank=True, null=True, max_length=255)
+    thumbnail = models.ImageField(upload_to='uploads/sauron_thumbnails/', blank=True, null=True, max_length=255)
+    firebase_image_url = models.TextField(default="replace_here_later_for_firebase_url")
+    # desenvolvedor ai colocar imagem na pasta do arquivo abaixo
+    local_image_url = models.TextField(default="uploads/sauron_imagens/n_avaliadas/example.png")
 
     class Meta:
         ordering = ('-date_added',)
@@ -177,5 +182,5 @@ class alert(models.Model):
         img.thumbnail(size)
         thumb_io = BytesIO()
         img.save(thumb_io, 'PNG', quality=85)
-        thumbnail = File(thumb_io, name=image.name)
+        thumbnail = File(thumb_io, name=Path(image.name).name)
         return thumbnail

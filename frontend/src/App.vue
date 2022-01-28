@@ -11,7 +11,7 @@
       </div>
       <div class="navbar-menu" id="navbar-menu" v-bind:class="{'is-active': showMobileMenu }">
         <div class="navbar-start">
-            <router-link to="/alertas" class="navbar-item">Alertas</router-link>
+            <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/tupan" class="navbar-item">Tupan</router-link>
         </div>
@@ -19,7 +19,8 @@
           <div class="navbar-item">
             <div class="buttons">
               <template v-if="$store.state.isAuthenticated">
-                <router-link to="/log-in" class="button is-light">log out</router-link>
+                <button @click="logout()" class="button is-danger">Log out</button>
+                <!--router-link to="/log-in" class="button is-light">log out</router-link-->
               </template>
               <template v-else>
                 <router-link to="/log-in" class="button is-light">Log in</router-link>
@@ -66,6 +67,16 @@ export default {
         items: []
       }
     }
+  },
+  methods:{
+    logout() {
+            axios.defaults.headers.common["Authorization"] = ""
+            localStorage.removeItem("token")
+            localStorage.removeItem("username")
+            localStorage.removeItem("userid")
+            this.$store.commit('removeToken')
+            this.$router.push('/log-in')
+        },
   },
   beforeCreate() {
     this.$store.commit('initializeStore')
