@@ -18,14 +18,3 @@ def create_alert(fields):  # fields capos do alerta nao padrões
     alerta_to_create.save()
 
 
-if __name__ == "__main__":
-    BASE_DIR = Path(__file__).resolve().parent.parent
-    path = os.path.join(BASE_DIR,"media","uploads","sauron_images","n_avaliadas","example.png")
-    fields = {
-        "quantidade":randint(1, 3),
-        "description":"fake_alert",
-        "thumb_up":False,
-        "thumb_down":False,
-        "image_path": path
-    }
-    create_alert(fields=fields)

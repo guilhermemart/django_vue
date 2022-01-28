@@ -10,6 +10,7 @@ from PIL import Image
 from io import BytesIO
 from django.core.files import File
 from datetime import datetime
+from pathlib import Path
 
 
 class UserManager(BaseUserManager):
@@ -146,6 +147,7 @@ class alert(models.Model):
     image = models.ImageField(upload_to='uploads/sauron_imagens/n_avaliadas', blank=True, null=True, max_length=255)
     thumbnail = models.ImageField(upload_to='uploads/sauron_thumbnails/', blank=True, null=True, max_length=255)
     firebase_image_url = models.TextField(default="replace_here_later_for_firebase_url")
+    # desenvolvedor ai colocar imagem na pasta do arquivo abaixo
     local_image_url = models.TextField(default="uploads/sauron_imagens/n_avaliadas/example.png")
 
     class Meta:
@@ -180,5 +182,5 @@ class alert(models.Model):
         img.thumbnail(size)
         thumb_io = BytesIO()
         img.save(thumb_io, 'PNG', quality=85)
-        thumbnail = File(thumb_io, name=image.name)
+        thumbnail = File(thumb_io, name=Path(image.name).name)
         return thumbnail

@@ -36,6 +36,7 @@ class create_alert(APIView):
         categoria = category.objects.all()[0]
         with open(path, 'rb') as f:
             image = ImageFile(f)
+            image.name=Path(image.name).name
             alerta_to_create = alert(
                 alert_category=categoria,
                 quantidade=fields.get("quantidade", randint(1, 3)),
