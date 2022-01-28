@@ -46,7 +46,7 @@ export default {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest_alerts/1')
+        .get('/api/v1/latest-alerts/1')
         .then(response => {
           this.latest_alerts = response.data
         })

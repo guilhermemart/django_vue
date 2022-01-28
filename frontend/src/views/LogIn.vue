@@ -51,7 +51,7 @@ export default {
         }
     },
     mounted() {
-        document.title = 'Log In | Djackets'
+        document.title = 'Log In | Harpia'
     },
     methods: {
         async submitForm() {
@@ -75,7 +75,7 @@ export default {
 
                     localStorage.setItem("token", token)
 
-                    const toPath = this.$route.query.to || '/cart'
+                    const toPath = this.$route.query.to || '/latest-alerts/1'
 
                     this.$router.push(toPath)
                 })

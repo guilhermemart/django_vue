@@ -25,9 +25,10 @@
 <script>
 // @ is an alias to /src
 import alert_card from '@/components/alert_card.vue'
+import axios from 'axios'
 
 export default {
-  name: 'Home',
+  name: 'Alerts',
   data() {
     return {
         latest_alerts: []
@@ -38,13 +39,13 @@ export default {
   },
   mounted() {
     this.get_latest_alerts()
-    document.title = 'Home | Harpia'
+    document.title = 'Alerts | Harpia'
   },
     methods: {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest_alerts/')
+        .get('/api/v1/latest-alerts/1')
         .then(response => {
           this.latest_alerts = response.data
         })

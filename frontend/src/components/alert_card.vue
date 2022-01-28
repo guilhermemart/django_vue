@@ -15,6 +15,7 @@
                 <figure class="image">
                   <img src="../assets/logo.png" alt="Placeholder image">
                 </figure>
+                Alert id: {{Alert.id}}
               </div>
             <div class="media-content is-right">
               <!-- Obs: os ':' servem para passar variavel, sem eles passa string --> 
@@ -163,10 +164,14 @@ export default {
         thumb_up: false,
         thumb_down: true,
         modal: true,
+        notes: "0"
         }
   },
   components: {
     alert_card_box,
+  },
+  mounted(){
+        this.preencher_card()
   },
   methods: {
     invert_thumb_up(){
@@ -174,6 +179,20 @@ export default {
         if(this.thumb_up){
             this.thumb_down = false
         }
+        const formData = {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down
+                // to do notes:this.notes
+            }
+
+            axios
+                .post("/api/v1/update_alert_by_identificador/", formData)
+                .then(response => {
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         return this.thumb_up
     },
     invert_thumb_down(){
@@ -181,14 +200,33 @@ export default {
         if(this.thumb_down){
             this.thumb_up = false
         }
+        const formData = {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down
+                // to do notes:this.notes
+            }
+
+            axios
+                .post("/api/v1/update_alert_by_identificador/", formData)
+                .then(response => {
+                })
+                .catch(error => {
+                    console.log(error)
+                })
         return this.thumb_down
     },
     insert_notes(){
         this.modal = !this.modal
+    },
+    preencher_card(){
+        this.thumb_up=this.Alert.thumb_up
+        this.thumb_down=this.Alert.thumb_down
     }
   },
   computed: {
 
-  }
+  },
+
 }
 </script>
