@@ -130,17 +130,18 @@ export default {
     get_ip(){
       return process.env.VUE_APP_IP
       },
-    user() {
+    /*user() {
       return localStorage.harpiaUser
       },
     key() {
       return localStorage.harpiaPassword
-      },
+      },*/
     loadingImages(){
-      this.imageParameters1.src=require('@/assets/cam1.jpg')
+      let whichcam = String(1)
+      this.imageParameters1.src=require('@/assets/cam'+ whichcam +".jpg")
       this.imageParameters1.onload = () => {
       this.image=this.imageParameters1
-      this.stageConfig.width = 1980 ;  // pq 1/2?
+      this.stageConfig.width = 1980 ;
       this.stageConfig.height = 1080 ;
         };
       this.imageParameters2.src=require('@/assets/cam2.jpg')
@@ -194,7 +195,7 @@ export default {
     },
     loadRedZones(){
       this.redzones=[]
-      axios.get('http://' + this.get_ip() + ':8085/loaddots/'+ this.camSelected).then((resp)=>{
+      axios.get('loaddots/'+ this.camSelected).then((resp)=>{
         let rzCadastradas = resp.data.conteudo.split('\n')
         rzCadastradas.pop()
         rzCadastradas.forEach(element => {
@@ -214,8 +215,8 @@ export default {
 
 
       this.redzonesAtivas=[]
-      axios.get('http://' + this.get_ip() + ':8085/loaddots_ativos/'+ this.camSelected ).then((resp)=>{
-        let rzAtivas = resp.data.split('\n')
+      axios.get('loaddots_ativos/'+ this.camSelected ).then((resp)=>{
+        let rzAtivas = resp.data.conteudo.split('\n')
         rzAtivas.pop()
         rzAtivas.forEach(element => {
 
@@ -229,9 +230,12 @@ export default {
           r.pontos=pontos.map(Number)
           this.redzonesAtivas.push(r)
         });
+      }).catch(error=>{
+      console.log(error)
       })
     },
     save(){
+    // precisa ser substituido por algo sem buefy --> pensei num componente
       this.$buefy.dialog.prompt({
         message: `Nome desta redzone:`,
         type:'is-success',
