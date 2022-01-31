@@ -28,15 +28,14 @@ class update_alert(APIView):
 
 class create_alert(APIView):
     def get(self, request):
-        DIR = Path(__file__).resolve().parent.parent.parent
-        path = os.path.join("media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
-        path = "media/uploads/sauron_imagens/n_avaliadas/example.png"
+        DIR = Path().home()
         absol_path = os.path.join(DIR, "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
+        path = absol_path
         fields = request.data
         categoria = category.objects.all()[0]
         with open(path, 'rb') as f:
             image = ImageFile(f)
-            image.name=Path(image.name).name
+            image.name = Path(image.name).name
             alerta_to_create = alert(
                 alert_category=categoria,
                 quantidade=fields.get("quantidade", randint(1, 3)),
@@ -44,7 +43,6 @@ class create_alert(APIView):
                 thumb_up=fields.get("thumb_up", False),
                 thumb_down=fields.get("thumb_down", False),
                 image=image,
-                #image=ImageFile(open(fields.get("image_path", path))),
                 local_image_url=fields.get("image_path", absol_path)
             )
             alerta_to_create.save()

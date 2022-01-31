@@ -14,7 +14,7 @@
       <div class="column is-12">
           <h2 class="is-size-2 has-text-centered">Latest Alerts</h2>
       </div>
-      <alert_card
+      <alert_card class="column is-4"
         v-for="alert in latest_alerts"
         v-bind:key="alert.id"
         v-bind:Alert="alert" />

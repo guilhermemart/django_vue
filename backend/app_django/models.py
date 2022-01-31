@@ -176,7 +176,7 @@ class alert(models.Model):
             else:
                 return ''
 
-    def make_thumbnail(self, image, size=(300, 200)):
+    def make_thumbnail(self, image, size=(180, 120)):
         img = Image.open(image)
         img.convert('RGB')
         img.thumbnail(size)
