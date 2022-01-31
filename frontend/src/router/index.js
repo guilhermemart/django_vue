@@ -5,11 +5,13 @@ import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../views/Home.vue'
 
 import Alertas from '../views/Alertas.vue'
+import Alerta from '../views/Alerta.vue'
 //import Category from '../views/Category.vue'
 //import Search from '../views/Search.vue'
 //import Cart from '../views/Cart.vue'
 import SignUp from '../views/SignUp.vue'
 import LogIn from '../views/LogIn.vue'
+import RedZones from '../views/RedZones.vue'
 //import MyAccount from '../views/MyAccount.vue'
 //import Checkout from '../views/Checkout.vue'
 //import Success from '../views/Success.vue'
@@ -37,6 +39,11 @@ const routes = [
     path: '/log-in',
     name: 'LogIn',
     component: LogIn
+  },
+    {
+    path: '/red_zones',
+    name: 'RedZones',
+    component: RedZones
   },
   /*{
     path: '/my-account',
@@ -72,7 +79,7 @@ const routes = [
   {
     path: '/:category_slug/:product_slug',
     name: 'Alerta',
-    component: Alertas
+    component: Alerta
   },
     {
     path: '/latest-alerts/:page',

@@ -31,7 +31,8 @@ export default {
   name: 'Alerts',
   data() {
     return {
-        latest_alerts: []
+        latest_alerts: [],
+        page: "1"
     }
   },
   components: {
