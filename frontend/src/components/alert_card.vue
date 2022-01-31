@@ -14,7 +14,7 @@
               <div class="media-left">
                 <figure class="image">
                   <!--img src "imagem aqui" -->
-                  <img src="../assets/logo.png" alt="Placeholder image">
+                  <img :src="Alert.get_thumbnail">
                 </figure>
                 Alert id: {{Alert.id}}
               </div>
