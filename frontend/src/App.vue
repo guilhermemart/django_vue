@@ -1,6 +1,6 @@
 <template>
-  <div id="wrapper">
-    <nav class="navbar is-dark">
+  <!-- <div class="vertical-horizontal-center has-background-github"> -->
+    <!-- <nav class="navbar is-dark">
       <div class="navbar-brand">
         <router-link to="/" class="navbar-item"><strong>Beholder</strong></router-link>
         <a class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu" @click="showMobileMenu = !showMobileMenu">
@@ -20,7 +20,7 @@
             <div class="buttons">
               <template v-if="$store.state.isAuthenticated">
                 <button @click="logout()" class="button is-danger">Log out</button>
-                <!--router-link to="/log-in" class="button is-light">log out</router-link-->
+                <router-link to="/log-in" class="button is-light">log out</router-link>
               </template>
               <template v-else>
                 <router-link to="/log-in" class="button is-light">Log in</router-link>
@@ -45,19 +45,50 @@
 
     <div class="is-loading-bar has-text-centered" v-bind:class="{'is-loading': $store.state.isLoading }">
       <div class="lds-dual-ring"></div>
-    </div>
+    </div> -->
 
-    <section class="section">
+    <!-- <section class="section"> -->
       <router-view/>
-    </section>
+    <!-- </section> -->
+    
 
-    <footer class="footer">
+    <!-- <footer class="footer">
       <p class="has-text-centered">Copyright (c) 2021</p>
-    </footer>
-  </div>
+    </footer> -->
+  <!-- </div> -->
 </template>
+<style lang="scss">
+$primary: #045c74;
+$warning: #e9c46a;
+$danger: #ec0000;
+$info: #2a9d8f;
+$animationDuration: 0.35s;
+@import "~bulma/sass/utilities/_all";
+@import "~bulma";
 
+#app {
+  font-family: Avenir, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-align: center;
+  color: #2c3e50;
+}
+
+#nav {
+  padding: 30px;
+
+  a {
+    font-weight: bold;
+    color: #2c3e50;
+
+    &.router-link-exact-active {
+      color: #42b983;
+    }
+  }
+}
+</style>
 <script>
+
 import axios from 'axios'
 export default {
   data() {
