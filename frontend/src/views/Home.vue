@@ -32,7 +32,8 @@ export default {
   name: 'Home',
   data() {
     return {
-        latest_alerts: []
+        latest_alerts: [],
+        page: "1"
     }
   },
   components: {
@@ -46,7 +47,7 @@ export default {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest-alerts/1')
+        .get('/api/v1/latest-alerts/'+this.page)
         .then(response => {
           this.latest_alerts = response.data
         })

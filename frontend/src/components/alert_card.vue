@@ -25,6 +25,7 @@
               <alert_card_box v-if="Alert.data_3" :label="Alert.label_3" :data="Alert.data_3" />
               <alert_card_box v-if="Alert.data_4" :label="Alert.label_4" :data="Alert.data_4" />
             </div>
+<router-link v-bind:to="Alert.get_absolute_url" class="button is-dark mt-4">View details</router-link>
         </div>
     </div>
 
@@ -98,8 +99,8 @@
               <p class="control" >
                   <b-button rounded class="is-success" @click="insertNotes()" >Inserir</b-button>
               </p>
-            </b-field>  
-                     
+            </b-field>
+
           </footer>
           </section>
         </div>

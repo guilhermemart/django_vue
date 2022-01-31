@@ -13,7 +13,7 @@
         <div class="navbar-start">
             <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
-            <router-link to="/tupan" class="navbar-item">Tupan</router-link>
+            <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
