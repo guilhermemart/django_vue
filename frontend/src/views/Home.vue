@@ -15,7 +15,7 @@
       <div class="column is-12">
           <h2 class="is-size-2 has-text-centered">Latest Alerts</h2>
       </div>
-      <alert_card
+      <alert_card class="column is-4"
         v-for="alert in latest_alerts"
         v-bind:key="alert.id"
         v-bind:Alert="alert" />
@@ -32,7 +32,8 @@ export default {
   name: 'Home',
   data() {
     return {
-        latest_alerts: []
+        latest_alerts: [],
+        page: "1"
     }
   },
   components: {
@@ -46,7 +47,7 @@ export default {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest-alerts/1')
+        .get('/api/v1/latest-alerts/'+this.page)
         .then(response => {
           this.latest_alerts = response.data
         })

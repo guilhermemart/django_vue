@@ -28,7 +28,8 @@ export default {
   },
   data() {
     return {
-        latest_alerts: []
+        latest_alerts: [],
+        page: "1"
     }
   },
   
