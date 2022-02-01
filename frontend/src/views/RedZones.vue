@@ -1,5 +1,6 @@
 <template>
     <div>
+    <harpiaBar />
         <div class="columns">
           <div class="column is-2 mx-4">
               <p class="subtitle mt-4">Selecione a camera:</p>
@@ -24,7 +25,7 @@
             <div class="card">
               <p class="title is-size-4">Red Zones Ativas:</p>
               <div v-if="redzonesAtivas.length">
-              <ul class="is-size-4 mx-2 my-2" v-for="rz in redzonesAtivas" :key='rz.nome'><hr> <b-button class=" mb-2 is-danger" outlined rounded  label='Desabilitar' @click="disabledRZ(rz)"/> <b class="my-4">{{rz.nome}}</b> </ul>
+              <ul class="is-size-4 mx-2 my-2" v-for="rz in redzonesAtivas" :key='rz.nome'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar</button> <b class="my-4">{{rz.nome}}</b> </ul>
               </div>
               <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
             </div>
@@ -78,13 +79,14 @@
 
 <script>
 import axios from 'axios'
-
+import harpiaBar from '@/components/harpiaBar.vue'
 //const width = window.innerWidth;
 //const height = window.innerHeight;
 
 export default {
     name:'Redzones',
     components: {
+    harpiaBar,
     },
   data() {
     return {
@@ -197,6 +199,7 @@ export default {
       this.redzones=[]
       axios.get('loaddots/'+ this.camSelected).then((resp)=>{
         let rzCadastradas = resp.data.conteudo.split('\n')
+        console.log(resp.data.conteudo)
         rzCadastradas.pop()
         rzCadastradas.forEach(element => {
 

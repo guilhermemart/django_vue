@@ -1,60 +1,52 @@
 <template>
-  <div class="home">
-  <img alt="Vue logo" src="../assets/logo.png">
-  <section class="hero is-medium is-dark mb-6">
-        <div class="hero-body has-text-centered">
-            <p class="title mb-6">
-                Bem vindo ao Harpia
-            </p>
-            <p class="subtitle">
-                Versão beholder
-            </p>
-        </div>
-  </section>
+    <div>
+        <harpiaBar />
+        <div class="home">
+
     <div class="columns is-multiline">
-      <div class="column is-12">
-          <h2 class="is-size-2 has-text-centered">Latest Alerts</h2>
-      </div>
-      <alert_card class="column is-4"
+      <alert_card
         v-for="alert in latest_alerts"
         v-bind:key="alert.id"
         v-bind:Alert="alert" />
     </div>
   </div>
-  </template>
+    </div>
+
+</template>
 
 <script>
-// @ is an alias to /src
 import alert_card from '@/components/alert_card.vue'
 import axios from 'axios'
+import harpiaBar from '@/components/harpiaBar.vue'
+
 
 export default {
-  name: 'Home',
+    name: 'Alerts',
+  components:{
+    harpiaBar,
+    alert_card
+  },
   data() {
     return {
         latest_alerts: [],
         page: "1"
     }
   },
-  components: {
-    alert_card
-  },
+
   mounted() {
     this.get_latest_alerts()
-    document.title = 'Home | Harpia'
+    document.title = 'Alerts | Harpia'
   },
     methods: {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest-alerts/'+this.page)
+        .get('/api/v1/latest-alerts/1')
         .then(response => {
           this.latest_alerts = response.data
         })
         .catch(error => {
-          console.log("erro de axios")
           console.log(error)
-          console.log(response)
         })
       this.$store.commit('setIsLoading', false)
     }

@@ -11,6 +11,7 @@ from io import BytesIO
 from django.core.files import File
 from datetime import datetime
 from pathlib import Path
+from decouple import config
 
 
 class UserManager(BaseUserManager):
@@ -135,9 +136,9 @@ class category(models.Model):
 class alert(models.Model):
     # uma categoria pode ter multiplos alertas
     alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.CASCADE)
-    identificador = models.CharField(default=int(datetime.now().timestamp() * 1000), max_length=255)
-    slug = models.SlugField(default=f"alerta_{int(datetime.now().timestamp() * 1000)}")
-    timestamp = models.IntegerField(default=int(datetime.now().timestamp()))
+    identificador = models.CharField(default="example", max_length=255)
+    slug = models.SlugField(default=f"alerta_example")
+    timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
     date_added = models.DateTimeField(auto_now_add=True)
     description = models.TextField(blank=True, null=True)
     quantidade = models.IntegerField(default=1)
@@ -161,21 +162,21 @@ class alert(models.Model):
     
     def get_image(self):
         if self.image:
-            return 'http://192.168.0.27:8000'+self.image.url
-            # return 'http://127.0.0.1:8000' + self.image.url
+            #return 'http://192.168.0.27:8000'+self.image.url
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.image.url
         return ''
     
     def get_thumbnail(self):
         if self.thumbnail:
-            return 'http://192.168.0.27:8000'+self.thumbnail.url
-            # return 'http://127.0.0.1:8000' + self.thumbnail.url
+            #return 'http://192.168.0.27:8000'+self.thumbnail.url
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.thumbnail.url
         else:
             if self.image:
                 self.thumbnail = self.make_thumbnail(self.image)
                 self.save()
 
-                # return 'http://127.0.0.1:8000' + self.thumbnail.url
-                return 'http://192.168.0.27:8000'+self.thumbnail.url
+                return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.thumbnail.url
+                #return 'http://192.168.0.27:8000'+self.thumbnail.url
             else:
                 return ''
 
@@ -207,9 +208,9 @@ class camera(models.Model):
 class red_zone(models.Model):
     # uma categoria pode ter multiplos alertas
     red_zone_camera = models.ForeignKey(camera, related_name='red_zones', on_delete=models.CASCADE)
-    identificador = models.CharField(default=int(datetime.now().timestamp() * 1000), max_length=255)
-    slug = models.SlugField(default=f"red_zone_camx_{int(datetime.now().timestamp() * 1000)}")
-    timestamp = models.IntegerField(default=int(datetime.now().timestamp()))
+    identificador = models.CharField(default=str(1643679950000-(365*24*60*60)), max_length=255)
+    slug = models.SlugField(default=f"red_zone_camx_{1643679950000-(365*24*60*60)}")
+    timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
     date_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(default=f"example", max_length=255)
     dots_txt = models.FileField(upload_to=f'uploads/red_zones/individual_red_zones')
@@ -226,16 +227,17 @@ class red_zone(models.Model):
 
     def get_dots(self):
         if self.dots_txt:
-            return 'http://127.0.0.1:8000' + self.dots_txt.url
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.dots_txt.url
         return ''
 
 
 class condensed_red_zones(models.Model):
     # condensa todas as red zones de 1 camera
+    # não pode ter funcoes dinamicas ex: datetime.now()
     red_zone_camera = models.ForeignKey(camera, related_name='this_camera_red_zones', on_delete=models.CASCADE)
-    identificador = models.CharField(default=int(datetime.now().timestamp() * 1000), max_length=255)
+    identificador = models.CharField(default=str(1643679950000-(365*24*60*60)), max_length=255)
     slug = models.SlugField(default=f"red_zones_camx")
-    timestamp = models.IntegerField(default=int(datetime.now().timestamp()))
+    timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
     date_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(default=f"example", max_length=255)
     red_zones_txt = models.FileField(upload_to=f'uploads/red_zones/condensed_red_zones')
@@ -253,5 +255,5 @@ class condensed_red_zones(models.Model):
 
     def get_red_zones(self):
         if self.red_zones_txt:
-            return 'http://127.0.0.1:8000' + self.red_zones_txt.url
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.red_zones_txt.url
         return ''
