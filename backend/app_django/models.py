@@ -140,7 +140,7 @@ class alert(models.Model):
     slug = models.SlugField(default=f"alerta_example")
     timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
     date_added = models.DateTimeField(auto_now_add=True)
-    description = models.TextField(blank=True, null=True)
+    anotacoes = models.TextField(blank=True, null=True)
     quantidade = models.IntegerField(default=1)
     thumb_up = models.BooleanField(default=False)
     thumb_down = models.BooleanField(default=False)
