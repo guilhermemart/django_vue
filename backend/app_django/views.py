@@ -83,3 +83,37 @@ class load_red_zone(APIView):
         all_red_zone = self.get_all_red_zones(camera_slug)
         serializer = all_red_zone_serializer(all_red_zone)
         return Response(serializer.data)
+
+
+class save_dots(APIView):
+    def post(self, request, camera_slug):
+        upload = request.files.get('txt')
+        name, ext = os.path.splitext(upload.filename)
+        if ext not in ('.txt', '.csv'):
+            return f"File extension {ext} not allowed."
+        save_path = os.path.join(os.getenv("HOME"), "Documents", "armazenamento", "sauron", f"{camera_slug}")
+        upload.save(os.path.join(save_path, "temp"), overwrite=True)
+        temp_upload = []
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
+        with open(os.path.join(save_path, "temp")) as up:
+            for line in up:
+                temp_upload.append(line.replace("\n", ""))
+        file_path = os.path.join(save_path, f'{camera_slug}')
+        up.close()
+        with open(file_path, 'r') as arq:
+            dt = []
+            for line in arq:
+                dt.append(line.replace("\n", ""))
+            print(temp_upload)
+            for el in temp_upload:
+                dt.append(el)
+        arq.close()
+        with open(file_path, "w") as out:
+            out.writelines("\n".join(dt))
+        out.close()
+        print(f"File {upload.filename} successfully saved to '{save_path}'.")
+        return f"File {upload.filename} successfully saved to '{save_path}'."
+        print(request.data.get("identificador"))
+        serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+        return Response(serializer.data)
