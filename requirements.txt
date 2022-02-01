@@ -6,3 +6,4 @@ pillow
 stripe
 gevent
 pymongo
+python-decouple

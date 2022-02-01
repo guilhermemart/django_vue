@@ -15,8 +15,7 @@ import VueKonva from "vue3-konva";
 
 require("./styles/harpia.scss")
 // magia pra nao precisar chamar a api pelo endereço completo
-//axios.defaults.baseURL = 'http://127.0.0.1:8000'
-axios.defaults.baseURL = 'http://192.168.0.27:8000'
+axios.defaults.baseURL = 'http://'+process.env.VUE_APP_IP+':8000'
 
 //monta esse App no public-->index.html
 //createApp(App).use(store).use(router).mount('#app')
