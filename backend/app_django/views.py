@@ -1,4 +1,5 @@
 from django.http import Http404
+from django.shortcuts import redirect
 
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -60,8 +61,10 @@ class alert_detail(APIView):
         except alert.DoesNotExist:
             raise Http404
 
-    def get(self, request, category_slug, product_slug, format=None):
-        alerta = self.get_object(category_slug, product_slug)
+    def get(self, request, category_slug, alert_slug, format=None):
+        print(alert_slug)
+        alerta = self.get_object(category_slug, alert_slug)
+        print(alerta)
         serializer = alert_serializer(alerta)
         return Response(serializer.data)
 
@@ -117,3 +120,4 @@ class save_dots(APIView):
         print(request.data.get("identificador"))
         serializer = alert_serializer(update_alert_by_identificador(request), many=False)
         return Response(serializer.data)
+

@@ -78,7 +78,7 @@ const routes = [
     }
   },*/
   {
-    path: '/:category_slug/:product_slug',
+    path: '/:category_slug/:alert_slug',
     name: 'Alerta',
     component: Alerta
   },

@@ -21,7 +21,7 @@
 * Instale o postgresql
     - no terminal
       * sudo apt install postgresql postgresql-contrib
-* Crie um database e um user      
+* Crie um database e um user
     - no terminal
       * sudo su - postgres
       * psql  << entrar no shell do pg

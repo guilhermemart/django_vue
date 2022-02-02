@@ -10,7 +10,7 @@ class alert_serializer(serializers.ModelSerializer):
             "identificador",  # valor pra achar o alerta especifico
             "timestamp",  # formato js
             "date_added",  #
-            "description",  # fogo pessoa epi redzone veiculo
+            "anotacoes",  # fogo pessoa epi redzone veiculo
             "quantidade",  # dificilmente mais de 1 por imagem
             "thumb_up",  # avaliado positivo
             "thumb_down",  # avaliado falso positivo

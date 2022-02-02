@@ -17,6 +17,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from . import views
 
 
 urlpatterns = [
@@ -24,6 +25,7 @@ urlpatterns = [
     path('api/v1/', include('djoser.urls')),
     path('api/v1/', include('djoser.urls.authtoken')),
     path('api/v1/', include('backend.app_django.urls')),
+    path('<slug:category>/<slug:alert>/', views.url_redirect),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 # static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) serve para
 # permitir download de arquivos uploadados pelo usuario
