@@ -7,3 +7,4 @@ stripe
 gevent
 pymongo
 python-decouple
+psycopg2

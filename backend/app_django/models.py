@@ -138,7 +138,7 @@ class alert(models.Model):
     alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.CASCADE)
     identificador = models.CharField(default="example", max_length=255)
     slug = models.SlugField(default=f"alerta_example")
-    timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
+    timestamp = models.BigIntegerField(default=1643679950000-(365*24*60*60*1000))
     date_added = models.DateTimeField(auto_now_add=True)
     anotacoes = models.TextField(blank=True, null=True)
     quantidade = models.IntegerField(default=1)

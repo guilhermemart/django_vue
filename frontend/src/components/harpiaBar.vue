@@ -4,9 +4,9 @@
       <div class="navbar-brand">
         <router-link to="/" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
         <a class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu" @click="showMobileMenu = !showMobileMenu">
-          <span aria-hidden="true">a</span>
-          <span aria-hidden="true">a</span>
-          <span aria-hidden="true">a</span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
         </a>
       </div>
       <div class="navbar-menu" id="navbar-menu" v-bind:class="{'is-active': showMobileMenu }">
