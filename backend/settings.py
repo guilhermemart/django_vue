@@ -43,6 +43,9 @@ INSTALLED_APPS = [
     'rest_framework.authtoken',
     'corsheaders',
     'djoser',
+    # normalmente só o nome do app resolve (app_django)
+    # mas qdo dá pau tem que usar o nome da pasta do projeto (backend)
+    # e editar o arquivo apps.py dentro da pasta do app (backend.app_django)
     'backend.app_django'
 ]
 CORS_ALLOW_ALL_ORIGINS = True
@@ -87,8 +90,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': 'altave',
+        'USER': 'altave',
+        'PASSWORD': 'altave',
+        'HOST': 'localhost',
+        'PORT': '',
     }
 }
 
