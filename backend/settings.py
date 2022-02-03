@@ -28,7 +28,8 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
-LOCAL_IP = config('LOCAL_IP', default='127.0.0.1')
+LOCAL_IP = config('LOCAL_IP', default='192.168.0.28')
+#LOCAL_IP = config('LOCAL_IP', default='127.0.0.1')
 # Application definition
 
 INSTALLED_APPS = [

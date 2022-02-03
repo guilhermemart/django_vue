@@ -64,7 +64,7 @@
             . . .
 * Crie as migraçoes do django:
     - cd django_vue 
-    - python -m makemigrations
+    - python -m manage makemigrations
     - python -m migrate
 * Crie um superusuario
     - python -m manage createsuperuser
