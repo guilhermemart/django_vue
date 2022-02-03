@@ -1,6 +1,7 @@
 <template>
     <div>
         <harpiaBar />
+        <calendar_search/>
         <div class="home">
 
     <div class="columns is-multiline">
@@ -18,11 +19,12 @@
 import alert_card from '@/components/alert_card.vue'
 import axios from 'axios'
 import harpiaBar from '@/components/harpiaBar.vue'
-
+import calendar_search from '@/components/calendar_search.vue'
 
 export default {
     name: 'Alerts',
   components:{
+    calendar_search,
     harpiaBar,
     alert_card
   },

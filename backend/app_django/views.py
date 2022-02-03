@@ -22,6 +22,14 @@ class latest_alerts_list(APIView):
         return Response(serializer.data)
 
 
+class alert_search(APIView):
+    def get(self, request, init, end):
+        alerts = alert.objects.filter(timestamp__gte=init)
+        alerts = alerts.filter(timestamp__lte=end)[6*(page-1):6*page]
+        serializer = alert_serializer(alerts, many=True)
+        return Response(serializer.data)
+
+
 class update_alert(APIView):
     def post(self, request):
         print(request.data.get("identificador"))
