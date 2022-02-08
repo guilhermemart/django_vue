@@ -12,6 +12,7 @@ import Alerta from '../views/Alerta.vue'
 import SignUp from '../views/SignUp.vue'
 import LogIn from '../views/LogIn.vue'
 import RedZones from '../views/RedZones.vue'
+import Audio from '../views/Audio.vue'
 //import MyAccount from '../views/MyAccount.vue'
 //import Checkout from '../views/Checkout.vue'
 //import Success from '../views/Success.vue'
@@ -45,6 +46,11 @@ const routes = [
     path: '/red_zones',
     name: 'RedZones',
     component: RedZones
+  },
+  {
+    path: '/audio',
+    name: 'Audio',
+    component: Audio
   },
   /*{
     path: '/my-account',

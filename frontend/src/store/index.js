@@ -2,8 +2,11 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
-    cart: {
-        items: [],
+    audio: {
+        is_on: true,
+        is_instantaneo: true,
+        is_recorrente: true,
+        has_delay: true
     },
     isAuthenticated: false,
     token: '',
@@ -11,10 +14,10 @@ export default createStore({
   },
   mutations: {
     initializeStore(state) {
-      if (localStorage.getItem('cart')) {
-        state.cart = JSON.parse(localStorage.getItem('cart'))
+      if (localStorage.getItem('audio')) {
+        state.audio = JSON.parse(localStorage.getItem('audio'))
       } else {
-        localStorage.setItem('cart', JSON.stringify(state.cart))
+        localStorage.setItem('audio', JSON.stringify(state.audio))
       }
 
       if (localStorage.getItem('token')) {
@@ -25,15 +28,12 @@ export default createStore({
           state.isAuthenticated = false
       }
     },
-    addToCart(state, item) {
-      const exists = state.cart.items.filter(i => i.product.id === item.product.id)
-      if (exists.length) {
-        exists[0].quantity = parseInt(exists[0].quantity) + parseInt(item.quantity)
-      } else {
-        state.cart.items.push(item)
-      }
-
-      localStorage.setItem('cart', JSON.stringify(state.cart))
+    save_audio(state, audio_new) {
+      state.audio.is_on = audio_new.is_on
+      state.audio.is_instantaneo = audio_new.is_instantaneo
+      state.audio.is_recorrente = audio_new.is_recorrente
+      state.audio.has_delay = audio_new.has_delay
+      localStorage.setItem('audio', JSON.stringify(state.audio))
     },
     setIsLoading(state, status) {
       state.isLoading = status
@@ -45,11 +45,6 @@ export default createStore({
     removeToken(state) {
         state.token = ''
         state.isAuthenticated = false
-    },
-    clearCart(state) {
-      state.cart = { items: [] }
-
-      localStorage.setItem('cart', JSON.stringify(state.cart))
     },
   },
   actions: {

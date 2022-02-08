@@ -22,7 +22,7 @@ class alert_serializer(serializers.ModelSerializer):
         )
 
 
-class CategorySerializer(serializers.ModelSerializer):
+class category_serializer(serializers.ModelSerializer):
     alerts = alert_serializer(many=True)
 
     class Meta:

@@ -5,7 +5,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from .models import alert, category, red_zone, camera
-from .serializers import alert_serializer, red_zone_serializer, camera_serializer
+from .serializers import alert_serializer, red_zone_serializer, camera_serializer, category_serializer
 from .main import update_alert_by_identificador
 from .watchdog_postgree import wait_for_new_alert
 
@@ -83,7 +83,7 @@ class alert_detail(APIView):
     # mostra uma pagina com o alerta e seus detalhes
     def get_object(self, category_slug, alert_slug):
         try:
-            return alert.objects.filter(alert_category__slug=category_slug).get(slug=alert_slug)
+            return alert.objects.filter(alert_category__slug=category_slug).filter(slug=alert_slug)[0]
         except alert.DoesNotExist:
             raise Http404
 
@@ -91,6 +91,21 @@ class alert_detail(APIView):
         alerta = self.get_object(category_slug, alert_slug)
         serializer = alert_serializer(alerta)
         return Response(serializer.data)
+
+
+class category_detail(APIView):
+    # mostra uma pagina com o alerta e seus detalhes
+    def get_object(self, category_slug):
+        try:
+            return category.objects.get(slug=category_slug)[0]
+        except category.DoesNotExist:
+            raise Http404
+
+    def get(self, request, category_slug, format=None):
+        category = self.get_object(category_slug)
+        serializer = category_serializer(category)
+        return Response(serializer.data)
+
 
 class load_red_zone(APIView):
     def get_red_zone(self, camera_slug, red_zone_slug):

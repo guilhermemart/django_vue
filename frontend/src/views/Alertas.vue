@@ -54,7 +54,13 @@ export default {
         page: "1",
         date: new Date(),
         last_date: new Date(),
-        isRange:''
+        isRange:'',
+        audio: {
+            is_on: true,
+            is_instantaneo: true,
+            is_recorrente: true,
+            has_delay: true
+        }
     }
   },
   computed:{
@@ -77,6 +83,7 @@ export default {
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.get_latest_alerts(),
+    this.audio = this.$store.state.audio
     document.title = 'Alerts | Harpia'
   },
   created(){
@@ -88,9 +95,16 @@ export default {
             if(this.page == '1'){
                 this.get_latest_alerts()
                 console.log("watchdog atuando")
+                this.play_audio(1)
                 }
             this.watchdog()
             })
+        },
+    play_audio(vol){
+            if (this.audio.is_on==true && this.audio.is_instantaneo==true){
+            var audio = new Audio(require("../assets/beep-12.wav"));
+            audio.volume = vol
+            audio.play()}
         },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)

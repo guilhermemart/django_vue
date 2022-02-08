@@ -25,9 +25,9 @@
                 <router-link to="/log-in" class="button is-light">Log in</router-link>
               </template>
               <template v-if="true">
-                <router-link to="/config-som" class="button is-success">
+                <router-link to="/audio" class="button is-success">
                     <span class="icon"><img alt="sound_logo" src="../assets/sound_logo.png"></span>
-                    <span>Audio ({{ cartTotalLength }})</span>
+                    <span>Audio</span>
                 </router-link>
               </template>
               <template v-else>

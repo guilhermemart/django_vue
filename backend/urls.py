@@ -21,6 +21,7 @@ from . import views
 
 
 urlpatterns = [
+    path('', views.url_redirect_home),
     path('admin/', admin.site.urls),
     path('api/v1/', include('djoser.urls')),
     path('api/v1/', include('djoser.urls.authtoken')),

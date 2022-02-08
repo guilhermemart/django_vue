@@ -58,6 +58,7 @@ export default {
 
         console.log("iniciando")
         this.getAlert()
+        document.title = 'Alerta | Harpia'
     },
     methods: {
         get_thumb() {
