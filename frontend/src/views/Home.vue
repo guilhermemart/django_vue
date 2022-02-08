@@ -38,6 +38,9 @@ export default {
     document.title = 'Alerts | Harpia'
   },
     methods: {
+    watchdog() {
+
+    },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios

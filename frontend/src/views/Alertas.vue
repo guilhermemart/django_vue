@@ -1,8 +1,25 @@
 <template>
     <div>
         <harpiaBar />
-        <calendar_search/>
+        <!--calendar_search/-->
         <div class="home">
+
+  <div>
+    <div class="control">
+  <label class="radio">
+    <input v-model="isRange" value="false" type="radio" name="day">
+    dia
+  </label>
+  <label class="radio">
+    <input v-model="isRange" value="false" type="radio" name="period">
+    periodo
+  </label>
+</div>
+    <Datepicker v-model="date" :range="isRange" :partialRange='false'/>
+    {{date}}
+    <hr>
+    {{isRange}}
+  </div>
 
     <div class="columns is-multiline">
       <alert_card
@@ -19,31 +36,66 @@
 import alert_card from '@/components/alert_card.vue'
 import axios from 'axios'
 import harpiaBar from '@/components/harpiaBar.vue'
-import calendar_search from '@/components/calendar_search.vue'
-
+//import calendar_search from '@/components/calendar_search.vue'
+import { ref } from "vue";
+import Datepicker from "vue3-date-time-picker";
+import "vue3-date-time-picker/dist/main.css";
 export default {
-    name: 'Alerts',
+  name: 'Alerts',
   components:{
-    calendar_search,
+    //calendar_search,
     harpiaBar,
-    alert_card
+    alert_card,
+    Datepicker,
   },
   data() {
     return {
         latest_alerts: [],
-        page: "1"
+        page: "1",
+        date: new Date(),
+        last_date: new Date(),
+        isRange:''
     }
   },
-  
+  computed:{
+    dateSelect(){
+      return this.date
+    }
+  },
+  watch:{
+      dateSelect:{
+        handler(){
+          this.toTimestamp()
+        }
+      },
+      watchdog:{
+           handler(){
+               this.watchdog
+           }
+      }
+  },
   mounted() {
-    this.get_latest_alerts()
+    this.page=this.$route.params.page  // armazena em qual pagina está
+    this.get_latest_alerts(),
     document.title = 'Alerts | Harpia'
   },
-    methods: {
+  created(){
+    this.watchdog()
+  },
+  methods: {
+    watchdog(){
+        axios.get('/api/v1/watchdog').then( item => {
+            if(this.page == '1'){
+                this.get_latest_alerts()
+                console.log("watchdog atuando")
+                }
+            this.watchdog()
+            })
+        },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest-alerts/1')
+        .get('/api/v1/latest-alerts/'+this.page)
         .then(response => {
           this.latest_alerts = response.data
         })
@@ -51,7 +103,28 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-    }
-  }
+    },
+    async get_date_filtered_alerts() {
+      this.$store.commit('setIsLoading', true)
+      var path='/api/v1/'+this.date[0]+'/'+this.date[1]+'/'+this.page
+      alert(path)
+      await axios
+        .get('/api/v1/alert_search/'+this.date[0]+'/'+this.date[1]+'/'+this.page)
+        .then(response => {
+          this.latest_alerts = response.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      this.$store.commit('setIsLoading', false)
+    },
+    toTimestamp(){
+      let justDate0=new Date(this.date[0]).toDateString()
+      this.date[0]=new Date(justDate0).getTime()
+      let justDate1=new Date(this.date[1]).toDateString()
+      this.date[1]=new Date(justDate1).getTime()-99
+      console.log(this.get_date_filtered_alerts())
+    },
+  },
 }
 </script>

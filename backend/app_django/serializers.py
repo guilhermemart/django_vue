@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import alert, category, camera, red_zone, condensed_red_zones
+from .models import alert, category, camera, red_zone
 
 
 class alert_serializer(serializers.ModelSerializer):
@@ -47,29 +47,13 @@ class red_zone_serializer(serializers.ModelSerializer):
             "get_dots",  # retorna os pontos da red zone em formato txt
             "conteudo",  # retorna os pontos da red json
             "get_absolute_url",  # primeiro link da imagem (imutavel)
-            "local_dots_url"   # local que o txt encontra agora
+            "local_dots_url",   # local que o txt encontra agora
+            "dots"
         )
 
 
-class all_red_zone_serializer(serializers.ModelSerializer):
-    class Meta:
-        model = condensed_red_zones
-        fields = (
-            "id",  # mesma do mongo se possível
-            "identificador",  # valor pra achar o alerta especifico
-            "timestamp",  # formato js
-            "date_added",  #
-            "name",  # ponte, guindaste ..
-            "get_red_zones",  # retorna os pontos da red zone em formato txt
-            "conteudo",  # retorna os pontos da red json
-            "get_absolute_url",  # primeiro link da imagem (imutavel)
-            "local_dots_url"   # local que o txt encontra agora
-        )
-
-
-class CameraSerializer(serializers.ModelSerializer):
+class camera_serializer(serializers.ModelSerializer):
     red_zones = red_zone_serializer(many=True)
-    all_red_zones = all_red_zone_serializer(many=True)
 
     class Meta:
         model = camera
@@ -79,5 +63,4 @@ class CameraSerializer(serializers.ModelSerializer):
             "ativa",
             "get_absolute_url",
             "red_zones"
-            "all_red_zones"
         }

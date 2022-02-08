@@ -4,18 +4,22 @@ from django.shortcuts import redirect
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
-from .models import alert, category, red_zone, camera, condensed_red_zones
-from .serializers import alert_serializer, red_zone_serializer, all_red_zone_serializer
+from .models import alert, category, red_zone, camera
+from .serializers import alert_serializer, red_zone_serializer, camera_serializer
 from .main import update_alert_by_identificador
+from .watchdog_postgree import wait_for_new_alert
 
 from random import randint
 from django.core.files.images import ImageFile
 import os
 from pathlib import Path
 from datetime import datetime
+import pgpubsub
 
 
 class latest_alerts_list(APIView):
+    # devolve alertas sem filtro
+    # usada para chamar a pagina dos alertas sem filtros
     def get(self, request, page):
         alertas = alert.objects.all()[6*(page-1):6*page]
         serializer = alert_serializer(alertas, many=True)
@@ -23,7 +27,8 @@ class latest_alerts_list(APIView):
 
 
 class alert_search(APIView):
-    def get(self, request, init, end):
+    # devolve alertas filtrados de acordo com a data (timestamp)
+    def get(self, request, init, end, page):
         alerts = alert.objects.filter(timestamp__gte=init)
         alerts = alerts.filter(timestamp__lte=end)[6*(page-1):6*page]
         serializer = alert_serializer(alerts, many=True)
@@ -32,12 +37,18 @@ class alert_search(APIView):
 
 class update_alert(APIView):
     def post(self, request):
-        print(request.data.get("identificador"))
-        serializer = alert_serializer(update_alert_by_identificador(request), many=False)
-        return Response(serializer.data)
+        temp = request.data.get("identificador", "wrong_id")
+        if temp == "wrong_id":
+            print(temp)
+        else:
+            # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
+            serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+            return Response(serializer.data)
+        raise Http404
 
 
 class create_alert(APIView):
+    # cria um novo alerta de acordo com os dados do request
     def get(self, request):
         DIR = Path().home()
         absol_path = os.path.join(DIR, "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
@@ -49,20 +60,27 @@ class create_alert(APIView):
             image.name = Path(image.name).name
             alerta_to_create = alert(
                 alert_category=categoria,
+                slug=fields.get("slug", f'example_{int(datetime.now().timestamp()*1000)}'),
                 identificador=fields.get("identificador", int(datetime.now().timestamp()*1000)),
                 quantidade=fields.get("quantidade", randint(1, 3)),
-                description=fields.get("description", ""),
+                anotacoes=fields.get("anotacoes", ""),
                 thumb_up=fields.get("thumb_up", False),
                 thumb_down=fields.get("thumb_down", False),
                 image=image,
                 local_image_url=fields.get("image_path", absol_path)
             )
             alerta_to_create.save()
+            try:
+                pubsub = pgpubsub.connect(dbname="altave", user='altave', password='altave', host="localhost")
+            except Exception as e:
+                print(e)
+            pubsub.notify('canal_1', 'mensagem_enviada')
             serializer = alert_serializer(alerta_to_create)
         return Response(serializer.data)
 
 
 class alert_detail(APIView):
+    # mostra uma pagina com o alerta e seus detalhes
     def get_object(self, category_slug, alert_slug):
         try:
             return alert.objects.filter(alert_category__slug=category_slug).get(slug=alert_slug)
@@ -70,30 +88,31 @@ class alert_detail(APIView):
             raise Http404
 
     def get(self, request, category_slug, alert_slug, format=None):
-        print(alert_slug)
         alerta = self.get_object(category_slug, alert_slug)
-        print(alerta)
         serializer = alert_serializer(alerta)
         return Response(serializer.data)
 
 class load_red_zone(APIView):
     def get_red_zone(self, camera_slug, red_zone_slug):
         try:
-            return red_zone.objects.filter(red_zone_camera__slug=camera_slug).get(slug=red_zone_slug)
+            return red_zone.objects.filter(red_zone_camera__slug=camera_slug).filter(slug=red_zone_slug)[0]
         except red_zone.DoesNotExist:
             raise Http404
 
-    def get_all_red_zones(self, camera_slug):
+    def get_all_red_zones_dots(self, camera_slug):
         try:
-            condensado = condensed_red_zones.objects.filter(red_zone_camera__slug=camera_slug)[0]
-            return condensado
-        except condensed_red_zones.DoesNotExist:
+            condensado = red_zone.objects.filter(red_zone_camera__slug=camera_slug)
+            serializer = camera_serializer(condensado)
+            all_red_zones = {}
+            for red_zone_ in serializer.data:
+                all_red_zones[red_zone_["name"]] = red_zone_['dots']
+            return all_red_zones
+        except camera.DoesNotExist:
             raise Http404
 
     def get(self, request, camera_slug, format=None):
-        all_red_zone = self.get_all_red_zones(camera_slug)
-        serializer = all_red_zone_serializer(all_red_zone)
-        return Response(serializer.data)
+        all_red_zone = self.get_all_red_zones_dots(camera_slug)
+        return Response(all_red_zone)
 
 
 class save_dots(APIView):
@@ -129,3 +148,11 @@ class save_dots(APIView):
         serializer = alert_serializer(update_alert_by_identificador(request), many=False)
         return Response(serializer.data)
 
+# o watchdog do front deve chamar essa função e deixar ela em watch
+class wait_alert(APIView):
+    def get(self, request):
+        # o for abaixo fica travado esperando um novo alerta chegar
+        for alert_ in wait_for_new_alert():
+            serializer = alert_serializer(alert_, many=True)
+            print("novo alerta recebido: " + datetime.now().isoformat())
+            return Response(serializer.data)

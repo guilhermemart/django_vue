@@ -24,7 +24,7 @@ from django.utils.html import escape
 from django.utils.translation import gettext, gettext_lazy as _
 from django.views.decorators.csrf import csrf_protect
 from django.views.decorators.debug import sensitive_post_parameters
-from .models import category, alert, User, camera, red_zone, condensed_red_zones
+from .models import category, alert, User, camera, red_zone
 
 csrf_protect_m = method_decorator(csrf_protect)
 sensitive_post_parameters_m = method_decorator(sensitive_post_parameters())
@@ -202,5 +202,4 @@ class UserAdmin(admin.ModelAdmin):
 admin.site.register(category)
 admin.site.register(alert)
 admin.site.register(red_zone)
-admin.site.register(condensed_red_zones)
 admin.site.register(camera)

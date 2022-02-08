@@ -131,6 +131,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 frontend_old
-/backend/app_django/migrations/
+/backend/app_django/migrations/*
 frontend/.env
 backend/.env
