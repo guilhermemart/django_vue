@@ -80,3 +80,4 @@
 * Manteiners:
     - Guilherme Martins
     - Celso Reis
+    - Devanir Ramos
