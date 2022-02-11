@@ -18,6 +18,6 @@ axios.defaults.baseURL = 'http://'+process.env.VUE_APP_IP+':8000'
 const app = createApp(App);
 app.use(store);
 app.use(router, axios);
-app.use(VueKonva);
+app.use(VueKonva); // app para desenhar na tela
 app.use(Konva);
 app.mount('#app');

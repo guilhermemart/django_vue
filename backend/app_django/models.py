@@ -114,7 +114,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.company
 
     def email_user(self, subject, message, from_email=None, **kwargs):
-        """Send an email to this user."""
+        """email to this user."""
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
@@ -137,6 +137,7 @@ class alert(models.Model):
     # uma categoria pode ter multiplos alertas
     alert_category = models.ForeignKey(category, related_name='alerts', on_delete=models.CASCADE)
     identificador = models.CharField(default="example", max_length=255)
+    sequencial = models.IntegerField(default=0)
     slug = models.SlugField(default=f"alerta_example")
     timestamp = models.BigIntegerField(default=1643679950000-(365*24*60*60*1000))
     date_added = models.DateTimeField(auto_now_add=True)
@@ -150,7 +151,8 @@ class alert(models.Model):
     firebase_image_url = models.TextField(default="replace_here_later_for_firebase_url")
     # desenvolvedor ai colocar imagem na pasta do arquivo abaixo
     local_image_url = models.TextField(default="uploads/sauron_imagens/n_avaliadas/example.png")
-
+    opsreport = models.FileField(upload_to="witsml_opsreports/", default="witsml/opsreport.xml")
+    attachment = models.FileField(upload_to="witsml_attachments/", default="witsml/attachment.xml")
     class Meta:
         ordering = ('-date_added',)
     
@@ -162,13 +164,21 @@ class alert(models.Model):
     
     def get_image(self):
         if self.image:
-            #return 'http://192.168.0.27:8000'+self.image.url
+            # return 'http://192.168.0.27:8000'+self.image.url
             return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.image.url
         return ''
-    
+
+    def get_opsreport(self):
+        if self.opsreport:
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.opsreport.url
+
+    def get_attachment(self):
+        if self.attachment:
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.attachment.url
+
     def get_thumbnail(self):
         if self.thumbnail:
-            #return 'http://192.168.0.27:8000'+self.thumbnail.url
+            # return 'http://192.168.0.27:8000'+self.thumbnail.url
             return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.thumbnail.url
         else:
             if self.image:
@@ -176,7 +186,7 @@ class alert(models.Model):
                 self.save()
 
                 return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.thumbnail.url
-                #return 'http://192.168.0.27:8000'+self.thumbnail.url
+                # return 'http://192.168.0.27:8000'+self.thumbnail.url
             else:
                 return ''
 
