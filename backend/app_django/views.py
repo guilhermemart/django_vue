@@ -50,11 +50,15 @@ class update_alert(APIView):
 class create_alert(APIView):
     # cria um novo alerta de acordo com os dados do request
     def get(self, request):
-        DIR = Path().home()
-        absol_path = os.path.join(DIR, "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
+        diretorio = Path().home()
+        absol_path = os.path.join(diretorio, "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
         path = absol_path
         fields = request.data
         categoria = category.objects.all()[0]
+        categoria_input = category.objects.filter(name=fields.get('category_name','Nonconformity'))
+        if categoria_input.count() > 0:
+            categoria = categoria_input[0]
+        alertas_qtde = alert.objects.all().count()
         with open(path, 'rb') as f:
             image = ImageFile(f)
             image.name = Path(image.name).name
@@ -67,7 +71,8 @@ class create_alert(APIView):
                 thumb_up=fields.get("thumb_up", False),
                 thumb_down=fields.get("thumb_down", False),
                 image=image,
-                local_image_url=fields.get("image_path", absol_path)
+                local_image_url=fields.get("image_path", absol_path),
+                sequencial=int(alertas_qtde+1)
             )
             alerta_to_create.save()
             try:
@@ -102,8 +107,8 @@ class category_detail(APIView):
             raise Http404
 
     def get(self, request, category_slug, format=None):
-        category = self.get_object(category_slug)
-        serializer = category_serializer(category)
+        categoria = self.get_object(category_slug)
+        serializer = category_serializer(categoria)
         return Response(serializer.data)
 
 
@@ -162,6 +167,7 @@ class save_dots(APIView):
         print(request.data.get("identificador"))
         serializer = alert_serializer(update_alert_by_identificador(request), many=False)
         return Response(serializer.data)
+
 
 # o watchdog do front deve chamar essa função e deixar ela em watch
 class wait_alert(APIView):

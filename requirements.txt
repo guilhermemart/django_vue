@@ -8,3 +8,4 @@ gevent
 pymongo
 python-decouple
 psycopg2
+pgpubsub

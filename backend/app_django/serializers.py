@@ -18,7 +18,11 @@ class alert_serializer(serializers.ModelSerializer):
             "get_thumbnail",  # url imagem local reduzida
             "firebase_image_url",  # qdo alerta é criado a imagem é enviada para firebase
             "get_absolute_url",  # primeiro link da imagem (imutavel)
-            "local_image_url"   # local que a imagem encontra agora
+            "local_image_url",   # local que a imagem encontra agora
+            "get_opsreport",
+            'get_attachment',
+            'sequencial'
+
         )
 
 
