@@ -16,6 +16,7 @@ import Audio from '../views/Audio.vue'
 //import MyAccount from '../views/MyAccount.vue'
 //import Checkout from '../views/Checkout.vue'
 //import Success from '../views/Success.vue'
+import Cameras from '../views/Cameras.vue'
 
 const routes = [
   {
@@ -98,6 +99,11 @@ const routes = [
     name: 'Category',
     component: Category
   }*/
+  {
+    path: '/cameras',
+    name: 'Cameras',
+    component: Cameras
+  },
 ]
 
 const router = createRouter({

@@ -62,10 +62,15 @@
             }
             
             . . .
+
+* Instalar os requirements.txt 
+    - pip install -r requirements.txt
+
 * Crie as migraçoes do django:
     - cd django_vue 
     - python -m manage makemigrations
     - python -m manage migrate
+
 * Crie um superusuario
     - python -m manage createsuperuser
 
@@ -80,3 +85,4 @@
 * Manteiners:
     - Guilherme Martins
     - Celso Reis
+    - Devanir Ramos
