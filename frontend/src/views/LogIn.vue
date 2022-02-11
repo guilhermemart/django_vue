@@ -9,21 +9,25 @@
                 </figure>              
                 <div class="field">
                     <p class="control">
-                        <span class=" has-text-white-bis is-size-6">Login</span>
-                        <input class="input is-hovered has-background-primary has-text-white-bis" type="text" v-model="username"  />
+                        <span class=" has-text-white-bis is-size-5">Login</span>
+                        <input class="input is-hovered has-background-primary is-medium has-text-white-bis" type="text" v-model="username"  />
                     </p>   
                 </div>
                 <div class="field">               
-                    <span class=" has-text-white-bis is-size-6">Password</span>
-                    <input class="input is-hovered has-background-primary has-text-white-bis" v-model="password" type="password"  />                
+                    <span class=" has-text-white-bis is-size-5">Password</span>
+                    <input class="input is-hovered has-background-primary is-medium has-text-white-bis" v-model="password" type="password"  />                
                     <div class="notification is-danger" v-if="errors.length">
                         <p v-for="error in errors" v-bind:key="error">{{ error }}</p>
                     </div>
                     <div class="field">
                     <br/>
-                        <div class="control">
+                        <!-- <div class="control">
                             <button class="button is-dark is-centered">Log in</button>
+                        </div> -->
+                         <div class="control has-text-centered">
+                            <button class="button has-text-primary has-custom-width is-medium is-responsive is-light">Login<span class="is-family-sans-serif"></span></button>                            
                         </div>
+                        
                     </div>
 
                     <!--<hr>
@@ -40,7 +44,8 @@
 <style lang="scss" scoped>
 
 .has-custom-width {
-    width: 75%
+    width: 75%;
+    border-radius: 2vh;
 }
 
 .vertical-horizontal-center {

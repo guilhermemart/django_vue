@@ -134,3 +134,4 @@ frontend_old
 /backend/app_django/migrations/
 frontend/.env
 backend/.env
+frontend/.env
