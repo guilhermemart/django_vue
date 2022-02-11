@@ -117,7 +117,8 @@ export default {
   components:{
     Datepicker,
     harpiaBar,
-    alert_card
+    alert_card,
+    Datepicker,
   },
   data() {
     return {
@@ -153,14 +154,35 @@ export default {
     },
   
   mounted() {
-    this.get_latest_alerts()
+    this.page=this.$route.params.page  // armazena em qual pagina está
+    this.get_latest_alerts(),
+    this.audio = this.$store.state.audio
     document.title = 'Alerts | Harpia'
   },
-    methods: {
+  created(){
+    this.watchdog()
+  },
+  methods: {
+    watchdog(){
+        axios.get('/api/v1/watchdog').then( item => {
+            if(this.page == '1'){
+                this.get_latest_alerts()
+                console.log("watchdog atuando")
+                this.play_audio(1)
+                }
+            this.watchdog()
+            })
+        },
+    play_audio(vol){
+            if (this.audio.is_on==true && this.audio.is_instantaneo==true){
+            var audio = new Audio(require("../assets/beep-12.wav"));
+            audio.volume = vol
+            audio.play()}
+        },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
-        .get('/api/v1/latest-alerts/1')
+        .get('/api/v1/latest-alerts/'+this.page)
         .then(response => {
           this.latest_alerts = response.data
         })
@@ -168,7 +190,28 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-    }
-  }
+    },
+    async get_date_filtered_alerts() {
+      this.$store.commit('setIsLoading', true)
+      var path='/api/v1/'+this.date[0]+'/'+this.date[1]+'/'+this.page
+      alert(path)
+      await axios
+        .get('/api/v1/alert_search/'+this.date[0]+'/'+this.date[1]+'/'+this.page)
+        .then(response => {
+          this.latest_alerts = response.data
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      this.$store.commit('setIsLoading', false)
+    },
+    toTimestamp(){
+      let justDate0=new Date(this.date[0]).toDateString()
+      this.date[0]=new Date(justDate0).getTime()
+      let justDate1=new Date(this.date[1]).toDateString()
+      this.date[1]=new Date(justDate1).getTime()-99
+      console.log(this.get_date_filtered_alerts())
+    },
+  },
 }
 </script>

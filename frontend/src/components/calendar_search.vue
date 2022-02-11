@@ -54,7 +54,7 @@ export default {
       let justDate1=new Date(this.date[1]).toDateString()
       this.date[1]=new Date(justDate1).getTime()-99
       alert(this.date)
-      
+
     }
   }
 };

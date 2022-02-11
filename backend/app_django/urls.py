@@ -10,7 +10,8 @@ urlpatterns = [
     path('alerts/<slug:category_slug>/<slug:alert_slug>/', views.alert_detail.as_view()),
     path('loaddots/<slug:camera_slug>', views.load_red_zone.as_view()),
     path('loaddots_ativos/<slug:camera_slug>', views.load_red_zone.as_view()),
-    path('alert_search/<int:init>/<int:end>/<int:page>', views.alert_search.as_view())
+    path('alert_search/<int:init>/<int:end>/<int:page>', views.alert_search.as_view()),
+    path('watchdog/', views.wait_alert.as_view()),
 ]
 '''path('products/search/', views.search),
     path('products/<slug:category_slug>/<slug:product_slug>/', views.ProductDetail.as_view()),

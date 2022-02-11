@@ -20,7 +20,7 @@
     - edite o .env do backend e o .env do frontend ask manteiners for the keys
 * Instale o postgresql
     - no terminal
-      * sudo apt install postgresql postgresql-contrib
+      * sudo apt install libpq-dev python-dev postgresql postgresql-contrib
 * Crie um database e um user
     - no terminal
       * sudo su - postgres
@@ -28,7 +28,7 @@
       * CREATE DATABASE altave;  << nao esquecer o ";"
       * CREATE USER  altave WITH PASSWORD 'altave';
       * ALTER ROLE altave SET client_encoding TO 'utf8';
-      * ALTER ROLE altave SET default_transaction_isolation TO 'read commited';
+      * ALTER ROLE altave SET default_transaction_isolation TO 'read committed';
       * GRANT ALL PRIVILEGES ON DATABASE altave TO altave;
       * \q
       * exit
@@ -62,10 +62,15 @@
             }
             
             . . .
+
+* Instalar os requirements.txt 
+    - pip install -r requirements.txt
+
 * Crie as migraçoes do django:
     - cd django_vue 
-    - python -m makemigrations
-    - python -m migrate
+    - python -m manage makemigrations
+    - python -m manage migrate
+
 * Crie um superusuario
     - python -m manage createsuperuser
 
@@ -80,3 +85,4 @@
 * Manteiners:
     - Guilherme Martins
     - Celso Reis
+    - Devanir Ramos

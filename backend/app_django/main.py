@@ -32,7 +32,7 @@ def update_alert_by_identificador(request):  # passar o ident no data do POST
     alerta_to_modify.local_image_url = new_image_url
     # cuidando das notes
     notes = request.data.get('notes', "")
-    alerta_to_modify.description = alerta_to_modify.description + "\n" + notes
+    alerta_to_modify.anotacoes = alerta_to_modify.anotacoes + "\n" + notes
     alerta_to_modify.save()
     alerta_serializado = alert_serializer(alerta_to_modify)
     print(alerta_serializado)
