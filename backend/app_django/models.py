@@ -148,11 +148,13 @@ class alert(models.Model):
     # imagem precisa ter campo maior pq as pastas contam
     image = models.ImageField(upload_to='uploads/sauron_imagens/n_avaliadas', blank=True, null=True, max_length=255)
     thumbnail = models.ImageField(upload_to='uploads/sauron_thumbnails/', blank=True, null=True, max_length=255)
-    firebase_image_url = models.TextField(default="replace_here_later_for_firebase_url")
+    firebase_image_url = models.TextField(default="image_not_sent")
     # desenvolvedor ai colocar imagem na pasta do arquivo abaixo
     local_image_url = models.TextField(default="uploads/sauron_imagens/n_avaliadas/example.png")
     opsreport = models.FileField(upload_to="witsml_opsreports/", default="witsml/opsreport.xml")
     attachment = models.FileField(upload_to="witsml_attachments/", default="witsml/attachment.xml")
+    witsml_confirm = models.TextField(default="witsml_not_sent")
+
     class Meta:
         ordering = ('-date_added',)
     
