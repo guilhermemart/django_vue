@@ -1,5 +1,37 @@
 <template>
-  <div class="card">
+  <div>
+  <div class="box has-background-white">
+    <div>
+      <button class=" button is-observation is-rounded is-small is-info">O</button>
+      <button class=" button is-floating-right is-rounded is-small is-success">L</button>
+      <button class=" button is-floating-left is-rounded is-small is-danger">D</button>
+      <div class="columns">
+        <div class="column is-4">
+
+        </div>
+        <div class="column is-3">
+          <p class="dates mb-3">{{new Date(Alert.timestamp).toLocaleDateString("en-US")}}</p>
+
+          <p class="dates">{{new Date(Alert.timestamp).toLocaleTimeString("en-US")}}</p>
+
+        </div>
+
+        <div class="column is-5">
+          <figure class="image">
+            <!--img src "imagem aqui" -->
+            <img :src="Alert.get_thumbnail">
+          </figure>
+        </div>
+
+
+      
+      </div>  
+    </div>
+  
+  </div>
+
+
+  <div class="card" v-if="false">
   <nav class="breadcrumb is-right" aria-label="breadcrumbs">
     <ul>
       <li v-if="thumb_up"><button class="button" @click="invert_thumb_up()" >thumbup_on </button></li>
@@ -106,7 +138,7 @@
         </div>
         </b-modal>
   </div>-->
- 
+ </div>
 </template>
 
 <style lang="scss">
@@ -151,6 +183,14 @@ img {
   margin-top: -30px;
   margin-right: 10px;
   display: inline-block;
+}
+.dates{
+    padding: .01vh .10vw .01vh;
+    border: .5px solid rgb(82, 82, 82);
+    border-radius: 8px;
+    margin-top: 1vh;
+    font-size: 2vh;
+  
 }
 </style>
 <script>
