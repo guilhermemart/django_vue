@@ -5,11 +5,11 @@ import os
 import base64
 import requests
 
-fake_alert={
-    'alert_category' : {'name':'Nonconformity'},
-    'identificador' : "example",
-    'sequencial' : '0',
-    'slug' : "alerta_example",
+fake_alert = {
+    'alert_category': {'name': 'Nonconformity'},
+    'identificador': "example",
+    'sequencial': '0',
+    'slug': "alerta_example",
     'timestamp': 1643679950000 - (365 * 24 * 60 * 60 * 1000),
     'date_added': "2022-02-10T15:25:14-03:00",
     'anotacoes': "",
@@ -72,7 +72,7 @@ def compose_witsml(alerta=None):
     output_ops = output_ops.replace('%opsName', f"PPE/RedZone_Alert_{alerta['sequencial']}")
     output_ops = output_ops.replace('%dTim', f"{alerta['date_added']}")
     output_ops = output_ops.replace('%comments', f"{alerta['alert_category']['name']} :{alerta['quantidade']}")
-    with open(os.path.join(os.getcwd(), "witsml_models", 'temp_opsreport.xml'), 'w') as out_ops:
+    with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_opsreport.xml"), 'w') as out_ops:
         out_ops.write(output_ops)
     out_ops.close()
     with open(os.path.join(os.getcwd(), "witsml_models", 'attachment.xml')) as input_att:
@@ -84,19 +84,24 @@ def compose_witsml(alerta=None):
     output_att = output_att.replace('%name_attach', f"PPE/RedZone_Alert_{alerta['sequencial']}")
     output_att = output_att.replace('%filename', f"attachment{alerta['sequencial']}.jpg")
     output_att = output_att.replace("%image", str(image_64_encode).replace("b'","").replace("'", ""))
-    with open(os.path.join(os.getcwd(), "witsml_models", 'temp_attachment.xml'), 'w') as out_att:
+    with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_attachment.xml"), 'w') as out_att:
         out_att.write(output_att)
     out_att.close()
-    return alerta['thumb_up']
+    return output_ops, output_att
 
 
-def send_witsml(witsml_user, witsml_pass, url, data):
+def send_witsml(witsml_user, witsml_pass, url, alerta):
     headers = {
         'Content-Type': 'text/xml',
         'SOAPAction': 'http://www.witsml.org/action/120/Store.WMLS_AddToStore',
         'Authorization': get_witsml_pass(witsml_user, witsml_pass)
     }
-    resposta = requests.request("POST", url, headers=headers, data=data)
+    data = compose_witsml(alerta)
+    print("Sending opsReport")
+    response_ops = requests.request("POST", url, headers=headers, data=data[0])
+    print("Sending attachment")
+    response_att = requests.request("POST", url, headers=headers, data=data[1])
+    return response_ops, response_att
 
 
 def get_witsml_pass(user, password):
