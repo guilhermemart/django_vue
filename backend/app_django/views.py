@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from .models import alert, category, red_zone, camera
 from .serializers import alert_serializer, red_zone_serializer, camera_serializer, category_serializer
-from .main import update_alert_by_identificador
+from .main import update_alert_by_identificador, compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 
 from random import randint
@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 import pgpubsub
+from decouple import config
 
 
 class latest_alerts_list(APIView):
@@ -42,7 +43,12 @@ class update_alert(APIView):
             print(temp)
         else:
             # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
-            serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+            serializer = alert_serializer(update_alert_by_identificador(request))
+            if str(serializer.data.thumb_up).lower() == "true":
+                try:
+                    send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer)
+                except Exception as e:
+                    print(f"impossivel criar xml {e}")
             return Response(serializer.data)
         raise Http404
 
@@ -72,7 +78,8 @@ class create_alert(APIView):
                 thumb_down=fields.get("thumb_down", False),
                 image=image,
                 local_image_url=fields.get("image_path", absol_path),
-                sequencial=int(alertas_qtde+1)
+                sequencial=int(alertas_qtde+1),
+                witsml_confirm="witsml_not_sent"
             )
             alerta_to_create.save()
             try:
@@ -165,7 +172,7 @@ class save_dots(APIView):
         print(f"File {upload.filename} successfully saved to '{save_path}'.")
         return f"File {upload.filename} successfully saved to '{save_path}'."
         print(request.data.get("identificador"))
-        serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+        serializer = alert_serializer(update_alert_by_identificador(request))
         return Response(serializer.data)
 
 

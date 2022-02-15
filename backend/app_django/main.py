@@ -1,6 +1,29 @@
 from .models import alert
 from .serializers import alert_serializer
 from shutil import move, copy
+import os
+import base64
+import requests
+
+fake_alert = {
+    'alert_category': {'name': 'Nonconformity'},
+    'identificador': "example",
+    'sequencial': '0',
+    'slug': "alerta_example",
+    'timestamp': 1643679950000 - (365 * 24 * 60 * 60 * 1000),
+    'date_added': "2022-02-10T15:25:14-03:00",
+    'anotacoes': "",
+    'quantidade': 0,
+    'thumb_up': False,
+    'thumb_down': False,
+    'get_image': 'witsml_models/example.jpg',
+    'thumbnail': 'uploads/sauron_thumbnails/',
+    'firebase_image_url': "replace_here_later_for_firebase_url",
+    'local_image_url': "uploads/sauron_imagens/n_avaliadas/example.png",
+    'opsreport': "witsml/opsreport.xml",
+    'attachment': "witsml/attachment.xml",
+    'witsml_confirm': 'witsml_not_sent'
+}
 
 
 def update_alert_by_identificador(request):  # passar o ident no data do POST
@@ -31,73 +54,56 @@ def update_alert_by_identificador(request):  # passar o ident no data do POST
     print(new_image_url)
     alerta_to_modify.local_image_url = new_image_url
     # cuidando das notes
-    notes = request.data.get('notes', "")
+    notes = request.data.get('anotacoes', "")
     alerta_to_modify.anotacoes = alerta_to_modify.anotacoes + "\n" + notes
     alerta_to_modify.save()
     alerta_serializado = alert_serializer(alerta_to_modify)
     print(alerta_serializado)
-    '''temp["thumb_up"] = str(thumb_up).lower()
-    temp["thumb_down"] = str(thumb_down).lower()
-    image_url_primaria = temp['imageUrl'].replace("/thumb_up", "").replace("/thumb_down", "")
-    # a condicional a seguir é para caso se deseje acabar com o backup
-    if os.path.isfile(temp['imageUrl']):  # verifica se a imagem existe
-        old_image_url = temp['imageUrl']
-    else:  # procura no caminho raiz (backup) a imagem correspondente
-        old_image_url = image_url_primaria
-    image_url_primaria_splited = image_url_primaria.split("/")
-    if thumb_up:
-        new_url = "/".join(image_url_primaria_splited[:-1]) + "/thumb_up/" + image_url_primaria_splited[-1]
-        if not os.path.isdir("/".join(image_url_primaria_splited[:-1]) + "/thumb_up/"):
-            os.mkdir("/".join(image_url_primaria_splited[:-1]) + "/thumb_up/")
-        move(old_image_url, new_url)
-        copy(new_url, image_url_primaria)  # se quiser evitar duas imagens comente essa linha
-        temp['imageUrl'] = new_url
-    elif thumb_down:
-        if not os.path.isdir("/".join(image_url_primaria_splited[:-1]) + "/thumb_down/"):
-            os.mkdir("/".join(image_url_primaria_splited[:-1]) + "/thumb_down/")
-        new_url = "/".join(image_url_primaria_splited[:-1]) + "/thumb_down/" + image_url_primaria_splited[-1]
-        move(old_image_url, new_url)
-        copy(new_url, image_url_primaria)
-        temp['imageUrl'] = new_url
-    else:
-        new_url = image_url_primaria
-        temp['imageUrl'] = new_url
-        move(old_image_url, new_url)  # /home/sauron/output-sauron/thumb_up_down --> /home/sauron/output-sauron
-    temp["seen"] = True
-    try:
-        # parte do firebase
-        img_name = datetime.utcfromtimestamp(int(temp['timestamp'] / 1000))
-        gcs.upload_blob('harpia-projetos.appspot.com', new_url,
-                        'Alerts_teste_' + cia + '/' + str(img_name.year) + '/' + str(img_name.month) + '/' + str(
-                            temp['_id']))
-        firebase_img_url = gcs.make_blob_public('harpia-projetos.appspot.com',
-                                                'Alerts_teste_' + cia + '/' + str(img_name.year) + '/' + str(
-                                                    img_name.month) + '/' + str(temp['_id']))
-        temp['firebase_img_url'] = firebase_img_url
-    except Exception as e:
-        print(f"{e} Problemas para atualizar alert images no Firebase")
-        firebase_img_url = '%img_not_found%'
-        temp['firebase_img_url'] = firebase_img_url
-    if "_id" not in temp:
-        temp["_id"] = dados["_id"]
-    try:
-        enviar_dados(cia, str(temp['thumb_up']).lower(),
-                     datetime.fromtimestamp(int(temp['timestamp'] / 1000), pytz.timezone("Brazil/East")), temp)
-    except Exception as e:
-        print(f"Erro: {e} - impossível enviar dados para o firebase")
-    try:
-        db.alerts.update_many({"_id": ObjectId(idd)}, {"$set": {"imageUrl": temp['imageUrl']}})
-        db.alerts.update_many({"_id": ObjectId(idd)}, {"$set": {"thumb_up": temp['thumb_up']}})
-        db.alerts.update_many({"_id": ObjectId(idd)}, {"$set": {"thumb_down": temp['thumb_down']}})
-        db.alerts.update_many({"_id": ObjectId(idd)}, {"$set": {"firebase_img_url": temp['firebase_img_url']}})
-    except Exception as e:
-        db.alerts.delete_one({"_id": temp["_id"]})
-        db.alerts.insert_one(temp)
-        print(f"{e} Problemas para atualizar alertas")
-    response.set_header("Content-Type", "application/json")
-    response.set_header("Cache-Control", 'no-cache')
-    response.add_header("Cache-Control", "no-store")
-    response.add_header("Cache-Control", 'must-revalidate')
-    response.add_header("Acces-Control-Allow-Origin", '*')
-    client.close()
-    return json.dumps(temp, default=json_util.default)'''
+    return alerta_to_modify
+
+
+def compose_witsml(alerta=None):
+    if alerta is None:
+        alerta = fake_alert
+    with open(os.path.join(os.getcwd(), "witsml_models", 'opsreport.xml')) as input_ops:
+        string_ops = input_ops.read()
+    input_ops.close()
+    output_ops = string_ops.replace('%uidOps', f"Alert_{alerta['sequencial']}")
+    output_ops = output_ops.replace('%opsName', f"PPE/RedZone_Alert_{alerta['sequencial']}")
+    output_ops = output_ops.replace('%dTim', f"{alerta['date_added']}")
+    output_ops = output_ops.replace('%comments', f"{alerta['alert_category']['name']} :{alerta['quantidade']}")
+    with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_opsreport.xml"), 'w') as out_ops:
+        out_ops.write(output_ops)
+    out_ops.close()
+    with open(os.path.join(os.getcwd(), "witsml_models", 'attachment.xml')) as input_att:
+        string_att = input_att.read()
+    input_att.close()
+    image = open(alerta['get_image'], 'rb')
+    image_64_encode = base64.b64encode(image.read())
+    output_att = string_att.replace('%uid_attach', f"Alert_{alerta['sequencial']}")
+    output_att = output_att.replace('%name_attach', f"PPE/RedZone_Alert_{alerta['sequencial']}")
+    output_att = output_att.replace('%filename', f"attachment{alerta['sequencial']}.jpg")
+    output_att = output_att.replace("%image", str(image_64_encode).replace("b'","").replace("'", ""))
+    with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_attachment.xml"), 'w') as out_att:
+        out_att.write(output_att)
+    out_att.close()
+    return output_ops, output_att
+
+
+def send_witsml(witsml_user, witsml_pass, url, alerta):
+    headers = {
+        'Content-Type': 'text/xml',
+        'SOAPAction': 'http://www.witsml.org/action/120/Store.WMLS_AddToStore',
+        'Authorization': get_witsml_pass(witsml_user, witsml_pass)
+    }
+    data = compose_witsml(alerta)
+    print("Sending opsReport")
+    response_ops = requests.request("POST", url, headers=headers, data=data[0])
+    print("Sending attachment")
+    response_att = requests.request("POST", url, headers=headers, data=data[1])
+    return response_ops, response_att
+
+
+def get_witsml_pass(user, password):
+    base64_out = base64.b64encode(f"{user}:{password}".encode("ascii"))
+    return 'Basic ' + str(base64_out)[2:-1]

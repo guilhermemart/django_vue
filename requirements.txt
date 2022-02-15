@@ -9,3 +9,4 @@ pymongo
 python-decouple
 psycopg2
 pgpubsub
+requests
