@@ -49,7 +49,7 @@
                         <div class="column">
                             <b-button size="is-large" @click="CurrentPage -= 1" icon-right="chevron-left" type="is-primary" :disabled="CurrentPage <= 1" outlined />
                         </div>
-                            <div class="column is-11">
+                            <div class="column is-12">
                             <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
                             <div class="columns has-text-black is-multiline mr-2" v-if="true">
                                 <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id">
