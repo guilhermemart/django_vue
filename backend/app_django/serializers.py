@@ -21,14 +21,13 @@ class alert_serializer(serializers.ModelSerializer):
             "local_image_url",   # local que a imagem encontra agora
             "get_opsreport",
             'get_attachment',
-            'sequencial'
-
+            'sequencial',
+            'witsml_confirm'
         )
 
 
 class category_serializer(serializers.ModelSerializer):
     alerts = alert_serializer(many=True)
-
     class Meta:
         model = category
         fields = (

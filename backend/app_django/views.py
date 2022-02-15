@@ -6,7 +6,7 @@ from rest_framework.response import Response
 
 from .models import alert, category, red_zone, camera
 from .serializers import alert_serializer, red_zone_serializer, camera_serializer, category_serializer
-from .main import update_alert_by_identificador
+from .main import update_alert_by_identificador, compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 
 from random import randint
@@ -43,6 +43,13 @@ class update_alert(APIView):
         else:
             # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
             serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+            try:
+                thumb = compose_witsml(serializer.data)
+                if thumb == True:
+                    # funcao de enviar alerta vem aqui
+                    send_witsml()
+            except Exception as e:
+                print(f"impossivel criar xml {e}")
             return Response(serializer.data)
         raise Http404
 
@@ -72,7 +79,8 @@ class create_alert(APIView):
                 thumb_down=fields.get("thumb_down", False),
                 image=image,
                 local_image_url=fields.get("image_path", absol_path),
-                sequencial=int(alertas_qtde+1)
+                sequencial=int(alertas_qtde+1),
+                witsml_confirm="witsml_not_sent"
             )
             alerta_to_create.save()
             try:
