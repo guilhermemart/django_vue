@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 from datetime import datetime
 import pgpubsub
+from decouple import config
 
 
 class latest_alerts_list(APIView):
@@ -42,14 +43,12 @@ class update_alert(APIView):
             print(temp)
         else:
             # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
-            serializer = alert_serializer(update_alert_by_identificador(request), many=False)
-            try:
-                thumb = compose_witsml(serializer.data)
-                if thumb == True:
-                    # funcao de enviar alerta vem aqui
-                    send_witsml()
-            except Exception as e:
-                print(f"impossivel criar xml {e}")
+            serializer = alert_serializer(update_alert_by_identificador(request))
+            if str(serializer.data.thumb_up).lower() == "true":
+                try:
+                    send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer)
+                except Exception as e:
+                    print(f"impossivel criar xml {e}")
             return Response(serializer.data)
         raise Http404
 
@@ -173,7 +172,7 @@ class save_dots(APIView):
         print(f"File {upload.filename} successfully saved to '{save_path}'.")
         return f"File {upload.filename} successfully saved to '{save_path}'."
         print(request.data.get("identificador"))
-        serializer = alert_serializer(update_alert_by_identificador(request), many=False)
+        serializer = alert_serializer(update_alert_by_identificador(request))
         return Response(serializer.data)
 
 

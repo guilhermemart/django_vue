@@ -1,22 +1,18 @@
 <template>
   <div>
   <div class="box has-background-white">
-    <div class="is-floating-left">
-      <button class=" button mx-1 is-rounded is-small is-primary">O</button>
-      <button class=" button mx-1 is-rounded is-small is-success">L</button>
-      <button class=" button mx-1 is-rounded is-small is-danger">D</button>
-    </div>
+   
       <div class="columns column">
         <div class="column is-3 mt-4">    
             <div class=" has-text-left">
               <div class="container has-text-underlined">
                 <icon  class="ml-2" icon="hard-hat" type="is-primary"></icon>
-                <span  class="is-size-6 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
+                <span  class="is-size-3 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
               </div>
 
               <div class="container has-text-underlined">
                 <icon class="ml-2" icon="exclamation-thick" type="is-primary"></icon>
-                <span class="is-size-6 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
+                <span class="is-size-3 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
               </div>
 
               <span class="has-text-grey-light is-custom-size">ID: {{ Alert.identificador }}</span>
@@ -29,7 +25,12 @@
 
         </div>
 
-        <div class="column is-5 thumb ">
+        <div class="column is-6">
+          <div class="is-floating-left">
+            <button class=" button mx-1 is-rounded is-small is-primary">O</button>
+            <button class=" button mx-1 is-rounded is-small is-success">L</button>
+            <button class=" button mx-1 is-rounded is-small is-danger">D</button>
+          </div>
           <figure class="image">
             <!--img src "imagem aqui" -->
             <img :src="Alert.get_thumbnail " class="has-pointer-cursor" >
@@ -47,8 +48,8 @@
 
 <style lang="scss">
 .thumb{
-position: relative;
-margin-left: 25%;
+
+
 }
 .is-observation {   
     float: right;
@@ -76,8 +77,8 @@ margin-left: 25%;
 }
 .is-floating-left {
   float: right;
-  margin-top: -39px;
-  margin-right: -30px;
+  margin-top: -50px;
+  margin-right: -40px;
   display: inline-block;
 }
 
