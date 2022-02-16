@@ -9,12 +9,31 @@
        <button class="button has-text-light has-custom-width is-medium is-responsive is-success">Find<span class="is-family-sans-serif"></span></button>     
     </div>
   </div> -->
+<div v-if="true">
+        <div class="control mt-1">
+          <label class="radio">
+            <input v-model="isRange" v-bind:value="true" type="radio" name="day">
+            dia
+          </label>
+          <label class="radio">
+            <input v-model="isRange" v-bind:value="false" type="radio" name="period">
+            periodo
+          </label>
+        </div>
 
-  <div class="has-addons level-item has-text-centered mt-4">
-  <div class="control calendar">
+      </div>
+  <div class="has-addons level-item has-text-centered ">
   
-   <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date"></Datepicker>  
+  <div class="control calendar" v-if="isRange">  
+    <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
   </div>
+
+  <div class="control calendar"  v-else>
+  <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />
+  </div>
+
+
+
   <div class="control">    
        <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary">Confirm<span class="is-family-sans-serif"></span></button>     
   </div>
@@ -23,21 +42,7 @@
   </div>
   
 </div>
-      <div v-if="false">
-        <div class="control">
-          <label class="radio">
-            <input v-model="isRange" value="false" type="radio" name="day">
-            dia
-          </label>
-          <label class="radio">
-            <input v-model="isRange" value="false" type="radio" name="period">
-            periodo
-          </label>
-        </div>
-      {{date}}
-      <hr>
-      {{isRange}}
-      </div>
+      
         <div class="home">
 
     <div class="columns mt-4 is-centered">
@@ -125,7 +130,7 @@ export default {
         page: "1",
         date: new Date(),
         last_date: new Date(),
-        isRange:'',
+        isRange:true,
         format:'',
         has_next_page: false,
     }
@@ -208,8 +213,10 @@ export default {
     toTimestamp(){
       let justDate0=new Date(this.date[0]).toDateString()
       this.date[0]=new Date(justDate0).getTime()
+
       let justDate1=new Date(this.date[1]).toDateString()
       this.date[1]=new Date(justDate1).getTime()-99
+
       console.log(this.get_date_filtered_alerts())
     },
   },
