@@ -22,7 +22,7 @@ class latest_alerts_list(APIView):
     # devolve alertas sem filtro
     # usada para chamar a pagina dos alertas sem filtros
     def get(self, request, page):
-        alertas = alert.objects.all()[6*(page-1):6*page]
+        alertas = alert.objects.all()[6*(page-1):(6*page)+1]
         serializer = alert_serializer(alertas, many=True)
         return Response(serializer.data)
 
@@ -31,7 +31,7 @@ class alert_search(APIView):
     # devolve alertas filtrados de acordo com a data (timestamp)
     def get(self, request, init, end, page):
         alerts = alert.objects.filter(timestamp__gte=init)
-        alerts = alerts.filter(timestamp__lte=end)[6*(page-1):6*page]
+        alerts = alerts.filter(timestamp__lte=end)[6*(page-1):(6*page)+1]
         serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)
 

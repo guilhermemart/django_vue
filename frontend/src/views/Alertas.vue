@@ -2,8 +2,7 @@
     <div>
       <harpiaBar />
      <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
-    
-   
+
   <!-- <div class="level-item has-text-centered mt-4">
     <div class="calendar">
        <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" />  
@@ -24,8 +23,6 @@
   </div>
   
 </div>
-
-
       <div v-if="false">
         <div class="control">
           <label class="radio">
@@ -37,8 +34,6 @@
             periodo
           </label>
         </div>
-        
-      
       {{date}}
       <hr>
       {{isRange}}
@@ -78,6 +73,11 @@
         v-bind:key="alert.id"
         v-bind:Alert="alert" />
     </div>
+    <nav class="pagination" role="navigation" aria-label="pagination">
+        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)-1).toString()">Previous</router-link></a>
+        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)+1).toString()">Next</router-link></a>
+    </nav>
+{{page}}
   </div>
   
     </div>
@@ -115,7 +115,6 @@ export default {
     name: 'Alerts',
 
   components:{
-    Datepicker,
     harpiaBar,
     alert_card,
     Datepicker,
@@ -124,13 +123,15 @@ export default {
     return {
         latest_alerts: [],
         page: "1",
-
         date: new Date(),
         last_date: new Date(),
         isRange:'',
         format:'',
-        
+        has_next_page: false,
     }
+  },
+    computed: {
+
   },
    setup() {
         const date = ref();
@@ -139,46 +140,41 @@ export default {
             const day = String(date.getDate()).length <2? '0'+String(date.getDate()):String(date.getDate())
             const month = String(date.getMonth() + 1).length <2? '0'+String(date.getMonth() + 1):String(date.getMonth() + 1);
             const year = date.getFullYear();
-
-            
-
-
-
             return `${day}/${month}/${year}`;
         }
-        
         return {
             date,
             format,
         }
     },
-  
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.get_latest_alerts(),
-    this.audio = this.$store.state.audio
     document.title = 'Alerts | Harpia'
   },
   created(){
     this.watchdog()
   },
   methods: {
+    play_audio(vol){
+        if(this.$store.state.audio.is_on==true){
+            var audio = new Audio(require("../assets/beep-12.wav"));
+            audio.volume = vol
+            audio.play()
+        }
+    },
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
             if(this.page == '1'){
                 this.get_latest_alerts()
                 console.log("watchdog atuando")
+            }
+            if(this.$store.state.audio.is_instantaneo == true){
                 this.play_audio(1)
-                }
+            }
             this.watchdog()
-            })
-        },
-    play_audio(vol){
-            if (this.audio.is_on==true && this.audio.is_instantaneo==true){
-            var audio = new Audio(require("../assets/beep-12.wav"));
-            audio.volume = vol
-            audio.play()}
-        },
+        })
+    },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       await axios
@@ -190,6 +186,10 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
+      if(Object.keys(this.latest_alerts).length>6){
+        this.has_next_page = true
+        this.latest_alerts = this.latest_alerts.slice(0,6)
+      }
     },
     async get_date_filtered_alerts() {
       this.$store.commit('setIsLoading', true)
