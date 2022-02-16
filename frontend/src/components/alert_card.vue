@@ -110,7 +110,8 @@ export default {
         thumb_up: false,
         thumb_down: true,
         modal: true,
-        notes: "0"
+        notes: "0",
+        local_audio_enable: true,
         }
   },
   components: {
@@ -131,7 +132,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -152,7 +152,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -168,11 +167,34 @@ export default {
     preencher_card(){
         this.thumb_up=this.Alert.thumb_up
         this.thumb_down=this.Alert.thumb_down
-    }
-  },
+    },
+    get_delta_time(){
+      return Date.now()-parseInt(this.Alert.timestamp);
+    },
+    out_of_time(){  // alerta chegou e não atualizou o thumb ainda
+      if (this.$store.state.audio.has_delay == true){
+      if(this.get_delta_time()>300000 && (this.thumb_up=='false') && (this.thumb_down=='false') && (this.local_audio_enable == true)){
+          this.Play_audio(1);
+          if(this.$store.state.audio.is_recorrente == false) {
+              this.local_audio_enable = false  //caso tenha atraso e nao for recorrente esse if desabilita até dar reload na pagina
+          }
+          return "Atenção, classificar alerta!"  // alertar
+      }
+      else{
+          return ""
+      }}
+    },
+    play_audio(vol){
+        if(this.$store.state.audio.is_on==true){
+            var audio = new Audio(require("../assets/beep-12.wav"))
+            audio.volume = vol
+            audio.play()
+        }
+    },},
   computed: {
+        continuous_out_of_time: function (){  // fica verificando se estourou o tempo limite de observação
+            return this.out_of_time()
+        },
+  },}
 
-  },
-
-}
 </script>
