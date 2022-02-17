@@ -6,7 +6,8 @@ from rest_framework.response import Response
 
 from .models import alert, category, red_zone, camera
 from .serializers import alert_serializer, red_zone_serializer, camera_serializer, category_serializer
-from .main import update_alert_by_identificador, compose_witsml, send_witsml
+from .main import update_alert_by_identificador
+from .wistml_sender import compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 
 from random import randint
@@ -21,9 +22,24 @@ from decouple import config
 class latest_alerts_list(APIView):
     # devolve alertas sem filtro
     # usada para chamar a pagina dos alertas sem filtros
-    def get(self, request, page):
-        alertas = alert.objects.all()[6*(page-1):(6*page)+1]
-        serializer = alert_serializer(alertas, many=True)
+    def post(self, request, page):
+        print(request.data)
+        start = request.data["start"]
+        end = request.data['end']
+        thumb_up = request.data["valids"]  # mostrar thumb upeds
+        thumb_down = request.data['invalids']  # mostrar thumbdown eds
+        non_classified = request.data['non_classifieds']  # mostrar não classificados
+        # filtragem por data
+        alerts = alert.objects.filter(timestamp__gte=start+1)
+        alerts = alerts.filter(timestamp__lte=end+1)
+        #filtragem por classificacao
+        alerts = alerts.filter(thumb_up__exact=not thumb_up)
+        alerts = alerts.filter(thumb_down__exact=not thumb_down)
+        alerts = alerts.filter(thumb_down__exact=not non_classified)[6 * (page - 1):(6 * page) + 1]
+        # 6 o numero magico de alertas na pagina
+        # retorna 7 valores o 7th serve para o vue definir se tem proxima pagina
+        serializer = alert_serializer(alerts, many=True)
+        print(serializer.data)
         return Response(serializer.data)
 
 
@@ -34,6 +50,8 @@ class alert_search(APIView):
         alerts = alerts.filter(timestamp__lte=end)[6*(page-1):(6*page)+1]
         serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)
+
+
 
 
 class update_alert(APIView):
