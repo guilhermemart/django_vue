@@ -14,6 +14,26 @@
             <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
+          <div class="navbar-item has-dropdown is-hoverable">
+            <a class="navbar-link">
+              Filtros
+            </a>
+            <div class="navbar-dropdown">
+              <a id="field-valid" class="navbar-item" @click="filterValid()">
+                Alertas validos
+              </a>
+              <a id="field-invalid" class="navbar-item" @click="filterInvalid()">
+                Alertas invalidos
+              </a>
+              <a id="field-nonclass" class="navbar-item" @click="filterNonClassified()">
+                Não classificados
+              </a>
+              <hr class="navbar-divider">
+              <a class="navbar-item" @click="filterClear()">
+                Limpar filtros
+              </a>
+            </div>
+          </div>
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
@@ -59,7 +79,9 @@ name:"harpiaBar",
 data() {
     return {
       showMobileMenu: false,
-
+      valid: false,
+      invalid: false,
+      non_classified: false,
     }
   },
   methods:{
@@ -71,6 +93,51 @@ data() {
             this.$store.commit('removeToken')
             this.$router.push('/log-in')
         },
+
+    /*
+      filterValid, filterInvald e filterNonClassified alteram suas respectivas variáveis locais,
+      atualiza a respectiva variável global e deixa o item do dropdown ativo ou desativado, para melhor visualização
+      filterClear deixa 3 variáveis locais como false, atualiza a global e desativa os itens do dropdown
+     */
+
+    filterValid() {
+      this.valid = !this.valid
+      this.$store.state.filter.valid = this.valid
+      if (this.valid){
+        document.getElementById("field-valid").classList.add("is-active")
+      } else {
+        document.getElementById("field-valid").classList.remove("is-active")
+      }
+    },
+    filterInvalid() {
+      this.invalid = !this.invalid
+      this.$store.state.filter.invalid = this.invalid
+      if (this.invalid){
+        document.getElementById("field-invalid").classList.add("is-active")
+      } else {
+        document.getElementById("field-invalid").classList.remove("is-active")
+      }
+    },
+    filterNonClassified() {
+      this.non_classified = !this.non_classified
+      this.$store.state.filter.non_classified = this.non_classified
+      if (this.non_classified){
+        document.getElementById("field-nonclass").classList.add("is-active")
+      } else {
+        document.getElementById("field-nonclass").classList.remove("is-active")
+      }
+    },
+    filterClear() {
+      this.valid = false
+      this.invalid = false
+      this.non_classified = false
+      this.$store.state.filter.valid = this.valid
+      this.$store.state.filter.invalid = this.invalid
+      this.$store.state.filter.non_classified = this.non_classified
+      document.getElementById("field-valid").classList.remove("is-active")
+      document.getElementById("field-invalid").classList.remove("is-active")
+      document.getElementById("field-nonclass").classList.remove("is-active")
+    }
   },
 
   mounted() {

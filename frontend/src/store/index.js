@@ -8,6 +8,11 @@ export default createStore({
         is_recorrente: true,
         has_delay: true
     },
+    filter: {
+        valid: true,
+        invalid: true,
+        non_classified: true,
+    },
     isAuthenticated: false,
     token: '',
     isLoading: false
