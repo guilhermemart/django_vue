@@ -8,6 +8,13 @@ export default createStore({
         is_recorrente: true,
         has_delay: true
     },
+    filter:{
+        valid: true,
+        invalid: true,
+        non_classified: true,
+        date_start: 0,
+        date_end:new Date().getTime()
+    },
     isAuthenticated: false,
     token: '',
     isLoading: false

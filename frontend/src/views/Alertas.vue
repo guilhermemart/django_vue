@@ -182,8 +182,15 @@ export default {
     },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
+      let data= {
+        "end": this.$store.state.filter.date_end,
+        "valids": this.$store.state.filter.valid,
+        "invalids": this.$store.state.filter.invalid,
+        "non_classifieds": this.$store.state.filter.non_classified,
+        "start": this.$store.state.filter.date_start,
+      }
       await axios
-        .get('/api/v1/latest-alerts/'+this.page)
+        .post('/api/v1/latest-alerts/'+this.page, data)
         .then(response => {
           this.latest_alerts = response.data
         })
