@@ -1,42 +1,56 @@
 <template>
   <div>
-  <div class="box has-background-white">
-   
-      <div class="columns column">
-        <div class="column is-3 mt-4">    
+  <div class="box has-background-white mx-1">
+   <div class="is-floating-left">
+            <button class=" button mx-1 is-rounded is-small is-primary">O</button>
+            <button class=" button mx-1 is-rounded is-small is-success">L</button>
+            <button class=" button mx-1 is-rounded is-small is-danger">D</button>
+          </div>
+          
+      <div class="columns column mt-1">
+        <div class="column is-4 mt-4">    
             <div class=" has-text-left">
               <div class="container has-text-underlined">
                 <icon  class="ml-2" icon="hard-hat" type="is-primary"></icon>
-                <span  class="is-size-3 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
+                <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
               </div>
 
               <div class="container has-text-underlined">
                 <icon class="ml-2" icon="exclamation-thick" type="is-primary"></icon>
-                <span class="is-size-3 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
+                <span class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
               </div>
 
               <span class="has-text-grey-light is-custom-size">ID: {{ Alert.identificador }}</span>
             </div>
           </div>
 
-        <div class="column is-3 ">
+        <div class="column is-4 ">
           <p class="dates mb-3"><p>Date:</p>{{new Date(Alert.timestamp).toLocaleDateString("en-US")}}</p>
           <p class="dates"> <p>Time:</p>{{new Date(Alert.timestamp).toLocaleTimeString("en-US")}}</p>
 
         </div>
 
-        <div class="column is-6">
-          <div class="is-floating-left">
-            <button class=" button mx-1 is-rounded is-small is-primary">O</button>
-            <button class=" button mx-1 is-rounded is-small is-success">L</button>
-            <button class=" button mx-1 is-rounded is-small is-danger">D</button>
-          </div>
+        <div class="column is-4">
+          
           <figure class="image">
             <!--img src "imagem aqui" -->
-            <img :src="Alert.get_thumbnail " class="has-pointer-cursor" >
+            <img :src="Alert.get_thumbnail " class="has-pointer-cursor" @click="showImage">
           </figure>
         </div>
 
+  
+<div class="modal" @click="showImage" :class="{'is-active': imageModal}">
+  <div class="modal-background"> </div>
+  <!--
+  Para fazer depois:
+   Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
+  <div class="modal-content fullImage">
+    <p class="image is-16by9 ">
+      <img :src="Alert.get_image" alt="">
+    </p>
+  </div>
+ 
+</div>
 
       
       </div>  
@@ -47,16 +61,14 @@
 </template>
 
 <style lang="scss">
-.thumb{
 
+.fullImage{
+  
+      display: block; 
+      min-width: 160vh;
+      height: auto;
+}
 
-}
-.is-observation {   
-    float: right;
-    margin-top: -35px;
-    margin-right: 50px;
-    display: inline-block;
-}
 #alerta_nao_classificado {
     font-size: 100%;
     color: rgb(245, 46, 11);
@@ -77,17 +89,11 @@
 }
 .is-floating-left {
   float: right;
-  margin-top: -50px;
-  margin-right: -40px;
+  margin-top: -35px;
+  margin-right: -30px;
   display: inline-block;
 }
 
-.is-floating-right {
-  float: right;
-  margin-top: -35px;
-  margin-right: 11px;
-  display: inline-block;
-}
 .dates{
     padding: .01vh .10vw .01vh;
     border: .5px solid rgb(82, 82, 82);
@@ -110,7 +116,9 @@ export default {
         thumb_up: false,
         thumb_down: true,
         modal: true,
-        notes: "0"
+        notes: "0",
+        local_audio_enable: true,
+        imageModal:false,
         }
   },
   components: {
@@ -131,7 +139,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -152,7 +159,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -168,11 +174,40 @@ export default {
     preencher_card(){
         this.thumb_up=this.Alert.thumb_up
         this.thumb_down=this.Alert.thumb_down
+    },
+    get_delta_time(){
+      return Date.now()-parseInt(this.Alert.timestamp);
+    },
+    out_of_time(){  // alerta chegou e não atualizou o thumb ainda
+      if (this.$store.state.audio.has_delay == true){
+      if(this.get_delta_time()>300000 && (this.thumb_up=='false') && (this.thumb_down=='false') && (this.local_audio_enable == true)){
+          this.Play_audio(1);
+          if(this.$store.state.audio.is_recorrente == false) {
+              this.local_audio_enable = false  //caso tenha atraso e nao for recorrente esse if desabilita até dar reload na pagina
+          }
+          return "Atenção, classificar alerta!"  // alertar
+      }
+      else{
+          return ""
+      }}
+    },
+    play_audio(vol){
+        if(this.$store.state.audio.is_on==true){
+            var audio = new Audio(require("../assets/beep-12.wav"))
+            audio.volume = vol
+            audio.play()
+        }
+    },
+    showImage(){
+      
+      this.imageModal=!this.imageModal
     }
-  },
+    
+    },
   computed: {
+        continuous_out_of_time: function (){  // fica verificando se estourou o tempo limite de observação
+            return this.out_of_time()
+        },
+  },}
 
-  },
-
-}
 </script>

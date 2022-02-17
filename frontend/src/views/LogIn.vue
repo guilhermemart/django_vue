@@ -74,6 +74,12 @@ export default {
         document.title = 'Log In | Harpia'
     },
     methods: {
+        play_audio(vol){
+            var audio = new Audio(require("../assets/login_ok.wav"));
+            audio.volume = vol
+            audio.play(0.05)
+            return audio
+        },
         async submitForm() {
             axios.defaults.headers.common["Authorization"] = ""
 
@@ -94,6 +100,8 @@ export default {
                     axios.defaults.headers.common["Authorization"] = "Token " + token
 
                     localStorage.setItem("token", token)
+
+                    this.play_audio(0.05)
 
                     const toPath = this.$route.query.to || '/latest-alerts/1'
 
