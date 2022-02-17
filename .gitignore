@@ -132,6 +132,8 @@ dmypy.json
 .pyre/
 frontend_old
 /backend/app_django/migrations/*
+/backend/app_django/.env
 frontend/.env
 backend/.env
 *.env
+frontend/.env
