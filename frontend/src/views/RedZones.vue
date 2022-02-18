@@ -4,9 +4,9 @@
         <div class="columns">
           <div class="column is-2 mx-4">
               <p class="subtitle mt-4">Selecione a camera:</p>
-                <div v-for="cam in cameras" :key="cam">
-                        <input type="radio" id="cam" :value="cam" v-model="cam_selected"/>
-                         <label for="cam">{{cam}}</label>
+                <div v-for="cam in stageConfig" :key="cam.name">
+                        <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"/>
+                         <label for="cam"> cam{{(cam.name+1)}}</label>
                 </div>
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
               <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
@@ -38,7 +38,7 @@
                 <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
-        <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: 0.75,scaleY: 0.75,}"/>
+        <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: scale,scaleY: scale,}"/>
         <v-line
           :config="{
             fill:'hsla(0, 100%, 50%, 0.5)',
@@ -63,7 +63,6 @@
         />
       </v-layer>
     </v-stage>
-
             </div>
         </div>
     </div>
@@ -85,12 +84,12 @@ export default {
     },
   data() {
     return {
+        scale:0.5,  // a escala das imagens deve ser fixa pois os pontos são pegos em relação a posição do mouse
       stageConfig: [],
       rdSelected:'',
       redzones:[],
       redzonesAtivas:[],
-      cameras:["cam1","cam2","cam3","cam4","cam5","cam6",],
-      cam_selected: 1,
+      cam_selected: 0,
       anchors: [],
       points: [],
       close:true,
@@ -125,18 +124,23 @@ export default {
     key() {
       return localStorage.harpiaPassword
       },*/
-    loadingImages(){
-      let base_path= "@/assets/red_zones_base_img/cam"
-      which_camera = 0
-      while (wich_camera < num_cameras){
-      this.imageParameters[wich_camera].src=require(base_path + wich_camera.toString() +".jpg")
-      this.imageParameters[wich_camera].onload = () => {
-      this.stageConfig[which_camera]={
-        width : this.imageParameters[wich_camera].naturalWidth ,
-        height : this.imageParameters[wich_camera].naturalHeight
-        }}
-      wich_camera +=1
-      }},
+
+    async loadingImages(){
+    this.$store.commit('setIsLoading', true)
+      let which_camera = 0
+      while (which_camera < this.num_cameras){
+        this.imageParameters.push(new window.Image())
+        this.imageParameters[which_camera].src=require("@/assets/red_zones_base_img/cam"+which_camera.toString()+".jpg")
+        this.stageConfig.push({
+            name : which_camera,
+            width : this.imageParameters[which_camera].naturalWidth,
+            height : this.imageParameters[which_camera].naturalHeight
+        })
+        console.log(this.stageConfig)
+        which_camera +=1
+      }
+      this.$store.commit('setIsLoading', false)
+    },
     handleMouseClick() {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x;
@@ -148,6 +152,8 @@ export default {
       });
       this.points.push(x);
       this.points.push(y);
+      console.log(x)
+
     },
     updatePoly(event) {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
@@ -156,9 +162,12 @@ export default {
       const id = event.target.id();
       const item = this.anchors.find((i) => i.id === id);
       const index = this.anchors.indexOf(item);
+      //o que isso faz?
       this.points[index * 2] = x;
       this.points[index * 2 + 1] = y;
     },
+
+
     loadRedZones(){
       this.redzones=[]
       axios.get('loaddots/'+ this.cam_selected).then((resp)=>{
@@ -178,9 +187,6 @@ export default {
           this.redzones.push(r)
         });
       })
-
-
-
       this.redzonesAtivas=[]
       axios.get('loaddots_ativos/'+ this.cam_selected ).then((resp)=>{
         let rzAtivas = resp.data.conteudo.split('\n')
