@@ -17,6 +17,7 @@ import Audio from '../views/Audio.vue'
 //import Checkout from '../views/Checkout.vue'
 //import Success from '../views/Success.vue'
 import Cameras from '../views/Cameras.vue'
+import SandBox from '../views/SandBox.vue'
 
 const routes = [
   {
@@ -103,6 +104,11 @@ const routes = [
     path: '/cameras',
     name: 'Cameras',
     component: Cameras
+  },
+  {
+    path: '/SandBox',
+    name: 'SandBox',
+    component: SandBox
   },
 ]
 
