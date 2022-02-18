@@ -76,7 +76,7 @@
 
             <div id="camGroupC" v-if="group==='3'" class="columns is-multiline is-gapless">
                 <div class="column is-half">
-                    <img id="camC1" src="@/assets/cam1.jpg" width="980" alt="camera 7"/>
+                    <img id="camC1" src="@/assets/red_zones_base_img/cam1.jpg" width="980" alt="camera 7"/>
                 </div>
                 <div class="column is-half">
                     <img id="camC2" src="@/assets/valaris3.jpg" width="980" alt="camera 8"/>
