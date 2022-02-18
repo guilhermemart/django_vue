@@ -90,10 +90,11 @@ class create_alert(APIView):
                 alert_category=categoria,
                 slug=fields.get("slug", f'example_{int(datetime.now().timestamp()*1000)}'),
                 identificador=fields.get("identificador", int(datetime.now().timestamp()*1000)),
+                date_added=datetime.now().replace(month=1),
                 quantidade=fields.get("quantidade", randint(1, 3)),
                 anotacoes=fields.get("anotacoes", ""),
                 thumb_up=fields.get("thumb_up", False),
-                thumb_down=fields.get("thumb_down", False),
+                thumb_down=fields.get("thumb_down", True),
                 image=image,
                 local_image_url=fields.get("image_path", absol_path),
                 sequencial=int(alertas_qtde+1),
@@ -205,9 +206,47 @@ class wait_alert(APIView):
             return Response(serializer.data)
 
 # Retorna todos os alertas
+#alterar nome da api aqui e url
+
+#n pesquisar todos
 class alerts_all(APIView):
     def get(self, request):
         alerts = alert.objects.all()
         serializer = alert_serializer(alerts, many=True)
-        print(serializer.data)
-        return Response(serializer.data)
+
+
+        now_alerts = []
+        past_alerts = []
+        now_month = ""
+        past_month = ""
+        #months = {"01": "Janeiro/", "02": "Fevereiro/", "03": "Março/",
+         #         "04": "Abril/", "05": "Maio/", "06": "Junho/",
+          #        "07": "Julho/", "08": "Agosto/", "09": "Setembro/",
+           #       "10": "Outubro/", "11": "Novembro/", "12": "Dezembro/"}
+        today = datetime.now()
+        for alert_ in serializer.data:
+            print("$" * 80)
+            if alert_["date_added"][0:7] == str(today)[:7]:
+                print(str(today.replace(month=today.month - 1))[:7])
+                now_alerts.append(alert_)
+                now_month = alert_["date_added"][0:7]
+            elif alert_["date_added"][0:7] == str(today.replace(month=today.month - 1))[:7]:
+                past_alerts.append(alert_)
+                past_month = alert_["date_added"][0:7]
+
+        now_monthly = {"total": len(now_alerts), "month": now_month, "approved": 0, "disapproved": 0}
+        past_monthly = {"total": len(past_alerts), "month": past_month, "approved": 0, "disapproved": 0}
+        for alert_ in now_alerts:
+            if alert_["thumb_up"]:
+                now_monthly["approved"] += 1
+            elif alert_["thumb_down"]:
+                now_monthly["disapproved"] += 1
+        for alert_ in past_alerts:
+            if alert_["thumb_up"]:
+                past_monthly["approved"] += 1
+            elif alert_["thumb_down"]:
+                past_monthly["disapproved"] += 1
+
+        result = {"now": now_monthly, "past": past_monthly}
+
+        return Response(result)

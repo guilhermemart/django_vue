@@ -4,9 +4,9 @@
 
     <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
       <div class="columns mt-6 is-centered">
-        <resumo_card class="column is-3 is-size-4"/>
-        <resumo_card class="column is-3 is-size-4"/>
-        <resumo_card class="column is-3 is-size-4"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="pastMonth"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
       </div>
     </div>
 
@@ -28,7 +28,8 @@ export default {
   },
   data() {
     return {
-      alerts: [],
+      thisMonth: [],
+      pastMonth: []
     }
   },
   mounted() {
@@ -39,8 +40,8 @@ export default {
       await axios
           .get('/api/v1/alerts/all')
           .then(response => {
-            this.alerts = response.data
-            console.log(this.alerts)
+            this.thisMonth = response.data.now
+            this.pastMonth = response.data.past
           })
       .catch(error => {
         console.log(error)

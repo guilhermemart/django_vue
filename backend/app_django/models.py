@@ -161,6 +161,9 @@ class alert(models.Model):
     def __str__(self):
         return self.identificador
 
+    def get_category_name(self):
+        return self.alert_category.name
+
     def get_absolute_url(self):
         return f'/{self.alert_category.slug}/{self.slug}/'
     
