@@ -28,17 +28,16 @@
     <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
   </div>
 
-  <div class="control calendar"  v-else>
-  <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />
+  <div class="control calendar" v-else>
+  <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
   </div>
 
 
-
   <div class="control">    
-       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary">Confirm<span class="is-family-sans-serif"></span></button>     
+       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">Confirm<span class="is-family-sans-serif"></span></button>     
   </div>
   <div class="control">    
-       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary">Refresh<span class="is-family-sans-serif"></span></button>     
+       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">Refresh<span class="is-family-sans-serif"></span></button>     
   </div>
   
 </div>
@@ -128,7 +127,7 @@ export default {
     return {
         latest_alerts: [],
         page: "1",
-        date: new Date(),
+        date:'',
         last_date: new Date(),
         isRange:true,
         format:'',
@@ -136,6 +135,7 @@ export default {
     }
   },
     computed: {
+ 
 
   },
    setup() {
@@ -159,6 +159,14 @@ export default {
   },
   created(){
     this.watchdog()
+    this.date=''
+  },
+  watch:{    
+  isRange:{
+    handler(){      
+      this.date=""
+    }  
+  }  
   },
   methods: {
     play_audio(vol){
@@ -209,6 +217,37 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
+    },
+    refreshPage(){
+       this.watchdog()
+    this.date=''
+    this.get_latest_alerts()
+    
+
+    },
+    findALerts(){      
+      if(this.isRange){
+        //Extrai apenas a data
+        let day= new Date(this.date).toDateString()
+        //Gera o timestamp da data as 00:00:00 horas
+        let timestamp= new Date(day).getTime()
+        
+        console.log(timestamp)
+        
+      }else{
+        //Extrai apenas a data
+        let day0= new Date(this.date[0]).toDateString()
+        let day1= new Date(this.date[1]).toDateString()
+        //Gera o timestamp da data as 00:00:00 horas
+        let timestamp0= new Date(day0).getTime()
+        let timestamp1= new Date(day1).getTime()
+        
+        console.log(timestamp0)
+        console.log(timestamp1)
+        
+      }
+      
+
     },
     toTimestamp(){
       let justDate0=new Date(this.date[0]).toDateString()

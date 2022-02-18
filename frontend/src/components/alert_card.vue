@@ -10,8 +10,8 @@
       <div class="columns column mt-1">
         <div class="column is-4 mt-4">    
             <div class=" has-text-left">
-              <div class="container has-text-underlined">
-                <icon  class="ml-2" icon="hard-hat" type="is-primary"></icon>
+              <div class="container has-text-underlined mb-4">
+                <icon  class="ml-2 " icon="hard-hat" type="is-primary"></icon>
                 <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
               </div>
 
