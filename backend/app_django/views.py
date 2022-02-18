@@ -202,3 +202,11 @@ class wait_alert(APIView):
             serializer = alert_serializer(alert_, many=True)
             print("novo alerta recebido: " + datetime.now().isoformat())
             return Response(serializer.data)
+
+# Retorna todos os alertas
+class alerts_all(APIView):
+    def get(self, request):
+        alerts = alert.objects.all()
+        serializer = alert_serializer(alerts, many=True)
+        print(serializer.data)
+        return Response(serializer.data)

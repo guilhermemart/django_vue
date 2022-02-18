@@ -15,6 +15,7 @@
             <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
+            <router-link to="/resumo" class="navbar-item">Resumo</router-link>
           <div class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               Filtros
