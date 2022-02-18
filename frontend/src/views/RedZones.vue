@@ -5,7 +5,7 @@
           <div class="column is-2 mx-4">
               <p class="subtitle mt-4">Selecione a camera:</p>
                 <div v-for="cam in cameras" :key="cam">
-                        <input type="radio" id="cam" :value="cam" v-model="camSelected"/>
+                        <input type="radio" id="cam" :value="cam" v-model="cam_selected"/>
                          <label for="cam">{{cam}}</label>
                 </div>
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
@@ -35,15 +35,10 @@
             <div class=" cams column is-10 mt-4 " >
 
 
-                <v-stage ref="stage" :config="stageConfig">
+                <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
-        <v-image v-if="camSelected=='cam1'" @click="handleMouseClick" :config="{image: imageParameters1,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam2'" @click="handleMouseClick" :config="{image: imageParameters2,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam3'" @click="handleMouseClick" :config="{image: imageParameters3,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam4'" @click="handleMouseClick" :config="{image: imageParameters4,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam5'" @click="handleMouseClick" :config="{image: imageParameters5,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam6'" @click="handleMouseClick" :config="{image: imageParameters6,scaleX: 0.75,scaleY: 0.75,}"/>
+        <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: 0.75,scaleY: 0.75,}"/>
         <v-line
           :config="{
             fill:'hsla(0, 100%, 50%, 0.5)',
@@ -90,25 +85,17 @@ export default {
     },
   data() {
     return {
-      stageConfig: {
-        width: '',
-        height: '',
-      },
+      stageConfig: [],
       rdSelected:'',
       redzones:[],
       redzonesAtivas:[],
       cameras:["cam1","cam2","cam3","cam4","cam5","cam6",],
-      camSelected:'cam1',
-      image: null,
+      cam_selected: 1,
       anchors: [],
       points: [],
       close:true,
-      imageParameters1: new window.Image(),
-      imageParameters2: new window.Image(),
-      imageParameters3: new window.Image(),
-      imageParameters4: new window.Image(),
-      imageParameters5: new window.Image(),
-      imageParameters6: new window.Image()
+      num_cameras: 6,
+      imageParameters: [],
     };
   },
   created() {
@@ -117,7 +104,7 @@ export default {
 
   },
   watch:{
-    camSelected:{
+    cam_selected:{
       handler(){
         this.clear()
       }
@@ -139,40 +126,17 @@ export default {
       return localStorage.harpiaPassword
       },*/
     loadingImages(){
-      let whichcam = String(1)
-      this.imageParameters1.src=require('@/assets/cam'+ whichcam +".jpg")
-      this.imageParameters1.onload = () => {
-      this.image=this.imageParameters1
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters2.src=require('@/assets/cam2.jpg')
-      this.imageParameters2.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters3.src=require('@/assets/cam3.jpg')
-      this.imageParameters3.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters4.src=require('@/assets/cam4.jpg')
-      this.imageParameters4.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters5.src=require('@/assets/cam5.jpg')
-      this.imageParameters5.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters6.src=require('@/assets/cam6.jpg')
-      this.imageParameters6.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-
-    },
+      let base_path= "@/assets/red_zones_base_img/cam"
+      which_camera = 0
+      while (wich_camera < num_cameras){
+      this.imageParameters[wich_camera].src=require(base_path + wich_camera.toString() +".jpg")
+      this.imageParameters[wich_camera].onload = () => {
+      this.stageConfig[which_camera]={
+        width : this.imageParameters[wich_camera].naturalWidth ,
+        height : this.imageParameters[wich_camera].naturalHeight
+        }}
+      wich_camera +=1
+      }},
     handleMouseClick() {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x;
@@ -197,7 +161,7 @@ export default {
     },
     loadRedZones(){
       this.redzones=[]
-      axios.get('loaddots/'+ this.camSelected).then((resp)=>{
+      axios.get('loaddots/'+ this.cam_selected).then((resp)=>{
         let rzCadastradas = resp.data.conteudo.split('\n')
         console.log(resp.data.conteudo)
         rzCadastradas.pop()
@@ -218,7 +182,7 @@ export default {
 
 
       this.redzonesAtivas=[]
-      axios.get('loaddots_ativos/'+ this.camSelected ).then((resp)=>{
+      axios.get('loaddots_ativos/'+ this.cam_selected ).then((resp)=>{
         let rzAtivas = resp.data.conteudo.split('\n')
         rzAtivas.pop()
         rzAtivas.forEach(element => {
@@ -240,15 +204,15 @@ export default {
     async save(){
         var x_y=[]
         //x_y.push('nome: '+(new Date()).toString())
-        //x_y.push(', largura: '+this.stageConfig.width)
-        //x_y.push(', altura: '+ this.stageConfig.height+', pontos: ')
+        //x_y.push(', largura: '+this.stageConfig[cam_selected].width)
+        //x_y.push(', altura: '+ this.stageConfig[cam_selected].height+', pontos: ')
         this.points.forEach(p => {
             x_y.push(p)
         });
         var red_zone_output = {
-            cam: this.camSelected,
+            cam: this.cam_selected,
             nome: (new Date()).toString(),
-            largura: this.stageConfig.width,
+            largura: this.stageConfig[cam_selected].width,
             pontos: x_y}
         this.$store.commit('setIsLoading', true)
       await axios
@@ -277,8 +241,8 @@ export default {
           //var FileSaver = require('file-saver');
           var x_y=[]
           x_y.push('nome: '+rdName)
-          x_y.push(', largura: '+this.stageConfig.width)
-          x_y.push(', altura: '+ this.stageConfig.height+', pontos: ')
+          x_y.push(', largura: '+this.stageConfig[cam_selected].width)
+          x_y.push(', altura: '+ this.stageConfig[cam_selected].height+', pontos: ')
           this.points.forEach(p => {
             x_y.push(p)
             x_y.push(',')
@@ -288,7 +252,7 @@ export default {
           var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
           var myformData = new FormData();
           myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.camSelected + "/" + this.key(), myformData, {
+          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.cam_selected + "/" + this.key(), myformData, {
             headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.loadRedZones())
             }
           })*/
@@ -312,7 +276,7 @@ export default {
         trapFocus: true,
         onConfirm: () => {
           //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.camSelected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
+          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
             console.log(r)
             this.loadRedZones()
           })
@@ -334,7 +298,7 @@ export default {
           var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
           var myformData = new FormData();
           myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.camSelected + "-ativas/" + this.key(), myformData, {
+          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.cam_selected + "-ativas/" + this.key(), myformData, {
             headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.loadRedZones())
 
 
@@ -349,7 +313,7 @@ export default {
         trapFocus: true,
         onConfirm: () => {
           //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.camSelected +"-ativas/" + this.key()+ "/" + rz.nome).then((r)=>{
+          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected +"-ativas/" + this.key()+ "/" + rz.nome).then((r)=>{
             console.log(r)
             this.loadRedZones()
           })
