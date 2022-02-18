@@ -237,8 +237,32 @@ export default {
       console.log(error)
       })
     },
-    save(){
-    // precisa ser substituido por algo sem buefy --> pensei num componente
+    async save(){
+        var x_y=[]
+        //x_y.push('nome: '+(new Date()).toString())
+        //x_y.push(', largura: '+this.stageConfig.width)
+        //x_y.push(', altura: '+ this.stageConfig.height+', pontos: ')
+        this.points.forEach(p => {
+            x_y.push(p)
+        });
+        var red_zone_output = {
+            cam: this.camSelected,
+            nome: (new Date()).toString(),
+            largura: this.stageConfig.width,
+            pontos: x_y}
+        this.$store.commit('setIsLoading', true)
+      await axios
+        .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
+        .then(response => {
+          red_zone_output = JSON.parse(response.data)
+          console.log(red_zone_output)
+        })
+        .catch(error => {
+          console.log(error)
+        })
+      this.$store.commit('setIsLoading', false)
+    //old
+    /* precisa ser substituido por algo sem buefy --> pensei num componente
       this.$buefy.dialog.prompt({
         message: `Nome desta redzone:`,
         type:'is-success',
@@ -267,7 +291,7 @@ export default {
           axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.camSelected + "/" + this.key(), myformData, {
             headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.loadRedZones())
             }
-          })
+          })*/
     },
     clear() {
       this.points = [];

@@ -15,7 +15,7 @@
             <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
-          <div class="navbar-item has-dropdown is-hoverable">
+          <div v-if="show_in_bar == true" class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               Filtros
             </a>
@@ -77,10 +77,16 @@ import axios from 'axios';
 
 export default {
 name:"harpiaBar",
+props: {
+show_in_bar: {
+    type: Boolean,
+    default: false
+    },
+},
 data() {
     return {
       showMobileMenu: false,
-      valid: false,
+      valid: false,  //false --> apresenta, true --> esconde
       invalid: false,
       non_classified: false,
     }
