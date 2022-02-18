@@ -1,6 +1,6 @@
 <template>
     <div>
-      <harpiaBar />
+      <harpiaBar :show_in_bar="true"/>
      <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
 
   <!-- <div class="level-item has-text-centered mt-4">

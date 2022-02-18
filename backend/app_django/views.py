@@ -160,8 +160,9 @@ class load_red_zone(APIView):
         return Response(all_red_zone)
 
 
-class save_dots(APIView):
-    def post(self, request, camera_slug):
+class save_red_zone(APIView):
+    def post(self, request):
+        print(request.data)
         upload = request.files.get('txt')
         name, ext = os.path.splitext(upload.filename)
         if ext not in ('.txt', '.csv'):
