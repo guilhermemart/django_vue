@@ -6,11 +6,9 @@
       <div class="columns mt-6 is-centered">
         <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="pastMonth"/>
         <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
-        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="today"/>
       </div>
     </div>
-
-
 
   </div>
 </template>
@@ -28,6 +26,7 @@ export default {
   },
   data() {
     return {
+      today: [],
       thisMonth: [],
       pastMonth: []
     }
@@ -36,10 +35,12 @@ export default {
     this.getAlerts()
   },
   methods: {
+    /* Pega os dados do 'alerts/report' e salva em variáveis separadas, uma pra cada card */
     async getAlerts() {
       await axios
-          .get('/api/v1/alerts/all')
+          .get('/api/v1/alerts/report')
           .then(response => {
+            this.today = response.data.today
             this.thisMonth = response.data.now
             this.pastMonth = response.data.past
           })
