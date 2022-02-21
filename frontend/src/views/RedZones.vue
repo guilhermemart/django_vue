@@ -29,8 +29,6 @@
               </div>
               <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
             </div>
-
-
             </div>
             <div class=" cams column is-10 mt-4 " >
 
@@ -84,8 +82,8 @@ export default {
     },
   data() {
     return {
-        scale:0.5,  // a escala das imagens deve ser fixa pois os pontos são pegos em relação a posição do mouse
-      stageConfig: [],
+      scale:0.5,  // a escala das imagens deve ser fixa pois os pontos são pegos em relação a posição do mouse
+      stageConfig: [],  // array onde as caracteristicas das imagens são armazenadas
       rdSelected:'',
       redzones:[],
       redzonesAtivas:[],
@@ -93,14 +91,13 @@ export default {
       anchors: [],
       points: [],
       close:true,
-      num_cameras: 6,
-      imageParameters: [],
+      num_cameras: 6,  // selecionar o numero de cameras para parametrizar o looping
+      imageParameters: [],  // array para armazenar as imagens base
     };
   },
   created() {
-    this.loadingImages()
+    this.loadingImages()  // le as imagens base onde os pontos serão desenhados
     this.loadRedZones()
-
   },
   watch:{
     cam_selected:{
@@ -118,12 +115,6 @@ export default {
     get_ip(){
       return process.env.VUE_APP_IP
       },
-    /*user() {
-      return localStorage.harpiaUser
-      },
-    key() {
-      return localStorage.harpiaPassword
-      },*/
 
     async loadingImages(){
     this.$store.commit('setIsLoading', true)
@@ -141,41 +132,17 @@ export default {
       }
       this.$store.commit('setIsLoading', false)
     },
-    handleMouseClick() {
-      const mousePos = this.$refs.stage.getNode().getPointerPosition();
-      const x = mousePos.x;
-      const y = mousePos.y;
-      this.anchors.push({
-        id: Math.round(Math.random() * 10000).toString(),
-        x: x,
-        y: y,
-      });
-      this.points.push(x);
-      this.points.push(y);
-      console.log(x)
+    load_red_zones(){
+        this.redzones=[]
 
-    },
-    updatePoly(event) {
-      const mousePos = this.$refs.stage.getNode().getPointerPosition();
-      const x = mousePos.x;
-      const y = mousePos.y;
-      const id = event.target.id();
-      const item = this.anchors.find((i) => i.id === id);
-      const index = this.anchors.indexOf(item);
-      //o que isso faz?
-      this.points[index * 2] = x;
-      this.points[index * 2 + 1] = y;
-    },
-
-
-    loadRedZones(){
+    }
+    /*loadRedZones(){  // lê as red zones da camera ativa
       this.redzones=[]
       axios.get('loaddots/'+ this.cam_selected).then((resp)=>{
         let rzCadastradas = resp.data.conteudo.split('\n')
         console.log(resp.data.conteudo)
-        rzCadastradas.pop()
+        rzCadastradas.pop()  // pop nome da redzone
         rzCadastradas.forEach(element => {
-
           let pontos=element.split(',').splice(3,element.split(',').length-1)
           pontos[0]=pontos[0].replace(' pontos: ',"")
           pontos.pop()
@@ -192,7 +159,6 @@ export default {
         let rzAtivas = resp.data.conteudo.split('\n')
         rzAtivas.pop()
         rzAtivas.forEach(element => {
-
           let pontos=element.split(',').splice(3,element.split(',').length-1)
           pontos[0]=pontos[0].replace(' pontos: ',"")
           pontos.pop()
@@ -206,7 +172,34 @@ export default {
       }).catch(error=>{
       console.log(error)
       })
+    },*/
+    handleMouseClick() {
+      const mousePos = this.$refs.stage.getNode().getPointerPosition();
+      const x = mousePos.x;
+      const y = mousePos.y;
+      this.anchors.push({
+        id: Math.round(Math.random() * 10000).toString(),
+        x: x,
+        y: y,
+      });
+      this.points.push(x);
+      this.points.push(y);
+      console.log(x)
     },
+    updatePoly(event) {
+      const mousePos = this.$refs.stage.getNode().getPointerPosition();
+      const x = mousePos.x;
+      const y = mousePos.y;
+      const id = event.target.id();
+      const item = this.anchors.find((i) => i.id === id);
+      const index = this.anchors.indexOf(item);
+      //o que isso faz?
+      this.points[index * 2] = x;
+      this.points[index * 2 + 1] = y;
+    },
+
+
+
     async save(){
         var x_y=[]
         //x_y.push('nome: '+(new Date()).toString())

@@ -51,7 +51,9 @@ class red_zone_serializer(serializers.ModelSerializer):
             "conteudo",  # retorna os pontos da red json
             "get_absolute_url",  # primeiro link da imagem (imutavel)
             "local_dots_url",   # local que o txt encontra agora
-            "dots"
+            "dots",
+            "enabled",
+            "get_camera"
         )
 
 

@@ -204,6 +204,8 @@ class alert(models.Model):
 class camera(models.Model):
     name = models.CharField(default="camx", max_length=255)
     ativa = models.BooleanField(default=True)
+    width = models.BigIntegerField(default = 100)
+    height = models.BigIntegerField(default = 100)
     # slug é tipo um nome mas que pode ser ajustado pra url
     slug = models.SlugField(default="camx")
 
@@ -231,6 +233,7 @@ class red_zone(models.Model):
     date_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(default=f"example", max_length=255)
     dots = models.JSONField("example", default=default_dots)
+    enabled = models.BooleanField(default=True)
     dots_txt = models.FileField(upload_to=f'uploads/red_zones/individual_red_zones')
     conteudo = models.TextField(default="nome: example, largura: 1980, altura: 1080, pontos: 574.84375,240.5625,587.84375,368.5625,676.84375,369.5625,614.84375,266.5625,")
     local_dots_url = models.TextField(default=f"uploads/red_zones/camx/red_zones_x.txt")
@@ -248,3 +251,5 @@ class red_zone(models.Model):
             return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.dots_txt.url
         return ''
 
+    def get_camera(self):
+        return self.red_zone_camera.name
