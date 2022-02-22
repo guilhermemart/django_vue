@@ -26,7 +26,11 @@ export default createStore({
       } else {
         localStorage.setItem('audio', JSON.stringify(state.audio))
       }
-
+      if (localStorage.getItem('filter')) {
+        state.audio = JSON.parse(localStorage.getItem('filter'))
+      } else {
+        localStorage.setItem('filter', JSON.stringify(state.audio))
+      }
       if (localStorage.getItem('token')) {
           state.token = localStorage.getItem('token')
           state.isAuthenticated = true

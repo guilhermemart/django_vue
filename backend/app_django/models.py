@@ -161,6 +161,9 @@ class alert(models.Model):
     def __str__(self):
         return self.identificador
 
+    def get_category_name(self):
+        return self.alert_category.name
+
     def get_absolute_url(self):
         return f'/{self.alert_category.slug}/{self.slug}/'
     
@@ -201,9 +204,12 @@ class alert(models.Model):
         thumbnail = File(thumb_io, name=Path(image.name).name)
         return thumbnail
 
+
 class camera(models.Model):
     name = models.CharField(default="camx", max_length=255)
     ativa = models.BooleanField(default=True)
+    width = models.BigIntegerField(default = 100)
+    height = models.BigIntegerField(default = 100)
     # slug é tipo um nome mas que pode ser ajustado pra url
     slug = models.SlugField(default="camx")
 
@@ -219,7 +225,7 @@ class camera(models.Model):
 
 def default_dots():
     # criar uma default red zone
-    return {'largura': 1980, "altura": 1080, "pontos": [574.84375, 240.5625, 587.84375, 368.5625, 676.84375, 369.5625, 614.84375, 266.5625]}
+    return [574.84375, 240.5625, 587.84375, 368.5625, 676.84375, 369.5625, 614.84375, 266.5625]
 
 
 class red_zone(models.Model):
@@ -227,24 +233,33 @@ class red_zone(models.Model):
     red_zone_camera = models.ForeignKey(camera, related_name='red_zones', on_delete=models.CASCADE)
     identificador = models.CharField(default=str(1643679950000-(365*24*60*60)), max_length=255)
     slug = models.SlugField(default=f"red_zone_camx_{1643679950000-(365*24*60*60)}")
-    timestamp = models.IntegerField(default=1643679950000-(365*24*60*60))
+    timestamp = models.IntegerField(default=(1643679950-(365*24*60*60)))
     date_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(default=f"example", max_length=255)
-    dots = models.JSONField("example", default=default_dots)
+    dots = models.JSONField(default=default_dots)
+    enabled = models.BooleanField(default=True)
     dots_txt = models.FileField(upload_to=f'uploads/red_zones/individual_red_zones')
     conteudo = models.TextField(default="nome: example, largura: 1980, altura: 1080, pontos: 574.84375,240.5625,587.84375,368.5625,676.84375,369.5625,614.84375,266.5625,")
     local_dots_url = models.TextField(default=f"uploads/red_zones/camx/red_zones_x.txt")
     class Meta:
-        ordering = ('-date_added',)
+        ordering = ('date_added',)
 
     def __str__(self):
         return self.identificador
 
     def get_absolute_url(self):
-        return f'/{self.alert_camera.slug}/{self.slug}/'
+        return f'/{self.red_zone_camera.slug}/{self.slug}/'
 
     def get_dots(self):
         if self.dots_txt:
             return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.dots_txt.url
         return ''
 
+    def get_camera(self):
+        return self.red_zone_camera.name
+
+    def width(self):
+        return self.red_zone_camera.width
+
+    def height(self):
+        return self.red_zone_camera.height
