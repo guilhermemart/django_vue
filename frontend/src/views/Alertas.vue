@@ -239,7 +239,8 @@ export default {
         //Gera o timestamp da data as 00:00:00 horas
         let timestamp= new Date(day).getTime()
         
-        console.log(timestamp)
+        // timestamp incluso no filtro
+         this.$store.state.filter.date_start =timestamp
         
       }else{
         //Extrai apenas a data
@@ -248,9 +249,11 @@ export default {
         //Gera o timestamp da data as 00:00:00 horas
         let timestamp0= new Date(day0).getTime()
         let timestamp1= new Date(day1).getTime()
-        
-        console.log(timestamp0)
-        console.log(timestamp1)
+
+        // timestamp incluso no filtro
+
+        this.$store.state.filter.date_start=timestamp0
+        this.$store.state.filter.date_end=timestamp1       
         
       }
       
