@@ -47,7 +47,7 @@ class latest_alerts_list(APIView):
         serializer = alert_serializer(alerts, many=True)
         print(serializer.data)
         return Response(serializer.data)
-
+        # Response transforma o serializer em um objeto javascript pro vue
 
 class alert_search(APIView):
     # devolve alertas filtrados de acordo com a data (timestamp)
@@ -142,33 +142,20 @@ class category_detail(APIView):
         return Response(serializer.data)
 
 
-class load_red_zone(APIView):
-    def get_red_zone(self, camera_slug, red_zone_slug):
-        try:
-            return red_zone.objects.filter(red_zone_camera__slug=camera_slug).filter(slug=red_zone_slug)[0]
-        except red_zone.DoesNotExist:
-            raise Http404
-
-    def get_all_red_zones_dots(self, camera_slug):
-        try:
-            condensado = red_zone.objects.filter(red_zone_camera__slug=camera_slug)
-            serializer = camera_serializer(condensado)
-            all_red_zones = {}
-            for red_zone_ in serializer.data:
-                all_red_zones[red_zone_["name"]] = red_zone_['dots']
-            return all_red_zones
-        except camera.DoesNotExist:
-            raise Http404
-
-    def get(self, request, camera_slug, format=None):
-        all_red_zone = self.get_all_red_zones_dots(camera_slug)
-        return Response(all_red_zone)
+class load_red_zones(APIView):
+    def get(self, request, cam):
+        red_zones = red_zone.objects.filter(red_zone_camera__name=f"cam{cam}")
+        serializer = red_zone_serializer(red_zones, many=True)
+        return Response(serializer.data)
+        # o serializer.data possui bem mais campos que os utilizados no front
+        # nao atrapalha ter mais campos
+        # name, height, width, enabled e dots são obrigatorios
 
 
+# deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):
     def post(self, request):
         print(request.data)
-        upload = request.files.get('txt')
         name, ext = os.path.splitext(upload.filename)
         if ext not in ('.txt', '.csv'):
             return f"File extension {ext} not allowed."
