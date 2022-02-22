@@ -4,13 +4,11 @@
 
     <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
       <div class="columns mt-6 is-centered">
-        <resumo_card class="column is-3 is-size-4"/>
-        <resumo_card class="column is-3 is-size-4"/>
-        <resumo_card class="column is-3 is-size-4"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="pastMonth"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
+        <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="today"/>
       </div>
     </div>
-
-
 
   </div>
 </template>
@@ -28,19 +26,23 @@ export default {
   },
   data() {
     return {
-      alerts: [],
+      today: [],
+      thisMonth: [],
+      pastMonth: []
     }
   },
   mounted() {
     this.getAlerts()
   },
   methods: {
+    /* Pega os dados do 'alerts/report' e salva em variáveis separadas, uma pra cada card */
     async getAlerts() {
       await axios
-          .get('/api/v1/alerts/all')
+          .get('/api/v1/alerts/report')
           .then(response => {
-            this.alerts = response.data
-            console.log(this.alerts)
+            this.today = response.data.today
+            this.thisMonth = response.data.now
+            this.pastMonth = response.data.past
           })
       .catch(error => {
         console.log(error)

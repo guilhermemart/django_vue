@@ -22,7 +22,8 @@ class alert_serializer(serializers.ModelSerializer):
             "get_opsreport",
             'get_attachment',
             'sequencial',
-            'witsml_confirm'
+            'witsml_confirm',
+            'get_category_name'
         )
 
 
