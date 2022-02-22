@@ -1,5 +1,3 @@
-import pprint
-
 from django.http import Http404
 from django.shortcuts import redirect
 
@@ -11,6 +9,7 @@ from .serializers import alert_serializer, red_zone_serializer, camera_serialize
 from .main import update_alert_by_identificador
 from .wistml_sender import compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
+from .monthly_report_data import report_data
 
 from random import randint
 from django.core.files.images import ImageFile
@@ -21,8 +20,6 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 
-
-# pip install python-dateutil
 
 
 class latest_alerts_list(APIView):
@@ -205,62 +202,35 @@ class alerts_report(APIView):
         # mesmo se for dia 31 de março irá cair no dia 28 de fevereiro
         time_now = datetime.now()
         time_past = time_now + relativedelta(months=-1)
-        # Pega a timestamp do começo do mês do passado e pesquisa no banco
-        stamp = time_past.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
-        alerts = alert.objects.filter(timestamp__gte=stamp)
-        # alerts.filter() -> filtra mais
-        serializer = alert_serializer(alerts, many=True)
-        months = {"01": "Janeiro/", "02": "Fevereiro/", "03": "Março/",
-                  "04": "Abril/", "05": "Maio/", "06": "Junho/",
-                  "07": "Julho/", "08": "Agosto/", "09": "Setembro/",
-                  "10": "Outubro/", "11": "Novembro/", "12": "Dezembro/"}
+        # Utiliza as timestamps do início do mês passado, desse mês e hoje, para filtrar os resultados do banco
+        # Multiplica por 1000 porque nesse timestamp o milisegundo é separado por virgula, exemplo:
+        # stamp_past_start = 1643684400.0
+        # timestamp alerta = 1612143950000
+        # Ou seja, é mil vezes menor que a timestamp do alerta que não tem ponto, é tudo junto
+        stamp_past_start = time_past.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
+        stamp_now_start = time_now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
+        stamp_today = time_now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
+        #TIMEZONE - SE PEGA SEM TIMEZONE OU CONSIDERA A DO BRASIL
+        alerts = alert.objects.filter(timestamp__gte=stamp_past_start)
+        alerts_past = alerts.filter(timestamp__lt=stamp_now_start)
+        alerts_now = alerts.filter(timestamp__gte=stamp_now_start)
+        alerts_today = alerts.filter(timestamp__gte=stamp_today)
+        serializer_past = alert_serializer(alerts_past, many=True).data
+        serializer_now = alert_serializer(alerts_now, many=True).data
+        serializer_today = alert_serializer(alerts_today, many=True).data
+        months = {"01": "January / ", "02": "February / ", "03": "March / ",
+                  "04": "April / ", "05": "May / ", "06": "June / ",
+                  "07": "July / ", "08": "August / ", "09": "September / ",
+                  "10": "October / ", "11": "November / ", "12": "December / "}
         now_month = months[str(time_now)[5:7]] + str(time_now)[:4]
         past_month = months[str(time_past)[5:7]] + str(time_past)[:4]
-        # Dicts com os dados que serão usados no front. Começam zerados e acrescenta conforme avalia os alertas
-        today = {"month": "Hoje", "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
-        now_monthly = {"month": now_month, "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
-        past_monthly = {"month": past_month, "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
-        # Avalia os alertas:
-        # Se for o ano-mês (2022-02) da data atual for igual ao 'date_added' do alerta, então irá verificar,
-        # Se o dia for igual ao de hoje ele atualiza os dicts de hoje e do mês atual,
-        # Caso contrário irá atualizar somente o dict do mês atual
-        for alert_ in serializer.data:
-            if alert_["date_added"][:7] == str(time_now)[:7]:
-                now_monthly["total"] += 1
-                if alert_["date_added"][:10] == str(time_now)[:10]:
-                    today["total"] += 1
-                    if alert_["get_category_name"].lower() == "nonconformity":
-                        today["EPI"] += 1
-                        now_monthly["EPI"] += 1
-                    elif alert_["get_category_name"].lower() == "redzone":
-                        today["red_zone"] += 1
-                        now_monthly["red_zone"] += 1
-                    if alert_["thumb_up"]:
-                        today["approved"] += 1
-                        now_monthly["approved"] += 1
-                    elif alert_["thumb_down"]:
-                        today["disapproved"] += 1
-                        now_monthly["disapproved"] += 1
-                else:
-                    if alert_["get_category_name"].lower() == "nonconformity":
-                        now_monthly["EPI"] += 1
-                    elif alert_["get_category_name"].lower() == "redzone":
-                        now_monthly["red_zone"] += 1
-                    if alert_["thumb_up"]:
-                        now_monthly["approved"] += 1
-                    elif alert_["thumb_down"]:
-                        now_monthly["disapproved"] += 1
-            # Se o ano e mês for igual ao do passado, atualiza o respectivo dict
-            elif alert_["date_added"][:7] == str(time_past)[:7]:
-                past_monthly["total"] += 1
-                if alert_["get_category_name"].lower() == "nonconformity":
-                    past_monthly["EPI"] += 1
-                elif alert_["get_category_name"].lower() == "redzone":
-                    past_monthly["red_zone"] += 1
-                if alert_["thumb_up"]:
-                    past_monthly["approved"] += 1
-                elif alert_["thumb_down"]:
-                    past_monthly["disapproved"] += 1
+        # Usa a função 'report_data' para criar os dicionários. Ver o arquivo 'monthly_report_data.py'
+        data_past = report_data(serializer_past)
+        data_past["month"] = past_month
+        data_now = report_data(serializer_now)
+        data_now["month"] = now_month
+        data_today = report_data(serializer_today)
+        data_today["month"] = "Today"
         # Salva os 3 dicts em um único dict e envia para o front
-        result = {"today": today, "now": now_monthly, "past": past_monthly}
+        result = {"today": data_today, "now": data_now, "past": data_past}
         return Response(result)

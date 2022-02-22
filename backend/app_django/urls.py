@@ -14,7 +14,6 @@ urlpatterns = [
     path('alert_search/<int:init>/<int:end>/<int:page>', views.alert_search.as_view()),
     path('watchdog/', views.wait_alert.as_view()),
     path('alerts/report', views.alerts_report.as_view()),
-    path('alerts/all', views.alerts_all.as_view()),
     path('load_rz/<int:cam>', views.load_red_zones.as_view())
 ]
 '''path('products/search/', views.search),

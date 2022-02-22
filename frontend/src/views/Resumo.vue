@@ -2,8 +2,8 @@
   <div class="resumo_page">
     <harpiaBar/>
 
-    <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
-      <div class="columns mt-6 is-centered">
+    <div class="hero has-background-grey-lighter is-fullheight-with-navbar mg-large">
+      <div class="columns is-centered hero-body">
         <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="pastMonth"/>
         <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="thisMonth"/>
         <resumo_card class="column is-3 is-size-4" v-bind:monthly-data="today"/>
