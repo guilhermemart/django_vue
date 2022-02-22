@@ -6,6 +6,7 @@ pillow
 stripe
 gevent
 pymongo
+python-dateutil
 python-decouple
 psycopg2
 pgpubsub

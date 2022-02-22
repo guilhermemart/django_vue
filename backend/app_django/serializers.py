@@ -22,7 +22,8 @@ class alert_serializer(serializers.ModelSerializer):
             "get_opsreport",
             'get_attachment',
             'sequencial',
-            'witsml_confirm'
+            'witsml_confirm',
+            'get_category_name'
         )
 
 
@@ -51,7 +52,11 @@ class red_zone_serializer(serializers.ModelSerializer):
             "conteudo",  # retorna os pontos da red json
             "get_absolute_url",  # primeiro link da imagem (imutavel)
             "local_dots_url",   # local que o txt encontra agora
-            "dots"
+            "dots",  # formato json
+            "enabled",  # redzone ativada, ou nao
+            "get_camera",  # camera que possui aquela red
+            "width",  # width  --> camera
+            "height"  # height  --> camera
         )
 
 

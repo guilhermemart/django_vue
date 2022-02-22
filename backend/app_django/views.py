@@ -1,3 +1,5 @@
+import pprint
+
 from django.http import Http404
 from django.shortcuts import redirect
 
@@ -14,9 +16,13 @@ from random import randint
 from django.core.files.images import ImageFile
 import os
 from pathlib import Path
-from datetime import datetime
+from datetime import datetime, timedelta
 import pgpubsub
 from decouple import config
+from dateutil.relativedelta import *
+
+
+# pip install python-dateutil
 
 
 class latest_alerts_list(APIView):
@@ -30,9 +36,9 @@ class latest_alerts_list(APIView):
         thumb_down = request.data['invalids']  # mostrar thumbdown eds
         non_classified = request.data['non_classifieds']  # mostrar não classificados
         # filtragem por data
-        alerts = alert.objects.filter(timestamp__gte=start+1)
-        alerts = alerts.filter(timestamp__lte=end+1)
-        #filtragem por classificacao
+        alerts = alert.objects.filter(timestamp__gte=start + 1)
+        alerts = alerts.filter(timestamp__lte=end + 1)
+        # filtragem por classificacao
         alerts = alerts.filter(thumb_up__exact=not thumb_up)
         alerts = alerts.filter(thumb_down__exact=not thumb_down)
         alerts = alerts.filter(thumb_down__exact=not non_classified)[6 * (page - 1):(6 * page) + 1]
@@ -41,17 +47,15 @@ class latest_alerts_list(APIView):
         serializer = alert_serializer(alerts, many=True)
         print(serializer.data)
         return Response(serializer.data)
-
+        # Response transforma o serializer em um objeto javascript pro vue
 
 class alert_search(APIView):
     # devolve alertas filtrados de acordo com a data (timestamp)
     def get(self, request, init, end, page):
         alerts = alert.objects.filter(timestamp__gte=init)
-        alerts = alerts.filter(timestamp__lte=end)[6*(page-1):(6*page)+1]
+        alerts = alerts.filter(timestamp__lte=end)[6 * (page - 1):(6 * page) + 1]
         serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)
-
-
 
 
 class update_alert(APIView):
@@ -79,7 +83,7 @@ class create_alert(APIView):
         path = absol_path
         fields = request.data
         categoria = category.objects.all()[0]
-        categoria_input = category.objects.filter(name=fields.get('category_name','Nonconformity'))
+        categoria_input = category.objects.filter(name=fields.get('category_name', 'Nonconformity'))
         if categoria_input.count() > 0:
             categoria = categoria_input[0]
         alertas_qtde = alert.objects.all().count()
@@ -88,15 +92,16 @@ class create_alert(APIView):
             image.name = Path(image.name).name
             alerta_to_create = alert(
                 alert_category=categoria,
-                slug=fields.get("slug", f'example_{int(datetime.now().timestamp()*1000)}'),
-                identificador=fields.get("identificador", int(datetime.now().timestamp()*1000)),
+                slug=fields.get("slug", f'example_{int(datetime.now().timestamp() * 1000)}'),
+                identificador=fields.get("identificador", int(datetime.now().timestamp() * 1000)),
+                date_added=datetime.now().replace(month=12),
                 quantidade=fields.get("quantidade", randint(1, 3)),
                 anotacoes=fields.get("anotacoes", ""),
                 thumb_up=fields.get("thumb_up", False),
-                thumb_down=fields.get("thumb_down", False),
+                thumb_down=fields.get("thumb_down", True),
                 image=image,
                 local_image_url=fields.get("image_path", absol_path),
-                sequencial=int(alertas_qtde+1),
+                sequencial=int(alertas_qtde + 1),
                 witsml_confirm="witsml_not_sent"
             )
             alerta_to_create.save()
@@ -137,33 +142,20 @@ class category_detail(APIView):
         return Response(serializer.data)
 
 
-class load_red_zone(APIView):
-    def get_red_zone(self, camera_slug, red_zone_slug):
-        try:
-            return red_zone.objects.filter(red_zone_camera__slug=camera_slug).filter(slug=red_zone_slug)[0]
-        except red_zone.DoesNotExist:
-            raise Http404
-
-    def get_all_red_zones_dots(self, camera_slug):
-        try:
-            condensado = red_zone.objects.filter(red_zone_camera__slug=camera_slug)
-            serializer = camera_serializer(condensado)
-            all_red_zones = {}
-            for red_zone_ in serializer.data:
-                all_red_zones[red_zone_["name"]] = red_zone_['dots']
-            return all_red_zones
-        except camera.DoesNotExist:
-            raise Http404
-
-    def get(self, request, camera_slug, format=None):
-        all_red_zone = self.get_all_red_zones_dots(camera_slug)
-        return Response(all_red_zone)
+class load_red_zones(APIView):
+    def get(self, request, cam):
+        red_zones = red_zone.objects.filter(red_zone_camera__name=f"cam{cam}")
+        serializer = red_zone_serializer(red_zones, many=True)
+        return Response(serializer.data)
+        # o serializer.data possui bem mais campos que os utilizados no front
+        # nao atrapalha ter mais campos
+        # name, height, width, enabled e dots são obrigatorios
 
 
+# deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):
     def post(self, request):
         print(request.data)
-        upload = request.files.get('txt')
         name, ext = os.path.splitext(upload.filename)
         if ext not in ('.txt', '.csv'):
             return f"File extension {ext} not allowed."
@@ -204,10 +196,71 @@ class wait_alert(APIView):
             print("novo alerta recebido: " + datetime.now().isoformat())
             return Response(serializer.data)
 
-# Retorna todos os alertas
-class alerts_all(APIView):
+
+# Monthly Report - Dados mensais (dia atual, esse mês e mês passado)
+class alerts_report(APIView):
     def get(self, request):
-        alerts = alert.objects.all()
+        # Cria as datas, e coloca a 'time_past' como sendo -1 mês.
+        # Essa lib 'relativedelta' faz com que pegue sempre uma data do mês anterior,
+        # mesmo se for dia 31 de março irá cair no dia 28 de fevereiro
+        time_now = datetime.now()
+        time_past = time_now + relativedelta(months=-1)
+        # Pega a timestamp do começo do mês do passado e pesquisa no banco
+        stamp = time_past.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp()
+        alerts = alert.objects.filter(timestamp__gte=stamp)
+        # alerts.filter() -> filtra mais
         serializer = alert_serializer(alerts, many=True)
-        print(serializer.data)
-        return Response(serializer.data)
+        months = {"01": "Janeiro/", "02": "Fevereiro/", "03": "Março/",
+                  "04": "Abril/", "05": "Maio/", "06": "Junho/",
+                  "07": "Julho/", "08": "Agosto/", "09": "Setembro/",
+                  "10": "Outubro/", "11": "Novembro/", "12": "Dezembro/"}
+        now_month = months[str(time_now)[5:7]] + str(time_now)[:4]
+        past_month = months[str(time_past)[5:7]] + str(time_past)[:4]
+        # Dicts com os dados que serão usados no front. Começam zerados e acrescenta conforme avalia os alertas
+        today = {"month": "Hoje", "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
+        now_monthly = {"month": now_month, "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
+        past_monthly = {"month": past_month, "total": 0, "EPI": 0, "red_zone": 0, "approved": 0, "disapproved": 0}
+        # Avalia os alertas:
+        # Se for o ano-mês (2022-02) da data atual for igual ao 'date_added' do alerta, então irá verificar,
+        # Se o dia for igual ao de hoje ele atualiza os dicts de hoje e do mês atual,
+        # Caso contrário irá atualizar somente o dict do mês atual
+        for alert_ in serializer.data:
+            if alert_["date_added"][:7] == str(time_now)[:7]:
+                now_monthly["total"] += 1
+                if alert_["date_added"][:10] == str(time_now)[:10]:
+                    today["total"] += 1
+                    if alert_["get_category_name"].lower() == "nonconformity":
+                        today["EPI"] += 1
+                        now_monthly["EPI"] += 1
+                    elif alert_["get_category_name"].lower() == "redzone":
+                        today["red_zone"] += 1
+                        now_monthly["red_zone"] += 1
+                    if alert_["thumb_up"]:
+                        today["approved"] += 1
+                        now_monthly["approved"] += 1
+                    elif alert_["thumb_down"]:
+                        today["disapproved"] += 1
+                        now_monthly["disapproved"] += 1
+                else:
+                    if alert_["get_category_name"].lower() == "nonconformity":
+                        now_monthly["EPI"] += 1
+                    elif alert_["get_category_name"].lower() == "redzone":
+                        now_monthly["red_zone"] += 1
+                    if alert_["thumb_up"]:
+                        now_monthly["approved"] += 1
+                    elif alert_["thumb_down"]:
+                        now_monthly["disapproved"] += 1
+            # Se o ano e mês for igual ao do passado, atualiza o respectivo dict
+            elif alert_["date_added"][:7] == str(time_past)[:7]:
+                past_monthly["total"] += 1
+                if alert_["get_category_name"].lower() == "nonconformity":
+                    past_monthly["EPI"] += 1
+                elif alert_["get_category_name"].lower() == "redzone":
+                    past_monthly["red_zone"] += 1
+                if alert_["thumb_up"]:
+                    past_monthly["approved"] += 1
+                elif alert_["thumb_down"]:
+                    past_monthly["disapproved"] += 1
+        # Salva os 3 dicts em um único dict e envia para o front
+        result = {"today": today, "now": now_monthly, "past": past_monthly}
+        return Response(result)
