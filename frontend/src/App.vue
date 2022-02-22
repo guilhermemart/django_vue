@@ -10,7 +10,7 @@
 <style lang="scss">
 $primary: #180474;
 $warning: #e9c46a;
-$danger: #ec0000;
+$danger: #c40000;
 $info: #2a9d8f;
 $animationDuration: 0.35s;
 @import "~bulma/sass/utilities/_all";
