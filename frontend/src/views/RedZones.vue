@@ -228,7 +228,6 @@ export default {
             x_y.push(p)
             x_y.push(',')
           });
-
           // cria o blob com a resolucao da imagem nos dois primeiros elementos do array
           var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
           var myformData = new FormData();
