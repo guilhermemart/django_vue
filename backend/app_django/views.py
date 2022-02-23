@@ -68,6 +68,19 @@ class update_alert(APIView):
                     send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer)
                 except Exception as e:
                     print(f"impossivel criar xml {e}")
+
+                # Procura os alertas que não foram enviados
+                alerts_not_sent = alert.object.filter(witsml_confirm="witsml_not_sent")
+                alerts = alert_serializer(alerts_not_sent, many=True).data
+                # Chama a função de enviar para cada alerta
+                for alert_ in alerts:
+                    try:
+                        send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), alert_)
+                    except Exception as e:
+                        print(f"Erro ao tentar enviar alertas pendentes {e}")
+                # Possivel problema: Esse campo 'witsml_confirm' do alerta acho que não muda depois de enviar,
+                # então no momento acho que sempre tentaria enviar todos
+
             return Response(serializer.data)
         raise Http404
 
@@ -211,6 +224,8 @@ class alerts_report(APIView):
         stamp_now_start = time_now.replace(day=1, hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
         stamp_today = time_now.replace(hour=0, minute=0, second=0, microsecond=0).timestamp() * 1000
         #TIMEZONE - SE PEGA SEM TIMEZONE OU CONSIDERA A DO BRASIL
+        # Faz uma busca usando o timestamp do mês passado e faz outras buscas dentro dessa busca,
+        # Busca com o timestamp desse mês e do dia de hoje, assim os alertas já ficam separados
         alerts = alert.objects.filter(timestamp__gte=stamp_past_start)
         alerts_past = alerts.filter(timestamp__lt=stamp_now_start)
         alerts_now = alerts.filter(timestamp__gte=stamp_now_start)
