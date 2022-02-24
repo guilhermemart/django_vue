@@ -233,14 +233,14 @@ class red_zone(models.Model):
     red_zone_camera = models.ForeignKey(camera, related_name='red_zones', on_delete=models.CASCADE)
     identificador = models.CharField(default=str(1643679950000-(365*24*60*60)), max_length=255)
     slug = models.SlugField(default=f"red_zone_camx_{1643679950000-(365*24*60*60)}")
-    timestamp = models.IntegerField(default=(1643679950-(365*24*60*60)))
+    timestamp = models.BigIntegerField(default=1000*(1643679950-(365*24*60*60)))
     date_added = models.DateTimeField(auto_now_add=True)
     name = models.CharField(default=f"example", max_length=255)
     dots = models.JSONField(default=default_dots)
     enabled = models.BooleanField(default=True)
     dots_txt = models.FileField(upload_to=f'uploads/red_zones/individual_red_zones')
     conteudo = models.TextField(default="nome: example, largura: 1980, altura: 1080, pontos: 574.84375,240.5625,587.84375,368.5625,676.84375,369.5625,614.84375,266.5625,")
-    local_dots_url = models.TextField(default=f"uploads/red_zones/camx/red_zones_x.txt")
+    local_dots_url = models.TextField(default=f"uploads/red_zones/camx/red_zones_x.txt")  #
     class Meta:
         ordering = ('date_added',)
 
