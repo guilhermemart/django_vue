@@ -66,6 +66,8 @@
 * Instalar os requirements.txt 
     - pip install -r requirements.txt
 
+* Verifique todos os .env's do codigo, o ip deve ser igual ao da maquina que está rodando o sistema
+
 * Crie as migraçoes do django:
     - cd django_vue 
     - python -m manage makemigrations
