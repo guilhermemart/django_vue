@@ -11,7 +11,6 @@ urlpatterns = [
     # path('loaddots/<slug:camera_slug>', views.load_red_zone.as_view()),
     # path('loaddots_ativos/<slug:camera_slug>', views.load_red_zone.as_view()),
     path('save_red_zone/', views.save_red_zone.as_view()),
-    path('alert_search/<int:init>/<int:end>/<int:page>', views.alert_search.as_view()),
     path('watchdog/', views.wait_alert.as_view()),
     path('alerts/report', views.alerts_report.as_view()),
     path('load_rz/<int:cam>', views.load_red_zones.as_view())
