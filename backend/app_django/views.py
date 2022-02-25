@@ -19,7 +19,7 @@ from datetime import datetime, timedelta, timezone
 import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
-
+import PIL.Image
 
 
 class latest_alerts_list(APIView):
@@ -245,3 +245,29 @@ class alerts_report(APIView):
         # Salva os 3 dicts em um único dict e envia para o front
         result = {"today": data_today, "now": data_now, "past": data_past}
         return Response(result)
+
+# Se o post é feito tudo de uma vez, as 10 imagens no mesmo post
+# Nomes padronizados nos dict
+class update_camera(APIView):
+    # Recebe a imagem, salva e salva o caminho dela na classe do get
+    def post(self, request):
+        image = request.FILES.get('img')
+        print(str(image))
+        print("imagem acima")
+        img = PIL.Image.open(image)
+        path = os.path.expanduser(os.path.join("~/media/cats/", str(image)))
+        img.save(path)
+        img.close()
+        path = os.path.join("media/cats/", str(image))
+        get_url_camera.url = path
+        return Response({"imageURL": path})
+
+
+class get_url_camera(APIView):
+    # Retorna o ip do django com o caminho da imagem
+    url = "a"
+    def get(self, request):
+        print(request.data.get("image_path"))
+        print(get_url_camera.url)
+        IP = request.build_absolute_uri("/")
+        return Response({"camera1": IP + get_url_camera.url})
