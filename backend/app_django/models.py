@@ -118,7 +118,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         send_mail(subject, message, from_email, [self.email], **kwargs)
 
 
-class category(models.Model):
+class category(models.Model):  # cada alerta tem sua categoria ex: Nonconformity, RedZone, Car ...
     name = models.CharField(default="Nonconformity", max_length=255)
     # slug é tipo um nome mas que pode ser ajustado pra url
     slug = models.SlugField(default="Nonconformity")

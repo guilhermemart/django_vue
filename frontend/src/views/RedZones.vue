@@ -11,21 +11,30 @@
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
               <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
               <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Salvar</button>
-            <dropdown expanded  v-model="rdSelected" aria-role="list">
-              <template #trigger>
-              <button class="is-dark mb-2"  icon-left="upload" :disabled='redzones.length<1' expanded outlined >Carregar</button>
-              </template>
-              <!--dropdown-item => buefy substituir-->
-              <dropdown-item v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
-                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted ></button>
-                  </div><div class="column my-4">{{rd.name.toUpperCase()}}</div>
-              </dropdown-item>
-            </dropdown>
+            <div class="dropdown is-hoverable">
+              <div class="dropdown-trigger">
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                  <span>Carregar</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content">
+                  <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
+                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >delete icon</button></div>
+                  <div class="column my-4">{{rd.name.toUpperCase()}}</div>
+                  </a>
+                </div>
+              </div>
+            </div>
+
             <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Ativar RedZone</button>
             <div class="card">
               <p class="title is-size-4">Red Zones Ativas:</p>
               <div v-if="red_zones_ativas.length">
-              <ul class="is-size-4 mx-2 my-2" v-for="rz in red_zones_ativas" :key='rz.nome'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar</button> <b class="my-4">{{rz.nome}}</b> </ul>
+              <ul class="is-size-4 mx-2 my-2" v-for="rz in red_zones_ativas" :key='rz.name'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar </button> <b class="my-4">{{rz.name}}</b> </ul>
               </div>
               <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
             </div>
@@ -121,7 +130,7 @@ export default {
       let which_camera = 0
       while (which_camera < this.num_cameras){
         this.imageParameters.push(new window.Image())
-        this.imageParameters[which_camera].src=require("@/assets/red_zones_base_img/cam"+which_camera.toString()+".jpg")
+        this.imageParameters[which_camera].src=require('@/assets/red_zones_base_img/cam'+which_camera.toString()+'.jpg')
         this.stageConfig.push({
             name : which_camera,
             width : this.imageParameters[which_camera].naturalWidth,
@@ -131,6 +140,7 @@ export default {
       }
       this.$store.commit('setIsLoading', false)
     },
+    // precisa colocar isso no watch
     load_red_zones(){
         this.redzones=[]
         this.red_zones_ativas=[]
@@ -206,36 +216,6 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-    //old
-    /* precisa ser substituido por algo sem buefy --> pensei num componente
-      this.$buefy.dialog.prompt({
-        message: `Nome desta redzone:`,
-        type:'is-success',
-        size:'is-large',
-        inputAttrs: {
-          placeholder: 'Nome da redzone',
-          maxlength: 20
-        },
-        confirmTest:'Salvar',
-        trapFocus: true,
-        onConfirm: (rdName) => {
-          //var FileSaver = require('file-saver');
-          var x_y=[]
-          x_y.push('nome: '+rdName)
-          x_y.push(', largura: '+this.stageConfig[cam_selected].width)
-          x_y.push(', altura: '+ this.stageConfig[cam_selected].height+', pontos: ')
-          this.points.forEach(p => {
-            x_y.push(p)
-            x_y.push(',')
-          });
-          // cria o blob com a resolucao da imagem nos dois primeiros elementos do array
-          var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
-          var myformData = new FormData();
-          myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.cam_selected + "/" + this.key(), myformData, {
-            headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.load_red_zones())
-            }
-          })*/
     },
     clear() {
       this.points = [];
@@ -265,41 +245,11 @@ export default {
     },
     enableRZ(rz){
       alert(rz.nome)
-      var x_y=[]
-          x_y.push('nome: '+rz.nome)
-          x_y.push(', largura: '+rz.largura)
-          x_y.push(', altura: '+ rz.altura+', pontos: ')
-          rz.pontos.forEach(p => {
-            x_y.push(p)
-            x_y.push(',')
-          });
-
-          // cria o blob com a resolucao da imagem nos dois primeiros elementos do array
-          var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
-          var myformData = new FormData();
-          myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.cam_selected + "-ativas/" + this.key(), myformData, {
-            headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.load_red_zones())
-
-
+          axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
-    disabledRZ(rz){
-       this.$buefy.dialog.confirm({
-        message: `Deseja desabilitar a redzone `+rz.nome+'?',
-        type:'is-danger',
-        size:'is-large',
-        confirmText:'SIM',
-        cancelText:'Não',
-        trapFocus: true,
-        onConfirm: () => {
-          //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected +"-ativas/" + this.key()+ "/" + rz.nome).then((r)=>{
-            console.log(r)
-            this.load_red_zones()
-          })
-        }
-      })
 
+    disabledRZ(rz){
+          axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: false}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     }
 
 }

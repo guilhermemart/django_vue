@@ -48,11 +48,7 @@
         <div id="tab-content" class="columns">
             <div id="camGroupA" v-if="group==='1'" class="columns is-multiline is-gapless">
                 <div class="column is-half">
-                    <img id="camA1" src="@/assets/valaris1.jpg" width="980" alt="camera 1"/>
-                    <!-- A primeira imagem está sendo pega de uma pasta 'images' que fica na HOME
-                    A página não funciona sem esta pasta e a imagem. Descomente para testar!
-                    <img id="camA1" src="../../../../../images/valaris1.jpg" width="980" alt="camera 1"/>
-                    -->
+                    <img id="camA1" :src="cameraA1" width="980" alt="camera 1"/>
                 </div>
                 <div class="column is-half">
                     <img id="camA2" src="@/assets/valaris2.jpg" width="980" alt="camera 2"/>
@@ -184,7 +180,7 @@ input:checked + .slider:before {
 #tab-content {
     transform: scale(0.92);
     position: relative;
-    top: -40px;
+    top: -30px;
 }
 
 #B2 {
@@ -195,6 +191,7 @@ input:checked + .slider:before {
 
 <script>
 import harpiaBar from '@/components/harpiaBar.vue'
+import axios from "axios";
 
 export default {
     name: 'Cameras',
@@ -205,12 +202,32 @@ export default {
         return {
             counter: '',
             group: '1',
+            cameraA1: 'http://192.168.0.46:8000/media/Screenshot from 2022-02-21 08-00-34.png'
         }
     },
     created() {
+        this.updateCamera()
         this.timer()
     },
+    watch: {
+      cameraA1(newImg) {
+
+      }
+    },
     methods: {
+        getImageUrl() {
+          return require('/home/devanir/img/valaris2.jpg')
+        },
+
+        async updateCamera() {
+          await axios
+          .get('api/v1/camera/get_url/')
+          .then(response => {
+            console.log(response.data.camera1)
+            this.cameraA1 = response.data.camera1 + "?" + new Date().getTime()
+          })
+        },
+
 
         /* Salva as li em 'tabs', desativa todas,
         ativa a tab selecionada e ajusta o height do div para não conflitar */
@@ -223,6 +240,7 @@ export default {
             })
             tabs[tabIndex - 1].classList.add('is-active')
             document.getElementById('tab-content').style.height = 'auto'
+            console.log(process.env['HOME'])
         },
 
         /* Se a checkbox estiver ativa a coluna se torna 'is-gapless',
@@ -248,45 +266,11 @@ export default {
 
         timer() {
             clearInterval(this.counter)
-            this.counter = setInterval(this.refreshCameras, 10000)
+            this.counter = setInterval(this.updateCamera, 200)
         },
 
         /* Salva o url das imagens em variáveis para poder mostrar a mais atualizada,
         adicionando '?v=1' faz com que seja selecionado a versão mais recente do arquivo */
-
-        refreshCameras() {
-            if (this.group === '1') {
-                let camA1 = document.getElementById('camA1').src
-                camA1 = camA1 += '?v=1'
-                console.log(camA1)
-                let camA2 = document.getElementById('camA2').src
-                camA2 = camA2 += '?v=1'
-                console.log(camA2)
-                let camA3 = document.getElementById('camA3').src
-                camA3 = camA3 += '?v=1'
-                console.log(camA3)
-                let camA4 = document.getElementById('camA4').src
-                camA4 = camA4 += '?v=1'
-                console.log(camA4)
-            } else if (this.group === '2') {
-                let camB1 = document.getElementById('camB1').src
-                camB1 = camB1 += '?v=1'
-                console.log(camB1)
-                let camB2 = document.getElementById('camB2').src
-                camB2 = camB2 += '?v=1'
-                console.log(camB2)
-            } else if (this.group === '3') {
-                console.log('GROUP C')
-                let camC1 = document.getElementById('camC1').src
-                camC1 = camC1 += '?v=1'
-                let camC2 = document.getElementById('camC2').src
-                camC2 = camC2 += '?v=1'
-                let camC3 = document.getElementById('camC3').src
-                camC3 = camC3 += '?v=1'
-                let camC4 = document.getElementById('camC4').src
-                camC4 = camC4 += '?v=1'
-            }
-        },
     },
     beforeUnmount() {
         console.log('destroy')

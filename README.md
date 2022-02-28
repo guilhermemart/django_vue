@@ -1,4 +1,4 @@
-# django_vue
+con# django_vue
     Estrutura do projeto
         django_vue
             |
@@ -21,6 +21,7 @@
 * Instale o postgresql
     - no terminal
       * sudo apt install libpq-dev python-dev postgresql postgresql-contrib
+    - Reinicie    
 * Crie um database e um user
     - no terminal
       * sudo su - postgres
