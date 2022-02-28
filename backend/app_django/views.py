@@ -162,51 +162,81 @@ class load_red_zones(APIView):
 
 # deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):
+    # se nao tiver uma camera no request ou a camera nao existir essa funcao a cria
+    def create_camera(self, cam_number, width=100, height=100):
+        new_camera = camera(
+            ativa=True,
+            name=f"cam{cam_number}",
+            width=width,
+            height=height,
+            slug=f"cam{cam_number}"
+        )
+        new_camera.save()
+
     def post(self, request):
         print(request.data)
         # cria a string que vai ser salva como txt
         output = request.data
-        output_string = f"nome: {output['name']}, largura: {output['width']}, pontos: "
+        output_string = f"nome: {output['name']}, largura: {output['width']}, altura: {output['height']},  pontos: "
         for ponto in output["dots"]:
             output_string = output_string + str(ponto) + ","
         # caminho dos arquivos no settings django
-        simple_save_path = os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
-        save_path = os.path.expanduser(os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt"))
-        save_path = request.data.get("red_zone_file_path", save_path)
         # precisa da lib Pathlib para salvar o arquivo
-        path = Path().home().joinpath('media','uploads','red_zones','individual_red_zones',f'{output["name"]}.txt')
+        dir_path = Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones").expanduser()
+        if Path(dir_path).is_dir():
+            pass
+        else:
+            Path(dir_path).mkdir(parents=True, exist_ok=True)
+        path = Path().joinpath(dir_path,f'{output["name"]}.txt')
+        # transforma path em str ou usa a string recebida no request
+        save_path = request.data.get("red_zone_file_path", str(path))
+        if "~" in save_path:
+            save_path = str(Path(save_path).expanduser())
         with open(save_path, 'w') as rzone:
             rzone.write(output_string)
             rzone.close()
         camera_number = output['cam']
-        wich_camera = camera.objects.filter(name="cam"+str(camera_number))[0]
+        wich_camera = camera.objects.filter(name="cam"+str(camera_number))
+        if len(wich_camera) == 0:
+            self.create_camera(camera_number)
+        wich_camera = camera.objects.filter(name="cam" + str(camera_number))
         date_added = datetime.now(tz=timezone(timedelta(hours=-3)))
         ident = date_added.timestamp()
-        r_zone_file_path = path  # r_zone_file_path = save_path nao aceitou o metodo File()
+        r_zone_file_path = Path().joinpath(path)  # r_zone_file_path =  precisa ser da lib Path para aceitar File()
         with r_zone_file_path.open(mode="rb") as f:
             new_red_zone = red_zone(
-                identificador=str(ident),
-                red_zone_camera=wich_camera,
+                identificador=str(int(ident)),
+                red_zone_camera=wich_camera[0],
                 slug=f"red_zone_cam{camera_number}_{ident}",
                 timestamp=1000*ident,
                 date_added=date_added,
-                name=f"red_zone_cam{camera_number}_{ident}",
+                name=f"red_zone_cam{camera_number+1}_{int(ident)}",
                 dots=output['dots'],
                 enabled=True,
                 dots_txt=File(f,name=r_zone_file_path.name),
                 conteudo=output_string,
-                local_dots_url=simple_save_path
+                local_dots_url=str(save_path)
             )
             new_red_zone.save()
             f.close()
         serializer = red_zone_serializer(new_red_zone)
         return Response(serializer.data)
 
+class del_red_zone(APIView):
+    def get(self, request, red_zone_name):
+        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)[0]
+        to_del_red_zone.delete()
+        serializer = red_zone_serializer(to_del_red_zone)
+        return Response(serializer.data)
+        # o serializer.data possui bem mais campos que os utilizados no front
+        # nao atrapalha ter mais campos
+        # name, height, width, enabled e dots são obrigatorios
 
 class update_red_zone(APIView):
     def post(self, request, red_zone_name):
         rzone = red_zone.objects.filter(name=red_zone_name)[0]
         rzone.enabled = request.data['is_active'] == "true"
+        rzone.timestamp += 1  # some 1 no timestamp pra usar como chave de looping no vue
         rzone.save()
         serializer = red_zone_serializer(rzone)
         return Response(serializer.data)
