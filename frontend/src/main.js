@@ -8,7 +8,8 @@ import axios from 'axios'
 import Konva from "konva";
 import VueKonva from "vue3-konva";
 
-
+import '@fortawesome/fontawesome-free/css/all.css'
+import '@fortawesome/fontawesome-free/js/all.js'
 require("./styles/harpia.scss")
 // magia pra nao precisar chamar a api pelo endereço completo
 axios.defaults.baseURL = 'http://'+process.env.VUE_APP_IP+':8000'
