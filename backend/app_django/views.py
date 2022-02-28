@@ -1,25 +1,22 @@
 from django.http import Http404
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
-
 from .models import alert, category, red_zone, camera
 from .serializers import alert_serializer, red_zone_serializer, camera_serializer, category_serializer
 from .main import update_alert_by_identificador
 from .wistml_sender import compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 from .monthly_report_data import report_data
-
 from random import randint
 from django.core.files.images import ImageFile
 from django.core.files import File
 import os
 from pathlib import Path
+# a lib pathlib funciona semelhante a os, mas o django se entende com ela
 from datetime import datetime, timedelta, timezone
 import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
-
 
 
 class latest_alerts_list(APIView):
@@ -78,15 +75,24 @@ class update_alert(APIView):
 
 
 class create_alert(APIView):
+    def create_category(self):
+        new_category = category(
+            name="fake_category"
+        )
+        new_category.save()
     # cria um novo alerta de acordo com os dados do request
     def get(self, request):
+        # futuramente usar decouple para definir esse caminho
         path = Path().home().joinpath("media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
-
+        simple_media_path = Path().joinpath("~", "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
         fields = request.data
-        categoria = category.objects.all()[0]
-        categoria_input = category.objects.filter(name=fields.get('category_name', 'Nonconformity'))
+        category_name = fields.get('category_name', "fake_category")
+        categoria_input = category.objects.filter(name=category_name)
         if categoria_input.count() > 0:
             categoria = categoria_input[0]
+        else:
+            self.create_category()
+            categoria = category.objects.filter(name=category_name)
         alertas_qtde = alert.objects.all().count()
         with path.open(mode='rb') as f:
             image = ImageFile(f)
@@ -101,12 +107,13 @@ class create_alert(APIView):
                 thumb_up=fields.get("thumb_up", False),
                 thumb_down=fields.get("thumb_down", True),
                 image=image,
-                local_image_url=fields.get("image_path", str(path)),
+                local_image_url=fields.get("image_path", str(simple_media_path)),
                 sequencial=int(alertas_qtde + 1),
-                witsml_confirm="witsml_not_sent"
+                witsml_confirm="witsml_not_sent",
+                timestamp= fields.get("timestamp", 1643679950000 - (365*24*60*60*1000) + randint(0,60*60*24*1000))
             )
             alerta_to_create.save()
-            try:
+            try:  # abre conexão com o bd pro pgpubsub perceber a chegada de um alerta novo
                 pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'), host=config('db_host'))
             except Exception as e:
                 print(e)
@@ -130,7 +137,7 @@ class alert_detail(APIView):
 
 
 class category_detail(APIView):
-    # mostra uma pagina com o alerta e seus detalhes
+    # mostra uma pagina com a categoria, detalhes e alertas da categoria
     def get_object(self, category_slug):
         try:
             return category.objects.get(slug=category_slug)[0]
@@ -157,22 +164,25 @@ class load_red_zones(APIView):
 class save_red_zone(APIView):
     def post(self, request):
         print(request.data)
+        # cria a string que vai ser salva como txt
         output = request.data
         output_string = f"nome: {output['name']}, largura: {output['width']}, pontos: "
         for ponto in output["dots"]:
-            output_string = output_string + ponto + ","
+            output_string = output_string + str(ponto) + ","
         # caminho dos arquivos no settings django
-        save_path = os.path.join(os.getenv("HOME"), "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
+        simple_save_path = os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
+        save_path = os.path.expanduser(os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt"))
+        save_path = request.data.get("red_zone_file_path", save_path)
         # precisa da lib Pathlib para salvar o arquivo
         path = Path().home().joinpath('media','uploads','red_zones','individual_red_zones',f'{output["name"]}.txt')
         with open(save_path, 'w') as rzone:
             rzone.write(output_string)
             rzone.close()
-        camera_number=request.output['cam'][0]
-        wich_camera = camera.objects.filter(name="cam"+str(camera_number))
-        date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
-        ident=date_added.timestamp()
-        r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
+        camera_number = output['cam']
+        wich_camera = camera.objects.filter(name="cam"+str(camera_number))[0]
+        date_added = datetime.now(tz=timezone(timedelta(hours=-3)))
+        ident = date_added.timestamp()
+        r_zone_file_path = path  # r_zone_file_path = save_path nao aceitou o metodo File()
         with r_zone_file_path.open(mode="rb") as f:
             new_red_zone = red_zone(
                 identificador=str(ident),
@@ -185,11 +195,20 @@ class save_red_zone(APIView):
                 enabled=True,
                 dots_txt=File(f,name=r_zone_file_path.name),
                 conteudo=output_string,
-                local_dots_url=str(save_path)
+                local_dots_url=simple_save_path
             )
             new_red_zone.save()
             f.close()
         serializer = red_zone_serializer(new_red_zone)
+        return Response(serializer.data)
+
+
+class update_red_zone(APIView):
+    def post(self, request, red_zone_name):
+        rzone = red_zone.objects.filter(name=red_zone_name)[0]
+        rzone.enabled = request.data['is_active'] == "true"
+        rzone.save()
+        serializer = red_zone_serializer(rzone)
         return Response(serializer.data)
 
 
