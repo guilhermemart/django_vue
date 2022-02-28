@@ -11,20 +11,20 @@
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
               <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
               <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Salvar</button>
-            <div class="dropdown is-hoverable">
+            <div  class="dropdown is-hoverable">
               <div class="dropdown-trigger">
-                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                <button  class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                   <span>Carregar</span>
-                  <span class="icon is-small">
+                  <span  class="icon is-small">
                     <i class="fas fa-angle-down" aria-hidden="true"></i>
                   </span>
                 </button>
               </div>
               <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
-                  <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
-                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >delete icon</button></div>
-                  <div class="column my-4">{{rd.name.toUpperCase()}}</div>
+                  <a v-for="rd in redzones" :key="rd.timestamp" :value="rd" aria-role="listitem" class="columns">
+                  <div class="column"><button @click="delete_rz(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >Delete (I)</button></div>
+                  <div class="column my-4" >{{rd.name.toUpperCase()}}</div>
                   </a>
                 </div>
               </div>
@@ -41,8 +41,8 @@
             </div>
             <div class=" cams column is-10 mt-4 " >
 
-<!--v-stage e v-layer são classes do vue-konva -->
-                <v-stage ref="stage" :config="stageConfig[cam_selected]">
+<!--v-stage e v-layer são classes do vue-konva não adianta procurar que nao está na doc do vue-->
+      <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
         <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: scale,scaleY: scale,}"/>
@@ -117,14 +117,11 @@ export default {
     rdSelected:{
       handler(){
         this.clear()
-        this.points=this.rdSelected.pontos
+        this.points=this.rdSelected.dots
+        console.log(rdSelected)
       }
     }
   },methods: {
-    get_ip(){
-      return process.env.VUE_APP_IP
-      },
-
     async loadingImages(){
     this.$store.commit('setIsLoading', true)
       let which_camera = 0
@@ -148,7 +145,7 @@ export default {
         /* campos minimos esperados de red zones
         name:
         width:
-        heigth:
+        height:
         enabled:
         dots: [] */
         // feito o get pro django retorna um objeto javascript --> magia do rest_api
@@ -165,7 +162,6 @@ export default {
             console.log(error)
         })
     },
-
     handleMouseClick() {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x;
@@ -190,7 +186,6 @@ export default {
       this.points[index * 2] = x;
       this.points[index * 2 + 1] = y;
     },
-
     async save(){
         var x_y=[]
         //x_y.push('nome: '+(new Date()).toString())
@@ -203,7 +198,7 @@ export default {
             cam: this.cam_selected,
             name: "cam" + this.cam_selected.toString() + "_" + (new Date().getTime()).toString(),
             width: this.stageConfig[this.cam_selected].width,
-            height: this.stageConfig[this.cam_selected].heigth,
+            height: this.stageConfig[this.cam_selected].height,
             dots: x_y}
         this.$store.commit('setIsLoading', true)
       await axios
@@ -211,6 +206,7 @@ export default {
         .then(response => {
           red_zone_output = JSON.parse(response.data)
           console.log(red_zone_output)
+          this.load_red_zone()
         })
         .catch(error => {
           console.log(error)
@@ -227,24 +223,15 @@ export default {
       this.points.pop();
       this.anchors.pop();
     },
-    deleteRZ(rz){
-       this.$buefy.dialog.confirm({
-        message: `Deseja excluir a redzone: `+rz.nome+'?',
-        type:'is-success',
-        size:'is-large',
-        confirmTest:'Confirmar',
-        trapFocus: true,
-        onConfirm: () => {
-          //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
-            console.log(r)
+    delete_rz(rz){
+        alert(rz.name)
+        axios.get('/api/v1/deldots/'+rz.name).then(()=>{
             this.load_red_zones()
-          })
-        }
-      })
+        })
     },
     enableRZ(rz){
-      alert(rz.nome)
+      alert(rz.name)
+
           axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
 
