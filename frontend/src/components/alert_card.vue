@@ -1,12 +1,24 @@
 <template>
   <div>
-  <div class="box has-background-white mx-1">
-   <div class="is-floating-left">
-            <button class=" button mx-1 is-rounded is-small is-primary">O</button>
-            <button class=" button mx-1 is-rounded is-small is-success">L</button>
-            <button class=" button mx-1 is-rounded is-small is-danger">D</button>
-          </div>
-          
+    <div class="box has-background-white mx-1">
+      <div class="is-floating-left">
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" >
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused">
+          <span class="icon ">
+            <i class="far fa-thumbs-up fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused">
+          <span class="icon ">
+            <i class="far fa-thumbs-down fa-lg" />
+          </span>
+        </button>
+      </div>
+            
       <div class="columns column mt-1">
         <div class="column is-4 mt-4">    
             <div class=" has-text-left">
@@ -14,54 +26,139 @@
                 <icon  class="ml-2 " icon="hard-hat" type="is-primary"></icon>
                 <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
               </div>
-
               <div class="container has-text-underlined">
                 <icon class="ml-2" icon="exclamation-thick" type="is-primary"></icon>
                 <span class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
               </div>
-
               <span class="has-text-grey-light is-custom-size">ID: {{ Alert.identificador }}</span>
             </div>
-          </div>
+        </div>
 
         <div class="column is-4 ">
           <p class="dates mb-3"><p>Date:</p>{{new Date(Alert.timestamp).toLocaleDateString("en-US")}}</p>
           <p class="dates"> <p>Time:</p>{{new Date(Alert.timestamp).toLocaleTimeString("en-US")}}</p>
-
         </div>
 
-        <div class="column is-4">
-          
+        <div class="column is-4">          
           <figure class="image">
             <!--img src "imagem aqui" -->
-            <img :src="Alert.get_thumbnail " class="has-pointer-cursor" @click="showImage">
+            <img :src="Alert.get_thumbnail " class="has-pointer-cursor" @click="imageModal=!imageModal">
           </figure>
         </div>
 
-  
-<div class="modal" @click="showImage" :class="{'is-active': imageModal}">
-  <div class="modal-background"> </div>
-  <!--
-  Para fazer depois:
-   Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
-  <div class="modal-content fullImage">
-    <p class="image is-16by9 ">
-      <img :src="Alert.get_image" alt="">
-    </p>
-  </div>
- 
-</div>
+    
+        <div class="modal" @click="imageModal=!imageModal" :class="{'is-active': imageModal}">
+          <div class="modal-background"> </div>
+          <!--
+          Para fazer depois:
+          Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
+          <div class="modal-content fullImage">
+            <p class="image is-16by9 ">
+              <img :src="Alert.get_image" alt="">
+            </p>
+          </div>      
+        </div>
 
-      
+        <div class="modal"  :class="{'is-active': commentModal}">
+            
+          <div class="modal-background"> </div>
+          <!--
+          Para fazer depois:
+          Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
+          <div class="modal-content">
+            <header class="modal-card-head">
+            <p class="modal-card-title">Information </p>
+            <button type="button" class="delete" @click="commentModal=false" />
+          </header>
+           <section class="modal-card-body">             
+            <table :data="Alert" class="mb-3 table  is-bordered is-striped is-hoverable is-fullwidth" >
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Hour</th>
+                  <th>Notes</th>
+                  <th>User</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+                    <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+                    <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+                    <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+                  <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+                  <tr>
+                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> Notes here</th>
+                  <th>User Login</th>
+                           
+                </tr>
+              </tbody>
+        
+              
+            </table> 
+           <br>
+           <hr>
+          <footer>
+            <div class="field has-addons">
+              <div class="control is-expanded">
+               <input class="input is-rounded" type="text" placeholder="Find a repository">
+              </div>
+              <div class="control">
+                <button class="button is-info is-rounded">
+               Save
+                </button>
+              </div>
+            </div> 
+                     
+          </footer>
+          </section>
+          </div>      
+        </div>
+        
+
+        
       </div>  
     </div>
-  
+    
   </div>
 
 </template>
 
 <style lang="scss">
-
+.table{
+  overflow: auto;
+}
 .fullImage{
   
       display: block; 
@@ -119,6 +216,7 @@ export default {
         notes: "0",
         local_audio_enable: true,
         imageModal:false,
+        commentModal:false
         }
   },
   components: {
@@ -198,10 +296,6 @@ export default {
             audio.play()
         }
     },
-    showImage(){
-      
-      this.imageModal=!this.imageModal
-    }
     
     },
   computed: {
