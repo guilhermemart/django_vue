@@ -21,10 +21,26 @@
 
 <div class="columns">
 <div class="  column is-2">
-<p><button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="showModal()" >CLEAN</button></p>
-<p><button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="showModal()" >UNDO</button></p>
-<p><button class="button is-success is-outlined is-fullwidth focus mt-1" @click="showModal()" >SAVE</button></p>
-<p><button class="button is-dark is-outlined is-fullwidth focus mt-1" @click="showModal()" >LOAD</button></p>
+ <button class="button">
+    <span class="icon">
+      <i class="fab fa-github"></i>
+    </span>
+    <span>GitHub</span>
+  </button>
+<p><button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="showModal()" >
+<span class="icon">
+      <i class="fas fa-eraser"></i>
+    </span><span>Clean</span>
+</button></p>
+<p><button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="showModal()" ><span class="icon">
+      <i class="fas fa-undo"></i>
+    </span><span>UNDO</span></button></p>
+<p><button class="button is-success is-outlined is-fullwidth focus mt-1" @click="showModal()" ><span class="icon">
+      <i class="fas fa-save"></i>
+    </span><span>SAVE</span></button></p>
+<p><button class="button is-dark is-outlined is-fullwidth focus mt-1" @click="showModal()" ><span class="icon">
+      <i class="fas fa-upload"></i>
+    </span><span>LOAD</span></button></p>
 
 <p><button class="button is-success is-outlined is-fullwidth focus mt-1" @click="showModal()" >ACTIVE</button></p>
 </div>
@@ -32,7 +48,23 @@
 <p>Redzone Name: {{rdName}}</p>
 </div>
 </div>
-
+ <div>
+  <span class="icon has-text-danger">  
+    <i class="far fa-user"></i>
+  </span>
+  <br>
+  <span class="icon">  
+    <i class="far fa-2x fa-flag"></i>
+  </span>
+    <br>
+  <span class="icon">  
+    <i class="fas fa-spinner fa-pulse"></i>
+  </span>
+  <br>
+   <span class="icon">  
+    <i class="fas fa-spinner"></i>
+  </span>
+ </div>
 
 <div class="select is-dark">
   <select>
@@ -79,6 +111,13 @@ export default {
             temp:''
         }
     },
+    computed: {
+         
+    },
+    watch:{
+      
+
+    },
     methods: {
         save(){
             this.rdName=this.temp
@@ -87,6 +126,7 @@ export default {
         },
         showModal(){            
             this.show=!this.show
+            
         }
     },
 }
