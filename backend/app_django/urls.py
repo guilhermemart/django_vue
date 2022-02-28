@@ -8,7 +8,7 @@ urlpatterns = [
     path('update_alert_by_identificador/', views.update_alert.as_view()),
     path('create_alert/', views.create_alert.as_view()),
     path('alerts/<slug:category_slug>/<slug:alert_slug>/', views.alert_detail.as_view()),
-    # path('loaddots/<slug:camera_slug>', views.load_red_zone.as_view()),
+    path('deldots/<red_zone_name>', views.del_red_zone.as_view()),
     path('update_red_zone/<red_zone_name>', views.update_red_zone.as_view()),
     path('save_red_zone/', views.save_red_zone.as_view()),
     path('watchdog/', views.wait_alert.as_view()),

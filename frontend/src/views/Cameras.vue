@@ -216,8 +216,8 @@ export default {
     },
     methods: {
         getImageUrl() {
-          // return require('/home/devanir/img/valaris2.jpg')
-          return
+          //return require('/home/devanir/img/valaris2.jpg')
+            return
         },
 
         async updateCamera() {
