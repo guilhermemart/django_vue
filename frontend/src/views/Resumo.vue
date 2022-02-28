@@ -38,7 +38,7 @@ export default {
     /* Pega os dados do 'alerts/report' e salva em variáveis separadas, uma pra cada card */
     async getAlerts() {
       await axios
-          .get('/api/v1/alerts/report')
+          .get('/api/v1/alerts/report/')
           .then(response => {
             this.today = response.data.today
             this.thisMonth = response.data.now
