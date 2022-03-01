@@ -175,6 +175,7 @@ class save_red_zone(APIView):
         for ponto in output["dots"]:
             output_string = output_string + str(ponto) + ","
         # caminho dos arquivos no settings django
+        save_path = os.path.join(os.getenv("HOME"), "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
         # precisa da lib Pathlib para salvar o arquivo
         simple_path = request.data.get("red_zone_file_path", str(Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones",f'{output["name"]}.txt')))
         dir_path = Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones").expanduser()
@@ -190,14 +191,11 @@ class save_red_zone(APIView):
         with open(save_path, 'w') as rzone:
             rzone.write(output_string)
             rzone.close()
-        camera_number = output['cam']
+        camera_number=request.output['cam'][0]
         wich_camera = camera.objects.filter(name="cam"+str(camera_number))
-        if len(wich_camera) == 0:
-            self.create_camera(camera_number)
-        wich_camera = camera.objects.filter(name="cam" + str(camera_number))
-        date_added = datetime.now(tz=timezone(timedelta(hours=-3)))
-        ident = date_added.timestamp()
-        r_zone_file_path = Path().joinpath(path)  # r_zone_file_path =  precisa ser da lib Path para aceitar File()
+        date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
+        ident=date_added.timestamp()
+        r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
         with r_zone_file_path.open(mode="rb") as f:
             new_red_zone = red_zone(
                 identificador=str(int(ident)),
@@ -226,16 +224,6 @@ class del_red_zone(APIView):
         # o serializer.data possui bem mais campos que os utilizados no front
         # nao atrapalha ter mais campos
         # name, height, width, enabled e dots são obrigatorios
-
-class update_red_zone(APIView):
-    def post(self, request, red_zone_name):
-        rzone = red_zone.objects.filter(name=red_zone_name)[0]
-        rzone.enabled = request.data['is_active'] == "true"
-        rzone.timestamp += 1  # some 1 no timestamp pra usar como chave de looping no vue
-        rzone.save()
-        serializer = red_zone_serializer(rzone)
-        return Response(serializer.data)
-
 
 # o watchdog do front deve chamar essa função e deixar ela em watch
 class wait_alert(APIView):
