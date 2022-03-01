@@ -85,8 +85,8 @@
         v-bind:Alert="alert" />
     </div>
     <nav class="pagination" role="navigation" aria-label="pagination">
-        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)-1).toString()">Previous</router-link></a>
-        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)+1).toString()">Next</router-link></a>
+        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
+        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)">Next</a>
     </nav>
 {{page}}
   </div>
@@ -226,6 +226,16 @@ export default {
         this.has_next_page = true
         this.latest_alerts = this.latest_alerts.slice(0,6)
       }
+    },
+    go_to_page(next_page){
+        console.log("teste")
+        // router push nao reloada a pagina se mudar apenas o parametro
+        this.$router.push("/latest-alerts/"+next_page.toString()).then(
+        ()=> {
+        this.$router.go()  // forca o reload da pagina
+        }
+        )
+
     },
     /*async get_date_filtered_alerts() {
       this.$store.commit('setIsLoading', true)
