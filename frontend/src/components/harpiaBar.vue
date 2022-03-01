@@ -87,9 +87,13 @@ show_in_bar: {
 data() {
     return {
       showMobileMenu: false,
-      valid: false,  //false --> apresenta, true --> esconde
-      invalid: false,
-      non_classified: false,
+      filter: {
+      valid: true,  // true --> apresenta, false --> esconde
+      invalid: true,
+      non_classified: true,
+      date_start: 0,
+      date_end: new Date().getTime()
+        }
     }
   },
   methods:{
@@ -105,50 +109,52 @@ data() {
     /*
       filterValid, filterInvald e filterNonClassified alteram suas respectivas variáveis locais,
       atualiza a respectiva variável global e deixa o item do dropdown ativo ou desativado, para melhor visualização
-      filterClear deixa 3 variáveis locais como false, atualiza a global e desativa os itens do dropdown
+      filterClear deixa 3 variáveis locais como true, atualiza a global e ativa os itens do dropdown
+     ToDo: campos do filtro nao estão iniciando ativos/inativos
      */
-
+ save_filter(){
+            this.$store.commit('save_filter', this.filter)
+        },
     filterValid() {
-      this.valid = !this.valid
-      this.$store.state.filter.valid = this.valid
-      if (this.valid){
+      this.filter.valid = !this.filter.valid
+      this.save_filter()
+      if (this.filter.valid){
         document.getElementById("field-valid").classList.add("is-active")
       } else {
         document.getElementById("field-valid").classList.remove("is-active")
       }
     },
     filterInvalid() {
-      this.invalid = !this.invalid
-      this.$store.state.filter.invalid = this.invalid
-      if (this.invalid){
+      this.filter.invalid = !this.filter.invalid
+      this.save_filter()
+      if (this.filter.invalid){
         document.getElementById("field-invalid").classList.add("is-active")
       } else {
         document.getElementById("field-invalid").classList.remove("is-active")
       }
     },
     filterNonClassified() {
-      this.non_classified = !this.non_classified
-      this.$store.state.filter.non_classified = this.non_classified
-      if (this.non_classified){
+      this.filter.non_classified = !this.filter.non_classified
+      this.save_filter()
+      if (this.filter.non_classified){
         document.getElementById("field-nonclass").classList.add("is-active")
       } else {
         document.getElementById("field-nonclass").classList.remove("is-active")
       }
     },
     filterClear() {
-      this.valid = false
-      this.invalid = false
-      this.non_classified = false
-      this.$store.state.filter.valid = this.valid
-      this.$store.state.filter.invalid = this.invalid
-      this.$store.state.filter.non_classified = this.non_classified
-      document.getElementById("field-valid").classList.remove("is-active")
-      document.getElementById("field-invalid").classList.remove("is-active")
-      document.getElementById("field-nonclass").classList.remove("is-active")
+      this.filter.valid = true
+      this.filter.invalid = true
+      this.filter.non_classified = true
+      this.save_filter()
+      document.getElementById("field-valid").classList.add("is-active")
+      document.getElementById("field-invalid").classList.add("is-active")
+      document.getElementById("field-nonclass").classList.add("is-active")
     }
   },
 
   mounted() {
+  this.filter = this.$store.state.filter
   },
   computed: {
 

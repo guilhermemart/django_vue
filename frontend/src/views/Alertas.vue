@@ -139,7 +139,14 @@ export default {
         isRange:true,
         format:'',
         has_next_page: false,
-        CurrentPage:1
+        CurrentPage:1,
+        filter:{
+            end: new Date().getTime(),
+            valids: true,
+            invalids: true,
+            non_classifieds: true,
+            start: 0,
+        }
     }
   },
     computed: {
@@ -163,6 +170,7 @@ export default {
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.get_latest_alerts(),
+    this.filter = this.$store.state.filter
     document.title = 'Alerts | Harpia'
   },
   created(){
@@ -199,11 +207,11 @@ export default {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       let data= {
-        "end": this.$store.state.filter.date_end,
-        "valids": this.$store.state.filter.valid,
-        "invalids": this.$store.state.filter.invalid,
-        "non_classifieds": this.$store.state.filter.non_classified,
-        "start": this.$store.state.filter.date_start,
+        "end": this.filter.end,
+        "valids": this.filter.valids,
+        "invalids": this.filter.invalids,
+        "non_classifieds": this.filter.non_classifieds,
+        "start": this.filter.start,
       }
       await axios
         .post('/api/v1/latest-alerts/'+this.page, data)
@@ -219,7 +227,7 @@ export default {
         this.latest_alerts = this.latest_alerts.slice(0,6)
       }
     },
-    async get_date_filtered_alerts() {
+    /*async get_date_filtered_alerts() {
       this.$store.commit('setIsLoading', true)
       var path='/api/v1/'+this.date[0]+'/'+this.date[1]+'/'+this.page
       alert(path)
@@ -232,13 +240,12 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-    },
+    },*/
+
     refreshPage(){
        this.watchdog()
     this.date=''
     this.get_latest_alerts()
-    
-
     },
     findALerts(){      
       if(this.isRange){
