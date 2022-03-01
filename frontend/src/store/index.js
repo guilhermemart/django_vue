@@ -27,9 +27,9 @@ export default createStore({
         localStorage.setItem('audio', JSON.stringify(state.audio))
       }
       if (localStorage.getItem('filter')) {
-        state.audio = JSON.parse(localStorage.getItem('filter'))
+        state.filter = JSON.parse(localStorage.getItem('filter'))
       } else {
-        localStorage.setItem('filter', JSON.stringify(state.audio))
+        localStorage.setItem('filter', JSON.stringify(state.filter))
       }
       if (localStorage.getItem('token')) {
           state.token = localStorage.getItem('token')
@@ -45,6 +45,14 @@ export default createStore({
       state.audio.is_recorrente = audio_new.is_recorrente
       state.audio.has_delay = audio_new.has_delay
       localStorage.setItem('audio', JSON.stringify(state.audio))
+    },
+    save_filter(state, filter_new) {
+      state.filter.valid = filter_new.valid
+      state.filter.invalid = filter_new.invalid
+      state.filter.non_classified = filter_new.non_classified
+      state.filter.date_start = filter_new.date_start
+      state.filter.date_end = filter_new.date_end
+      localStorage.setItem('filter', JSON.stringify(state.filter))
     },
     setIsLoading(state, status) {
       state.isLoading = status

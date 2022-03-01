@@ -33,9 +33,19 @@ class latest_alerts_list(APIView):
         alerts = alert.objects.filter(timestamp__gte=start + 1)
         alerts = alerts.filter(timestamp__lte=end + 1)
         # filtragem por classificacao
-        alerts = alerts.filter(thumb_up__exact=not thumb_up)
-        alerts = alerts.filter(thumb_down__exact=not thumb_down)
-        alerts = alerts.filter(thumb_down__exact=not non_classified)[6 * (page - 1):(6 * page) + 1]
+        if non_classified is True:
+            non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False)
+        else:
+            non_classified_alerts = alerts.none()
+        if thumb_up is True:
+            thumb_up_alerts = alerts.filter(thumb_up__exact=True)
+        else:
+            thumb_up_alerts = alerts.none()
+        if thumb_down is True:
+            thumb_down_alerts = alerts.filter(thumb_down__exact=True)
+        else:
+            thumb_down_alerts = alerts.none()
+        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts)[6 * (page - 1):(6 * page) + 1]
         # 6 o numero magico de alertas na pagina
         # retorna 7 valores o 7th serve para o vue definir se tem proxima pagina
         serializer = alert_serializer(alerts, many=True)
@@ -57,19 +67,7 @@ class update_alert(APIView):
                     send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer)
                 except Exception as e:
                     print(f"impossivel criar xml {e}")
-
-                # Procura os alertas que não foram enviados
-                alerts_not_sent = alert.object.filter(witsml_confirm="witsml_not_sent")
-                alerts = alert_serializer(alerts_not_sent, many=True).data
-                # Chama a função de enviar para cada alerta
-                for alert_ in alerts:
-                    try:
-                        send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), alert_)
-                    except Exception as e:
-                        print(f"Erro ao tentar enviar alertas pendentes {e}")
-                # Possivel problema: Esse campo 'witsml_confirm' do alerta acho que não muda depois de enviar,
-                # então no momento acho que sempre tentaria enviar todos
-
+                # pool witsml movida para witsml_sender
             return Response(serializer.data)
         raise Http404
 
@@ -92,8 +90,10 @@ class create_alert(APIView):
             categoria = categoria_input[0]
         else:
             self.create_category()
-            categoria = category.objects.filter(name=category_name)
+            categoria = category.objects.filter(name=category_name)[0]
         alertas_qtde = alert.objects.all().count()
+        if not path.is_file():
+            path=Path().joinpath(Path(__file__).resolve().parent.parent.parent, 'pwa_images', 'example.png')
         with path.open(mode='rb') as f:
             image = ImageFile(f)
             image.name = path.name
@@ -101,11 +101,11 @@ class create_alert(APIView):
                 alert_category=categoria,
                 slug=fields.get("slug", f'example_{int(datetime.now().timestamp() * 1000)}'),
                 identificador=fields.get("identificador", int(datetime.now().timestamp() * 1000)),
-                date_added=datetime.now().replace(month=12),
+                date_added=datetime.now()-timedelta(days=1),
                 quantidade=fields.get("quantidade", randint(1, 3)),
-                anotacoes=fields.get("anotacoes", ""),
+                anotacoes=fields.get("anotacoes", "this is a fake test alert"),
                 thumb_up=fields.get("thumb_up", False),
-                thumb_down=fields.get("thumb_down", True),
+                thumb_down=fields.get("thumb_down", False),
                 image=image,
                 local_image_url=fields.get("image_path", str(simple_media_path)),
                 sequencial=int(alertas_qtde + 1),
@@ -162,55 +162,74 @@ class load_red_zones(APIView):
 
 # deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):
+    # se nao tiver uma camera no request ou a camera nao existir essa funcao a cria
+    def create_camera(self, cam_number, width=100, height=100):
+        new_camera = camera(
+            ativa=True,
+            name=f"cam{cam_number}",
+            width=width,
+            height=height,
+            slug=f"cam{cam_number}"
+        )
+        new_camera.save()
+
     def post(self, request):
         print(request.data)
         # cria a string que vai ser salva como txt
         output = request.data
-        output_string = f"nome: {output['name']}, largura: {output['width']}, pontos: "
+        output_string = f"nome: {output['name']}, largura: {output['width']}, altura: {output['height']},  pontos: "
         for ponto in output["dots"]:
             output_string = output_string + str(ponto) + ","
         # caminho dos arquivos no settings django
-        simple_save_path = os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
-        save_path = os.path.expanduser(os.path.join("~", "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt"))
-        save_path = request.data.get("red_zone_file_path", save_path)
+        save_path = os.path.join(os.getenv("HOME"), "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
         # precisa da lib Pathlib para salvar o arquivo
-        path = Path().home().joinpath('media','uploads','red_zones','individual_red_zones',f'{output["name"]}.txt')
+        simple_path = request.data.get("red_zone_file_path", str(Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones",f'{output["name"]}.txt')))
+        dir_path = Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones").expanduser()
+        if Path(dir_path).is_dir():
+            pass
+        else:
+            Path(dir_path).mkdir(parents=True, exist_ok=True)
+        path = Path().joinpath(dir_path,f'{output["name"]}.txt')
+        # transforma path em str ou usa a string recebida no request
+        save_path = request.data.get("red_zone_file_path", str(path))
+        if "~" in save_path:
+            save_path = str(Path(save_path).expanduser())
         with open(save_path, 'w') as rzone:
             rzone.write(output_string)
             rzone.close()
-        camera_number = output['cam']
-        wich_camera = camera.objects.filter(name="cam"+str(camera_number))[0]
-        date_added = datetime.now(tz=timezone(timedelta(hours=-3)))
-        ident = date_added.timestamp()
-        r_zone_file_path = path  # r_zone_file_path = save_path nao aceitou o metodo File()
+        camera_number=request.output['cam'][0]
+        wich_camera = camera.objects.filter(name="cam"+str(camera_number))
+        date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
+        ident=date_added.timestamp()
+        r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
         with r_zone_file_path.open(mode="rb") as f:
             new_red_zone = red_zone(
-                identificador=str(ident),
-                red_zone_camera=wich_camera,
+                identificador=str(int(ident)),
+                red_zone_camera=wich_camera[0],
                 slug=f"red_zone_cam{camera_number}_{ident}",
-                timestamp=1000*ident,
+                timestamp=int(1000*ident),
                 date_added=date_added,
-                name=f"red_zone_cam{camera_number}_{ident}",
+                name=f"red_zone_cam{camera_number+1}_{int(ident)}",
                 dots=output['dots'],
                 enabled=True,
                 dots_txt=File(f,name=r_zone_file_path.name),
                 conteudo=output_string,
-                local_dots_url=simple_save_path
+                local_dots_url=simple_path
             )
             new_red_zone.save()
             f.close()
         serializer = red_zone_serializer(new_red_zone)
         return Response(serializer.data)
 
-
-class update_red_zone(APIView):
-    def post(self, request, red_zone_name):
-        rzone = red_zone.objects.filter(name=red_zone_name)[0]
-        rzone.enabled = request.data['is_active'] == "true"
-        rzone.save()
-        serializer = red_zone_serializer(rzone)
+class del_red_zone(APIView):
+    def get(self, request, red_zone_name):
+        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)[0]
+        to_del_red_zone.delete()
+        serializer = red_zone_serializer(to_del_red_zone)
         return Response(serializer.data)
-
+        # o serializer.data possui bem mais campos que os utilizados no front
+        # nao atrapalha ter mais campos
+        # name, height, width, enabled e dots são obrigatorios
 
 # o watchdog do front deve chamar essa função e deixar ela em watch
 class wait_alert(APIView):
@@ -290,3 +309,13 @@ class get_url_camera(APIView):
         print(get_url_camera.url)
         IP = request.build_absolute_uri("/")
         return Response({"camera1": IP + get_url_camera.url})
+
+
+class update_red_zone(APIView):
+    def post(self, request, red_zone_name):
+        rzone = red_zone.objects.filter(name=red_zone_name)[0]
+        rzone.enabled = request.data['is_active'] == 'true'
+        rzone.timestamp += 1
+        rzone.save()
+        serializer = red_zone_serializer(rzone)
+        return Response(serializer.data)

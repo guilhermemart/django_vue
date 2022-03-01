@@ -8,58 +8,65 @@
        <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" />  
        <button class="button has-text-light has-custom-width is-medium is-responsive is-success">Find<span class="is-family-sans-serif"></span></button>     
     </div>
-  </div> -->
-<div v-if="true">
-        <div class="control mt-1">
-          <label class="radio">
-            <input v-model="isRange" v-bind:value="true" type="radio" name="day">
-            dia
-          </label>
-          <label class="radio">
-            <input v-model="isRange" v-bind:value="false" type="radio" name="period">
-            periodo
-          </label>
-        </div>
+  </div> 
+  
+  -->
 
+    <div>
+      <div class="control mt-1">
+        <label class="radio">
+          <input v-model="isRange" v-bind:value="true" type="radio" name="day">
+          day
+        </label>
+        <label class="radio">
+          <input v-model="isRange" v-bind:value="false" type="radio" name="period">
+          period
+        </label>
       </div>
-  <div class="has-addons level-item has-text-centered ">
-  
-  <div class="control calendar" v-if="isRange">  
-    <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
-  </div>
+    </div>
+    <div class="has-addons level-item has-text-centered ">    
+      <div class="control calendar" v-if="isRange">  
+        <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
+      </div>
+      <div class="control calendar" v-else>
+        <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
+      </div>
 
-  <div class="control calendar" v-else>
-  <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
+      <div class="control">    
+          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">
+          <span class="icon">
+          <i class="fas fa-search"></i>
+        </span>
+          <span class="is-family-sans-serif">Confirm</span></button>     
+      </div>
+      <div class="control">    
+          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
+              <span class="icon">
+          <i class="fas fa-sync"></i>
+        </span>
+          <span class="is-family-sans-serif">Refresh</span></button>     
+      </div>
+    
   </div>
-
-
-  <div class="control">    
-       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">Confirm<span class="is-family-sans-serif"></span></button>     
-  </div>
-  <div class="control">    
-       <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">Refresh<span class="is-family-sans-serif"></span></button>     
-  </div>
-  
-</div>
       
         <div class="home">
 
     <div class="columns mt-4 is-centered">
                         <div class="column">
-                            <b-button size="is-large" @click="CurrentPage -= 1" icon-right="chevron-left" type="is-primary" :disabled="CurrentPage <= 1" outlined />
+                            <button size="is-large" @click="CurrentPage -= 1" icon-right="chevron-left" type="is-primary" :disabled="CurrentPage <= 1" outlined />
                         </div>
                             <div class="column is-12">
                             <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
                             <div class="columns has-text-black is-multiline mr-2" v-if="true">
-                                <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id">
+                              <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
+                                <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
                                     <div>
                                     <alert_card :Alert="alert" />
                                     </div>
                                 </div>
                             </div>
                             <div class="column is-12 has-text-centered is-half-screen-height is-flex has-vertical-centered-text" v-else>
-                                <b-icon icon="alert" size="is-large" type="is-dark">
-                                </b-icon>
+                                <i icon="alert" size="is-large" type="is-dark"></i>
                                 <p class="title">
                                     Não há alertas disponíveis.
                                 </p>
@@ -78,8 +85,8 @@
         v-bind:Alert="alert" />
     </div>
     <nav class="pagination" role="navigation" aria-label="pagination">
-        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)-1).toString()">Previous</router-link></a>
-        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"><router-link to="'/latest-alerts/'+ ((parseInt(page)+1).toString()">Next</router-link></a>
+        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
+        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)">Next</a>
     </nav>
 {{page}}
   </div>
@@ -132,6 +139,14 @@ export default {
         isRange:true,
         format:'',
         has_next_page: false,
+        CurrentPage:1,
+        filter:{
+            end: new Date().getTime(),
+            valids: true,
+            invalids: true,
+            non_classifieds: true,
+            start: 0,
+        }
     }
   },
     computed: {
@@ -155,6 +170,7 @@ export default {
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.get_latest_alerts(),
+    this.filter = this.$store.state.filter
     document.title = 'Alerts | Harpia'
   },
   created(){
@@ -191,11 +207,11 @@ export default {
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
       let data= {
-        "end": this.$store.state.filter.date_end,
-        "valids": this.$store.state.filter.valid,
-        "invalids": this.$store.state.filter.invalid,
-        "non_classifieds": this.$store.state.filter.non_classified,
-        "start": this.$store.state.filter.date_start,
+        "end": this.filter.end,
+        "valids": this.filter.valids,
+        "invalids": this.filter.invalids,
+        "non_classifieds": this.filter.non_classifieds,
+        "start": this.filter.start,
       }
       await axios
         .post('/api/v1/latest-alerts/'+this.page, data)
@@ -211,7 +227,17 @@ export default {
         this.latest_alerts = this.latest_alerts.slice(0,6)
       }
     },
-    async get_date_filtered_alerts() {
+    go_to_page(next_page){
+        console.log("teste")
+        // router push nao reloada a pagina se mudar apenas o parametro
+        this.$router.push("/latest-alerts/"+next_page.toString()).then(
+        ()=> {
+        this.$router.go()  // forca o reload da pagina
+        }
+        )
+
+    },
+    /*async get_date_filtered_alerts() {
       this.$store.commit('setIsLoading', true)
       var path='/api/v1/'+this.date[0]+'/'+this.date[1]+'/'+this.page
       alert(path)
@@ -224,13 +250,12 @@ export default {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-    },
+    },*/
+
     refreshPage(){
        this.watchdog()
     this.date=''
     this.get_latest_alerts()
-    
-
     },
     findALerts(){      
       if(this.isRange){
