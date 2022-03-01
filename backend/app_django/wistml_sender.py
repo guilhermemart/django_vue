@@ -1,6 +1,8 @@
 import os
 import base64
 import requests
+from .models import alert
+from .serializers import alert_serializer
 
 fake_alert = {
     'alert_category': {'name': 'Nonconformity'},
@@ -62,7 +64,35 @@ def send_witsml(witsml_user, witsml_pass, url, alerta):
     response_ops = requests.request("POST", url, headers=headers, data=data[0])
     print("Sending attachment")
     response_att = requests.request("POST", url, headers=headers, data=data[1])
-    return response_ops, response_att
+    if "Function" in response_ops.body:
+        alert_to_update = alert.objects.filter(identificador = alerta.identificador)[0]
+        alert_to_update.witsml_confirm = "sent"
+        alert_to_update.save()
+        # Procura os alertas que não foram enviados
+        alerts_not_sent = alert.object.filter(witsml_confirm="witsml_not_sent")  
+        # Chama a função de enviar para cada alerta
+        for alert_ in alerts_not_sent:
+            #  tudo que enviar aqui é lucro
+            alert_to_retry = alert_serializer(alert_).data
+            data = compose_witsml(alert_to_retry)
+            print("Sending opsReport")
+            response_ops = requests.request("POST", url, headers=headers, data=data[0])
+            print("Sending attachment")
+            response_att = requests.request("POST", url, headers=headers, data=data[1])
+            if "not_available" in response_ops.data:
+                break
+            else:
+                alert_.witsml_confirm = "sent"
+        data = compose_witsml(alerta)
+        print("Sending opsReport")
+        response_ops = requests.request("POST", url, headers=headers, data=data[0])
+        print("Sending attachment")
+        response_att = requests.request("POST", url, headers=headers, data=data[1])
+    else:
+        return "Error"
+        # Possivel problema: Esse campo 'witsml_confirm' do alerta acho que não muda depois de enviar,
+        # então no momento acho que sempre tentaria enviar todos
+        return "OK"
 
 
 def get_witsml_pass(user, password):
