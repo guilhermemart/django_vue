@@ -35,11 +35,17 @@ class latest_alerts_list(APIView):
         # filtragem por classificacao
         if non_classified is True:
             non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False)
+        else:
+            non_classified_alerts = alerts.none()
         if thumb_up is True:
             thumb_up_alerts = alerts.filter(thumb_up__exact=True)
+        else:
+            thumb_up_alerts = alerts.none()
         if thumb_down is True:
             thumb_down_alerts = alerts.filter(thumb_down__exact=True)
-        alerts=non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts)[6 * (page - 1):(6 * page) + 1]
+        else:
+            thumb_down_alerts = alerts.none()
+        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts)[6 * (page - 1):(6 * page) + 1]
         # 6 o numero magico de alertas na pagina
         # retorna 7 valores o 7th serve para o vue definir se tem proxima pagina
         serializer = alert_serializer(alerts, many=True)
@@ -303,3 +309,13 @@ class get_url_camera(APIView):
         print(get_url_camera.url)
         IP = request.build_absolute_uri("/")
         return Response({"camera1": IP + get_url_camera.url})
+
+
+class update_red_zone(APIView):
+    def post(self, request, red_zone_name):
+        rzone = red_zone.objects.filter(name=red_zone_name)[0]
+        rzone.enabled = request.data['is_active'] == 'true'
+        rzone.timestamp += 1
+        rzone.save()
+        serializer = red_zone_serializer(rzone)
+        return Response(serializer.data)
