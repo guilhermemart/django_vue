@@ -7,12 +7,22 @@
             <i class="far fa-comment-alt fa-lg" />
           </span>
         </button>
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused">
+        <button v-if="thumb_up" class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-success" @click="invert_thumb_up" >
           <span class="icon ">
             <i class="far fa-thumbs-up fa-lg" />
           </span>
         </button>
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused">
+        <button v-else class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="invert_thumb_up" >
+          <span class="icon ">
+            <i class="far fa-thumbs-up fa-lg" />
+          </span>
+        </button>
+        <button v-if="thumb_down" class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-warning" @click="invert_thumb_down" >
+          <span class="icon ">
+            <i class="far fa-thumbs-down fa-lg" />
+          </span>
+        </button>
+        <button v-else class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused"  @click="invert_thumb_down">
           <span class="icon ">
             <i class="far fa-thumbs-down fa-lg" />
           </span>
@@ -211,7 +221,7 @@ export default {
   data() {
     return {
         thumb_up: false,
-        thumb_down: true,
+        thumb_down: false,
         modal: true,
         notes: "0",
         local_audio_enable: true,
@@ -228,7 +238,7 @@ export default {
   methods: {
     invert_thumb_up(){
         this.thumb_up = !this.thumb_up
-        if(this.thumb_up){
+        if (this.thumb_up == true){
             this.thumb_down = false
         }
         const formData = {
@@ -248,7 +258,7 @@ export default {
     },
     invert_thumb_down(){
         this.thumb_down = !this.thumb_down
-        if(this.thumb_down){
+        if(this.thumb_down==true){
             this.thumb_up = false
         }
         const formData = {
