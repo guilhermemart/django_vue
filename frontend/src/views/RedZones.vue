@@ -8,41 +8,99 @@
                         <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"/>
                          <label for="cam"> cam{{(cam.name+1)}}</label>
                 </div>
+                <button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="clear()" >
+                  <span class="icon">
+                    <i class="fas fa-broom" />
+                  </span>
+                  <span>Clean</span>
+                </button>
+                <button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="undo()" >
+                  <span class="icon">
+                    <i class="fas fa-undo" />
+                  </span>
+                  <span>UNDO</span>
+                </button>
+                <button class="button is-success is-outlined is-fullwidth focus mt-1" @click="saveModal=!saveModal" >
+                  <span class="icon">
+                    <i class="fas fa-save" />
+                    </span>
+                  <span>SAVE</span>
+                </button>
+
+                <button class="button is-dark is-outlined is-fullwidth focus mt-1" @click="showModal()" v-if="false">
+                  <span class="icon">
+                    <i class="fas fa-upload" />
+                  </span>
+                  <span>LOAD</span>
+                </button>
+  
+                <div class="field my-1">
+                  <div class="control has-icons-left">
+                    <div class="select is-dark is-outlined is-fullwidth">
+                          <select class="has-text-centered" v-model="rdSelected2"
+                           v-for="rz in red_zones_ativas" :key='rz.name'>        
+                        <option value='zz'>LOAD</option>
+                        <option :value='rz'>{{rz.name}} </option>
+                       
+                      </select>
+                    </div>
+                    <div class="icon is-left has-text-dark">
+                      <i class="fas fa-upload"></i>
+                    </div>
+                  </div>
+                </div>
+
+                <button class="button is-success is-outlined is-fullwidth focus mt-1" :disabled='this.points.length<6' @click="enableRZ(rdSelected) " >
+                  <span class="icon">
+                    <i class="fas fa-play" />
+                  </span>
+                  <span>ACTIVE</span>
+                </button>
+
+                
+
+              <div v-if="true">
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
               <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
               <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Salvar</button>
-            <div  class="dropdown is-hoverable">
+            <div class="dropdown is-hoverable">
               <div class="dropdown-trigger">
-                <button  class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
                   <span>Carregar</span>
-                  <span  class="icon is-small">
+                  <span class="icon is-small">
                     <i class="fas fa-angle-down" aria-hidden="true"></i>
                   </span>
                 </button>
               </div>
               <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
-                  <a v-for="rd in redzones" :key="rd.timestamp" :value="rd" aria-role="listitem" class="columns">
-                  <div class="column"><button @click="delete_rz(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >Delete (I)</button></div>
-                  <div class="column my-4" >{{rd.name.toUpperCase()}}</div>
+                  <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
+                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >delete icon</button></div>
+                  <div class="column my-4">{{rd.name.toUpperCase()}}</div>
                   </a>
                 </div>
               </div>
             </div>
 
             <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Ativar RedZone</button>
+            </div>
+
+
             <div class="card">
               <p class="title is-size-4">Red Zones Ativas:</p>
               <div v-if="red_zones_ativas.length">
-              <ul class="is-size-4 mx-2 my-2" v-for="rz in red_zones_ativas" :key='rz.name'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar </button> <b class="my-4">{{rz.name}}</b> </ul>
+              <ul class="is-size-4 mx-2 my-2" v-for="rz in red_zones_ativas" :key='rz.name'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar </button> 
+              <b class="my-4">{{rz.name}}</b> </ul>
               </div>
               <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
             </div>
             </div>
             <div class=" cams column is-10 mt-4 " >
-
-<!--v-stage e v-layer são classes do vue-konva não adianta procurar que nao está na doc do vue-->
-      <v-stage ref="stage" :config="stageConfig[cam_selected]">
+{{rdSelected2}}
+<br>
+{{points}}
+<!--v-stage e v-layer são classes do vue-konva -->
+                <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
         <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: scale,scaleY: scale,}"/>
@@ -70,12 +128,32 @@
         />
       </v-layer>
     </v-stage>
+    
             </div>
         </div>
+        <div class="modal"  :class="{'is-active': saveModal}" >
+  
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Redzone name</p>
+      <button class="delete" @click="saveModal=!saveModal" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <input class="input is-focused" v-model="newRedzone" type="text" placeholder="Insert Redzone name" pattern="[A-Za-z0-9]+">
+
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" :disabled="newRedzone==''" @click="save">Save Redzone</button>
+      <button class="button is-danger isRight" @click="saveModal=!saveModal">Cancel</button>
+    </footer>
+  </div>
+</div>
     </div>
 </template>
 <style lang="scss">
-
+.lft{
+  margin-left: 20%;
+}
 </style>
 
 <script>
@@ -102,6 +180,12 @@ export default {
       close:true,
       num_cameras: 6,  // selecionar o numero de cameras para parametrizar o looping
       imageParameters: [],  // array para armazenar as imagens base
+
+      form:'',
+      saveModal:false,
+      selected:'LOAD',
+      newRedzone:'',
+      rdSelected2:'vazio'
     };
   },
   created() {
@@ -114,14 +198,24 @@ export default {
         this.clear()
       }
     },
+    rdSelected2:{
+      handler(){
+       
+        this.clear()
+       
+      }
+    },
     rdSelected:{
       handler(){
         this.clear()
-        this.points=this.rdSelected.dots
-        console.log(rdSelected)
+        this.points=this.rdSelected.pontos
       }
     }
   },methods: {
+    get_ip(){
+      return process.env.VUE_APP_IP
+      },
+
     async loadingImages(){
     this.$store.commit('setIsLoading', true)
       let which_camera = 0
@@ -145,7 +239,7 @@ export default {
         /* campos minimos esperados de red zones
         name:
         width:
-        height:
+        heigth:
         enabled:
         dots: [] */
         // feito o get pro django retorna um objeto javascript --> magia do rest_api
@@ -162,6 +256,7 @@ export default {
             console.log(error)
         })
     },
+
     handleMouseClick() {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x;
@@ -186,27 +281,35 @@ export default {
       this.points[index * 2] = x;
       this.points[index * 2 + 1] = y;
     },
-    async save(){
+
+    // async save(){
+    save(){
+      alert(this.cam_selected)
+      console.log(this.points)
         var x_y=[]
-        //x_y.push('nome: '+(new Date()).toString())
-        //x_y.push(', largura: '+this.stageConfig[cam_selected].width)
-        //x_y.push(', altura: '+ this.stageConfig[cam_selected].height+', pontos: ')
+        
+        // x_y.push('nome: '+(new Date()).toString())
+        // x_y.push(', largura: '+this.stageConfig[this.cam_selected].width)
+        // x_y.push(', altura: '+ this.stageConfig[this.cam_selected].height+', pontos: ')
         this.points.forEach(p => {
             x_y.push(p)
         });
         var red_zone_output = {
             cam: this.cam_selected,
-            name: "cam" + this.cam_selected.toString() + "_" + (new Date().getTime()).toString(),
+            // name: "cam" + this.cam_selected.toString() + "_" + (new Date().getTime()).toString(),
+            name: this.newRedzone,
             width: this.stageConfig[this.cam_selected].width,
             height: this.stageConfig[this.cam_selected].height,
             dots: x_y}
         this.$store.commit('setIsLoading', true)
-      await axios
+      // await axios
+      axios
         .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
         .then(response => {
-          red_zone_output = JSON.parse(response.data)
           console.log(red_zone_output)
-          this.load_red_zone()
+          console.log(response)
+          // red_zone_output = JSON.parse(response.data)
+          
         })
         .catch(error => {
           console.log(error)
@@ -214,6 +317,7 @@ export default {
       this.$store.commit('setIsLoading', false)
     },
     clear() {
+    
       this.points = [];
       this.anchors = [];
       this.load_red_zones()
@@ -223,15 +327,24 @@ export default {
       this.points.pop();
       this.anchors.pop();
     },
-    delete_rz(rz){
-        alert(rz.name)
-        axios.get('/api/v1/deldots/'+rz.name).then(()=>{
+    deleteRZ(rz){
+       this.$buefy.dialog.confirm({
+        message: `Deseja excluir a redzone: `+rz.nome+'?',
+        type:'is-success',
+        size:'is-large',
+        confirmTest:'Confirmar',
+        trapFocus: true,
+        onConfirm: () => {
+          //codigo para excluir uma redzone ainda em construção.
+          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
+            console.log(r)
             this.load_red_zones()
-        })
+          })
+        }
+      })
     },
     enableRZ(rz){
-      alert(rz.name)
-
+      alert(rz.nome)
           axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
 
