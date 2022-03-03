@@ -56,19 +56,16 @@ class latest_alerts_list(APIView):
 
 class update_alert(APIView):
     def post(self, request):
-        temp = request.data.get("identificador", "wrong_id")
-        if temp == "wrong_id":
-            print(temp)
-        else:
-            # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
-            serializer = alert_serializer(update_alert_by_identificador(request))
-            if str(serializer.data.thumb_up).lower() == "true":
-                try:
-                    send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer)
-                except Exception as e:
-                    print(f"impossivel criar xml {e}")
-                # pool witsml movida para witsml_sender
-            return Response(serializer.data)
+        # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
+        # main.update_alert_by_identificador
+        serializer = update_alert_by_identificador(request)
+        if str(serializer.data['thumb_up']).lower() == "true":
+            try:
+                send_witsml(config("WITSML_USER"), config("WITSML_PASS"), config("WITSML_URL"), serializer.data)
+            except Exception as e:
+                print(f"impossivel criar xml {e}")
+            # pool witsml movida para witsml_sender
+        return Response(serializer.data)
         raise Http404
 
 
@@ -93,7 +90,7 @@ class create_alert(APIView):
             categoria = category.objects.filter(name=category_name)[0]
         alertas_qtde = alert.objects.all().count()
         if not path.is_file():
-            path=Path().joinpath(Path(__file__).resolve().parent.parent.parent, 'pwa_images', 'example.png')
+            path = Path().joinpath(Path(__file__).resolve().parent.parent.parent, 'pwa_images', 'example.png')
         with path.open(mode='rb') as f:
             image = ImageFile(f)
             image.name = path.name
@@ -110,7 +107,7 @@ class create_alert(APIView):
                 local_image_url=fields.get("image_path", str(simple_media_path)),
                 sequencial=int(alertas_qtde + 1),
                 witsml_confirm="witsml_not_sent",
-                timestamp= fields.get("timestamp", 1643679950000 - (365*24*60*60*1000) + randint(0,60*60*24*1000))
+                timestamp = fields.get("timestamp", 1643679950000 - (365*24*60*60*1000) + randint(0,60*60*24*1000))
             )
             alerta_to_create.save()
             try:  # abre conexão com o bd pro pgpubsub perceber a chegada de um alerta novo
@@ -149,7 +146,7 @@ class category_detail(APIView):
         serializer = category_serializer(categoria)
         return Response(serializer.data)
 
-
+# retorna array com varias redzones
 class load_red_zones(APIView):
     def get(self, request, cam):
         red_zones = red_zone.objects.filter(red_zone_camera__name=f"cam{cam}")
@@ -159,6 +156,13 @@ class load_red_zones(APIView):
         # nao atrapalha ter mais campos
         # name, height, width, enabled e dots são obrigatorios
 
+
+# retorna uma camera e dentro dela um array com todas as red zones
+class get_cam(APIView):
+    def get(self, request, cam):
+        the_camera = camera.objects.filter(slug=f"{cam}")[0]
+        serializer = camera_serializer(the_camera)
+        return Response(serializer.data)
 
 # deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):

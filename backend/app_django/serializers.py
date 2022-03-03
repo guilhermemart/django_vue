@@ -62,13 +62,12 @@ class red_zone_serializer(serializers.ModelSerializer):
 
 class camera_serializer(serializers.ModelSerializer):
     red_zones = red_zone_serializer(many=True)
-
     class Meta:
         model = camera
-        fields = {
+        fields = (
             "id",
             "name",
             "ativa",
             "get_absolute_url",
             "red_zones"
-        }
+        )
