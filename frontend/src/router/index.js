@@ -12,6 +12,7 @@ import Alerta from '../views/Alerta.vue'
 import SignUp from '../views/SignUp.vue'
 import LogIn from '../views/LogIn.vue'
 import RedZones from '../views/RedZones.vue'
+import Camera from '../views/Camera.vue'
 import Audio from '../views/Audio.vue'
 //import MyAccount from '../views/MyAccount.vue'
 //import Checkout from '../views/Checkout.vue'
@@ -90,6 +91,11 @@ const routes = [
     path: '/:category_slug/:alert_slug',
     name: 'Alerta',
     component: Alerta
+  },
+  {
+    path: '/red_zone/:slug_cam',
+    name: 'Camera',
+    component: Camera
   },
     {
     path: '/latest-alerts/:page',

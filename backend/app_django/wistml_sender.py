@@ -34,10 +34,12 @@ def compose_witsml(alerta=None):
     output_ops = string_ops.replace('%uidOps', f"Alert_{alerta['sequencial']}")
     output_ops = output_ops.replace('%opsName', f"PPE/RedZone_Alert_{alerta['sequencial']}")
     output_ops = output_ops.replace('%dTim', f"{alerta['date_added']}")
-    output_ops = output_ops.replace('%comments', f"{alerta['alert_category']['name']} :{alerta['quantidade']}")
+    output_ops = output_ops.replace('%comments', f"{alerta['get_category_name']} :{alerta['quantidade']}")
+    '''
+    # removido backup do opsreport witsml --> poupa memoria de armazenamento
     with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_opsreport.xml"), 'w') as out_ops:
         out_ops.write(output_ops)
-    out_ops.close()
+    out_ops.close()'''
     with open(os.path.join(os.getcwd(), "witsml_models", 'attachment.xml')) as input_att:
         string_att = input_att.read()
     input_att.close()
@@ -47,9 +49,11 @@ def compose_witsml(alerta=None):
     output_att = output_att.replace('%name_attach', f"PPE/RedZone_Alert_{alerta['sequencial']}")
     output_att = output_att.replace('%filename', f"attachment{alerta['sequencial']}.jpg")
     output_att = output_att.replace("%image", str(image_64_encode).replace("b'","").replace("'", ""))
+    '''
+    # Removido backup do attachment witsml --> poupa memoria de armazenamento
     with open(os.path.join(os.getcwd(), "witsml_models", f"{alerta['sequencial']}_attachment.xml"), 'w') as out_att:
         out_att.write(output_att)
-    out_att.close()
+    out_att.close()'''
     with open(os.path.join(os.getcwd(), "witsml_models", 'getcap.xml')) as input_getcap:
         string_getcap = input_getcap.read()  # le um model de getcap --> usado para verificar funcionalidade do servidor
     input_getcap.close()
@@ -71,16 +75,19 @@ def send_witsml(witsml_user, witsml_pass, url, alerta):
             'SOAPAction': 'http://www.witsml.org/action/120/Store.WMLS_AddToStore',
             'Authorization': get_witsml_pass(witsml_user, witsml_pass)
         }
+        '''
+        # removido a tentativa inicial --> direto pro looping de envio da pilha
+        # uma busca a menos no bd
         print("Sending opsReport (1)")
         response_ops = requests.request("POST", url, headers=headers, data=data[0])
         print("Sending attachment (1)")
         response_att = requests.request("POST", url, headers=headers, data=data[1])
         alert_to_update = alert.objects.filter(identificador=alerta.identificador)[0]
         alert_to_update.witsml_confirm = "sent"
-        alert_to_update.save()
+        alert_to_update.save()'''
         # Procura os alertas que não foram enviados
         alerts_not_sent = alert.object.filter(witsml_confirm="witsml_not_sent")
-        # Chama a função de enviar para cada alerta
+        # Chama a função de enviar para cada alerta -- nao tenta enviar mais de uma vez
         for alert_ in alerts_not_sent:  # tentativa de esvaziar a pilha de alertas nao enviados
             #  tudo que enviar aqui é lucro
             alert_to_retry = alert_serializer(alert_).data
@@ -94,7 +101,7 @@ def send_witsml(witsml_user, witsml_pass, url, alerta):
                 alert_.witsml_confirm = "sent"
                 alert_.save()
             else:
-                break
+                break  # perdeu contato com o servidor
     else:
         return "Error"
 
