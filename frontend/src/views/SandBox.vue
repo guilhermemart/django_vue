@@ -42,6 +42,15 @@
       <i class="fas fa-upload"></i>
     </span><span>LOAD</span></button></p>
 
+    <div class="select is-dark is-outlined is-fullwidth focus">
+  <select v-model="selected" placeholder="teste">
+    <option value="LOAD">LOAD</option>
+    <option>With options</option>
+  </select>
+</div>
+
+    
+{{selected}}
 <p><button class="button is-success is-outlined is-fullwidth focus mt-1" @click="showModal()" >ACTIVE</button></p>
 </div>
 <div class="column is-4">
@@ -108,7 +117,8 @@ export default {
         return{
             show:false,
             rdName:'',
-            temp:''
+            temp:'',
+            selected:'LOAD'
         }
     },
     computed: {
