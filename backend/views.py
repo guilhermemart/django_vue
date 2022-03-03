@@ -6,13 +6,12 @@ ENV_File = os.path.dirname(os.path.abspath(__file__))
 config = Config(RepositoryEnv(ENV_File + "/.env"))
 
 
-
 def url_redirect_alert(request, category, alert):
     print(alert)
     return redirect("http://" + config.get("LOCAL_IP") + f":8080/{category}/{alert}")
 
 
-def url_redirect_category(request, category, alert):
+def url_redirect_category(request, category):
     print(category)
     return redirect("http://" + config.get("LOCAL_IP") + f":8080/{category}")
 
