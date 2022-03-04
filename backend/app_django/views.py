@@ -19,6 +19,7 @@ from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
 
+
 class latest_alerts_list(APIView):
     # devolve alertas sem filtro
     # usada para chamar a pagina dos alertas sem filtros
@@ -70,52 +71,57 @@ class update_alert(APIView):
 
 
 class create_alert(APIView):
-    def create_category(self):
+    def create_category(self, category_name):
         new_category = category(
-            name="fake_category"
+            name=category_name
         )
         new_category.save()
+
     # cria um novo alerta de acordo com os dados do request
-    def get(self, request):
+    def post(self, request):
         # futuramente usar decouple para definir esse caminho
-        path = Path().home().joinpath("media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
-        simple_media_path = Path().joinpath("~", "media", "uploads", "sauron_imagens", "n_avaliadas", "example.png")
+        image = request.FILES.get('alert_image')
+        img = ImageFile(image)
+        print(str(image.name))
+        simple_media_path = Path().joinpath("~", "media", "uploads", "sauron_imagens", "n_avaliadas")
         fields = request.data
-        category_name = fields.get('category_name', "fake_category")
+        category_name = fields.get('categoria', "fake_category")
         categoria_input = category.objects.filter(name=category_name)
         if categoria_input.count() > 0:
             categoria = categoria_input[0]
         else:
-            self.create_category()
+            self.create_category(category_name)
             categoria = category.objects.filter(name=category_name)[0]
         alertas_qtde = alert.objects.all().count()
-        if not path.is_file():
-            path = Path().joinpath(Path(__file__).resolve().parent.parent.parent, 'pwa_images', 'example.png')
-        with path.open(mode='rb') as f:
-            image = ImageFile(f)
-            image.name = path.name
-            alerta_to_create = alert(
-                alert_category=categoria,
-                slug=fields.get("slug", f'example_{int(datetime.now().timestamp() * 1000)}'),
-                identificador=fields.get("identificador", int(datetime.now().timestamp() * 1000)),
-                date_added=datetime.now()-timedelta(days=1),
-                quantidade=fields.get("quantidade", randint(1, 3)),
-                anotacoes=fields.get("anotacoes", "this is a fake test alert"),
-                thumb_up=fields.get("thumb_up", False),
-                thumb_down=fields.get("thumb_down", False),
-                image=image,
-                local_image_url=fields.get("image_path", str(simple_media_path)),
-                sequencial=int(alertas_qtde + 1),
-                witsml_confirm="witsml_not_sent",
-                timestamp = fields.get("timestamp", 1643679950000 - (365*24*60*60*1000) + randint(0,60*60*24*1000))
-            )
-            alerta_to_create.save()
-            try:  # abre conexão com o bd pro pgpubsub perceber a chegada de um alerta novo
-                pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'), host=config('db_host'))
-            except Exception as e:
-                print(e)
+        timestamp = int((1000*datetime.now().timestamp()) - 500 + randint(0, 1000))
+        alerta_to_create = alert(
+            alert_category=categoria,
+            slug=fields.get("slug", f'alert_{timestamp}'),
+            identificador=fields.get("identificador", timestamp),
+            date_added=datetime.now()-timedelta(days=1),
+            quantidade=fields.get("quantidade", randint(1, 3)),
+            anotacoes=fields.get("anotacoes", ""),
+            thumb_up=fields.get("thumb_up", False),
+            thumb_down=fields.get("thumb_down", False),
+            image=img,
+            local_image_url=fields.get("image_path", str(simple_media_path)),
+            sequencial=int(alertas_qtde + 1),
+            witsml_confirm="witsml_not_sent",
+            timestamp=fields.get("timestamp", timestamp)
+        )
+        alerta_to_create.save()
+        simple_path = str(alerta_to_create.image.url).split("/")[-1]
+        simple_media_path = Path().joinpath(simple_media_path, simple_path)
+        # caso o sauron nao tenha a imagem salva o harpia salva em um backup local
+        alerta_to_create.local_image_url = fields.get("image_path", str(simple_media_path))
+        alerta_to_create.save()
+        img.close()
+        try:  # abre conexão com o bd pro pgpubsub perceber a chegada de um alerta novo
+            pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'), host=config('db_host'))
             pubsub.notify('canal_1', 'mensagem_enviada')
-            serializer = alert_serializer(alerta_to_create)
+        except Exception as e:
+            print(e)
+        serializer = alert_serializer(alerta_to_create)
         return Response(serializer.data)
 
 
