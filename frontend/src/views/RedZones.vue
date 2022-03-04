@@ -68,7 +68,6 @@
               </span>
               <span>ACTIVE</span>
             </button>
-
                 
 
               <div v-if="false">
