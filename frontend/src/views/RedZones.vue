@@ -5,8 +5,8 @@
         <!--radios -->
           <div class="column is-2 mx-4">
               <p class="subtitle mt-4">Selecione a camera:</p>
-                <div v-for="cam in stageConfig" :key="cam.name">
-                        <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"/>
+                <div v-for="cam in stageConfig" :key="cam.name" class="radios">
+                        <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"  />
                          <label for="cam"> cam{{(cam.name+1)}}</label>
                 </div>
                 <!--botões -->
@@ -175,10 +175,7 @@
   width: 15vw;
   margin-left: 0vw;  
 }
-.glass{
-color: blue($color: #000000);
 
-}
 
 </style>
 
@@ -328,21 +325,25 @@ export default {
             width: this.stageConfig[this.cam_selected].width,
             height: this.stageConfig[this.cam_selected].height,
             dots: x_y}
-        this.$store.commit('setIsLoading', true)
+       // this.$store.commit('setIsLoading', true)
      
+
+
+     // não esta salvando no django, na pasta esta normal.
       // await axios
       axios
         .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
-        .then(response => {
-         
+        .then(response => {         
           console.log(response)
+          this.load_red_zones() // para recarregar a redzones no botão load
+
           // red_zone_output = JSON.parse(response.data)
           
         })
         .catch(error => {
           console.log(error)
         })
-      this.$store.commit('setIsLoading', false)
+     // this.$store.commit('setIsLoading', false)
     },
     clear() {
     
@@ -372,7 +373,11 @@ export default {
       })
     },
     enableRZ(rz){
+      //Vai setar o enabled na redzone.
+      // Precisa configurar para ir como disabled quando salva.
       console.log(rz)
+      
+       
 
         //  axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
