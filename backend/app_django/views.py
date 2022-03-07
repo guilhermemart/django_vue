@@ -7,6 +7,7 @@ from .main import update_alert_by_identificador
 from .wistml_sender import compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 from .monthly_report_data import report_data
+from .firebase_sender import firebase_uploader, retry_upload
 from random import randint
 from django.core.files.images import ImageFile
 from django.core.files import File
@@ -66,9 +67,13 @@ class update_alert(APIView):
             except Exception as e:
                 print(f"impossivel criar xml {e}")
             # pool witsml movida para witsml_sender
+        firebase_try = firebase_uploader("Valaris", serializer.data["timestamp"], serializer.data)
+        if firebase_try == "Sucesso Dev!":
+            alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
+            alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
+            retry_upload(alerts_not_uploaded)
         return Response(serializer.data)
         raise Http404
-
 
 class create_alert(APIView):
     def create_category(self, category_name):
