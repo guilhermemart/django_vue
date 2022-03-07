@@ -169,8 +169,8 @@ export default {
     },
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
-    this.get_latest_alerts(),
     this.filter = this.$store.state.filter
+    this.get_latest_alerts(),
     document.title = 'Alerts | Harpia'
   },
   created(){
