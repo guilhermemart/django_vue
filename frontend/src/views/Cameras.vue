@@ -57,7 +57,7 @@
                     <img id="camA3" src="@/assets/valaris3.jpg" width="980" alt="camera 3"/>
                 </div>
                 <div class="column is-half">
-                    <img id="camA4" src="@/assets/valaris4.jpg" width="980" alt="camera 4"/>
+                    <img id="camA4" :src="cameraA4" width="980" alt="camera 4"/>
                 </div>
             </div>
 
@@ -202,7 +202,8 @@ export default {
         return {
             counter: '',
             group: '1',
-            cameraA1: 'http://192.168.0.46:8000/media/Screenshot from 2022-02-21 08-00-34.png'
+            cameraA1: '',
+            cameraA4: '',
         }
     },
     created() {
@@ -221,11 +222,15 @@ export default {
         },
 
         async updateCamera() {
+          let ip = document.location.href.split("cameras")[0].slice(0, -5) + '8000/'
+          let image = ip + 'media/cat.jpg'
+          console.log(image)
           await axios
-          .get('api/v1/camera/get_url/')
+          .get('api/v1/cameras/get_url/')
           .then(response => {
             console.log(response.data.camera1)
             this.cameraA1 = response.data.camera1 + "?" + new Date().getTime()
+            this.cameraA4 = response.data.camera4 + "?" + new Date().getTime()
           })
         },
 

@@ -308,7 +308,7 @@ class alerts_report(APIView):
 
 # Se o post é feito tudo de uma vez, as 10 imagens no mesmo post
 # Nomes padronizados nos dict
-class update_camera(APIView):
+class update_cameras(APIView):
     # Recebe a imagem, salva e salva o caminho dela na classe do get
     def post(self, request):
         image = request.FILES.get('img')
@@ -319,18 +319,18 @@ class update_camera(APIView):
         img.save(path)
         img.close()
         path = os.path.join("media/cats/", str(image))
-        get_url_camera.url = path
+        get_url_cameras.url = path
         return Response({"imageURL": path})
 
 
-class get_url_camera(APIView):
+class get_url_cameras(APIView):
     # Retorna o ip do django com o caminho da imagem
     url = "a"
     def get(self, request):
         print(request.data.get("image_path"))
-        print(get_url_camera.url)
+        print(get_url_cameras.url)
         IP = request.build_absolute_uri("/")
-        return Response({"camera1": IP + get_url_camera.url})
+        return Response({"camera1": IP + get_url_cameras.url})
 
 
 class update_red_zone(APIView):

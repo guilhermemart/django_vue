@@ -24,9 +24,10 @@ def initialize_firebase_db():
     global firebase
     global db
     global storage
-    firebase = pyrebase.initialize_app(firebaseConfig)
-    db = firebase.database()
-    storage = firebase.storage()
+    if (firebase and db and storage) == "":
+        firebase = pyrebase.initialize_app(firebaseConfig)
+        db = firebase.database()
+        storage = firebase.storage()
 
 
 # cia -> nome da empresa para ser salvo no banco
@@ -70,15 +71,9 @@ def firebase_uploader(cia, timestamp, alerta):
 # timestamp -> timestamp do alerta, usa para ter o ano/mês do alerta e usar no nome da pasta
 # image_path -> caminho da imagem com o url do django ('http://192.168.0.46:8000/media/imagem.png')
 def upload_image(cia, dt, image_path):
-    # Tentativa de dar put usango a string toda, incluindo o IP do django
-    # No momento não consegui fazer desse jeito
-    #response = requests.get(image_path)
-    #print(response)
-    #rodar por debug, verificar os campos da response. Achar o campo q é um arquivo/file
-    #colocar isso no put do storage
-
-    # Então no momento estou cortando o IP da string
-    image_path = os.path.expanduser(f"~/{image_path[25:]}")
+    # Pega o caminho do arquivo a partir da home
+    response = requests.get(image_path)
+    image_path = os.path.expanduser(f"~{response.request.path_url}")
     # Pega somente o nome do arquivo
     image_name = image_path.split("/")
     image_name = image_name[len(image_name) - 1]

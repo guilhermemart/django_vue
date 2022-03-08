@@ -139,3 +139,6 @@ backend/.env
 frontend/.env
 frontend/.env
 frontend/.env
+
+# Json com keys do firebase
+django-test-de-firebase.json
