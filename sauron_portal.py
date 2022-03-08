@@ -1,6 +1,6 @@
 from datetime import datetime
 import requests
-
+import json
 '''funcionamento\n
 colocar a lib na pasta do sauron\n 
 executar a funcao enviar_alerta(argumentos)\n
@@ -17,7 +17,7 @@ backend_port: str porta destinada ao harpia backend\n
 '''
 
 
-global_token = ""
+global_token = "token ce1e21f3bd4269729b917b2dd3eb81abd6ded9dc"
 
 fake_alerta = {
     'local_image_url': "example.png"
@@ -47,7 +47,7 @@ def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
     to_alert['identificador'] = the_alerta.get('identificador', f"sauron_{timestamp}")
     to_alert['timestamp'] = timestamp
     to_alert['quantidade'] = the_alerta.get('quantidade', 1)
-    # analise dos thumbs
+    # analise dos thumbs transformando em bool
     to_alert['thumb_down'] = str(the_alerta.get('thumb_down', False)).lower() == 'true'
     to_alert['thumb_up'] = str(the_alerta.get('thumb_up', False)).lower() == 'true'
     # login no django rest
@@ -80,5 +80,44 @@ def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
         return f"alerta nao enviado erro: {result.text}"
 
 
+def get_red_zones(cam, backend_ip="127.0.0.1", backend_port="8000"):
+    """
+    cam --> int [0, n_cameras[
+    retorna um dict com todas as redzones da respectiva camera\n
+     Obs: as cameras são representadas por inteiros iniciando no 0
+     dict campos de maior interesse
+     {'dots':[lista com tod os x, y's da red zone],
+     'width': largura da imagem base,
+     'height':altura da imagem base,
+     'enabled': bool (red zone ativa, ou nao)
+     .
+     .
+     .
+     }
+     """
+    global global_token
+    url_do_django_token = f"http://{backend_ip}:{backend_port}/api/v1/token/login/"
+    url_do_django_get_rz = f"http://{backend_ip}:{backend_port}/api/v1/load_rz/{cam}"
+    if global_token == "":
+        formData = {
+            "username": 'altave',
+            "password": 'altave'
+        }
+        login = requests.post(url_do_django_token, data=formData)
+        if login.json().get("auth_token", False) is not False:
+            global_token = f"token {login.json().get('auth_token', '')}"
+        else:
+            return "Problemas para acessar o backend"
+    payload = {'Authorization': global_token}
+    result = requests.get(url_do_django_get_rz, headers=payload)
+    if result.status_code == 200:
+        print(json.loads(result.text))
+        return json.loads(result.text)
+    else:
+        print(f"rzs nao encontradas erro: {result.text}")
+        return f"rzs nao encontradas erro: {result.text}"
+
+
 if __name__ == "__main__":
     enviar_alerta(fake_alerta)
+    get_red_zones("0")

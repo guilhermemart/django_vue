@@ -4,6 +4,7 @@ con# django_vue
             |
             |-backend --> python -m django startproject backend .
             |   |-app_django --> cd backend | python -m django startapp app_django
+            |       |-.env --> crie/edite isso na sua maquina
             |   |-urls.py << aqui o axios vai buscar as urls
             |   |-settings.py
             |   |-others.py
@@ -33,8 +34,10 @@ con# django_vue
       * GRANT ALL PRIVILEGES ON DATABASE altave TO altave;
       * \q
       * exit
+- Problema comum, erro no django por nao conseguir logar  no banco de dados ao rodar o servidor
+  - solução: refaça os passos acima
   
-* Configure o Django database no settings.py
+* Configure o Django database no settings.py (no git já está ok)
     - Vai estar assim:
       
           . . .
@@ -67,7 +70,7 @@ con# django_vue
 * Instalar os requirements.txt 
     - pip install -r requirements.txt
 
-* Verifique todos os .env's do codigo, o ip deve ser igual ao da maquina que está rodando o sistema
+* Verifique todos os .env's do codigo (3), o ip deve ser igual ao da maquina que está rodando o sistema
 
 * Crie as migraçoes do django:
     - cd django_vue 
