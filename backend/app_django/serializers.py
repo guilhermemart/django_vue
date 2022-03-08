@@ -69,5 +69,6 @@ class camera_serializer(serializers.ModelSerializer):
             "name",
             "ativa",
             "get_absolute_url",
-            "red_zones"
+            "red_zones",
+            "get_base_img"
         )
