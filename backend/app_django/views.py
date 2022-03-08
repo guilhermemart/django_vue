@@ -7,7 +7,7 @@ from .main import update_alert_by_identificador
 from .wistml_sender import compose_witsml, send_witsml
 from .watchdog_postgree import wait_for_new_alert
 from .monthly_report_data import report_data
-from .firebase_sender import firebase_uploader, retry_upload
+from .firebase_sender import firebase_uploader, retry_upload, initialize_firebase_db
 from random import randint
 from django.core.files.images import ImageFile
 from django.core.files import File
@@ -67,6 +67,10 @@ class update_alert(APIView):
             except Exception as e:
                 print(f"impossivel criar xml {e}")
             # pool witsml movida para witsml_sender
+        initialize_firebase_db()
+        #ToDo - fechar client firebase
+        # q q é esse raise depois do http 404?
+        # firebase_uploader retorna algo diferee de success
         firebase_try = firebase_uploader("Valaris", serializer.data["timestamp"], serializer.data)
         if firebase_try == "Sucesso Dev!":
             alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
@@ -187,6 +191,7 @@ class save_red_zone(APIView):
             slug=f"cam{cam_number}"
         )
         new_camera.save()
+        return new_camera
 
     def post(self, request):
         print(request.data)
@@ -198,13 +203,13 @@ class save_red_zone(APIView):
         # caminho dos arquivos no settings django
         save_path = os.path.join(os.getenv("HOME"), "media", "uploads", "red_zones", "individual_red_zones", f"{output['name']}.txt")
         # precisa da lib Pathlib para salvar o arquivo
-        simple_path = request.data.get("red_zone_file_path", str(Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones",f'{output["name"]}.txt')))
+        simple_path = request.data.get("red_zone_file_path", str(Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones", f'{output["name"]}.txt')))
         dir_path = Path().joinpath("~", "media", "uploads", "red_zones", "individual_red_zones").expanduser()
         if Path(dir_path).is_dir():
             pass
         else:
             Path(dir_path).mkdir(parents=True, exist_ok=True)
-        path = Path().joinpath(dir_path,f'{output["name"]}.txt')
+        path = Path().joinpath(dir_path, f'{output["name"]}.txt')
         # transforma path em str ou usa a string recebida no request
         save_path = request.data.get("red_zone_file_path", str(path))
         if "~" in save_path:
@@ -212,15 +217,17 @@ class save_red_zone(APIView):
         with open(save_path, 'w') as rzone:
             rzone.write(output_string)
             rzone.close()
-        camera_number=request.output['cam'][0]
+        camera_number = request.data['cam']
         wich_camera = camera.objects.filter(name="cam"+str(camera_number))
+        if not len(wich_camera) > 0:
+            wich_camera = self.create_camera(camera_number, request.data.get('width', 100), request.data.get('height', 100))
         date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
         ident=date_added.timestamp()
         r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
         with r_zone_file_path.open(mode="rb") as f:
             new_red_zone = red_zone(
                 identificador=str(int(ident)),
-                red_zone_camera=wich_camera[0],
+                red_zone_camera=wich_camera,
                 slug=f"red_zone_cam{camera_number}_{ident}",
                 timestamp=int(1000*ident),
                 date_added=date_added,

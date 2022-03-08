@@ -16,16 +16,26 @@ firebaseConfig = {
     "storageBucket": "django-test-de.appspot.com",
     "serviceAccount": json_
 }
+firebase = ""
+db = ""
+storage = ""
 
-firebase = pyrebase.initialize_app(firebaseConfig)
-db = firebase.database()
-storage = firebase.storage()
+def initialize_firebase_db():
+    global firebase
+    global db
+    global storage
+    firebase = pyrebase.initialize_app(firebaseConfig)
+    db = firebase.database()
+    storage = firebase.storage()
 
 
 # cia -> nome da empresa para ser salvo no banco
 # timestamp -> timestamp do alerta, será convertido em date time e usado como referência no firebase
 # alerta -> dict do alerta
 def firebase_uploader(cia, timestamp, alerta):
+    global firebase
+    global db
+    global storage
     date_tm = datetime.fromtimestamp(int(timestamp/1000), pytz.timezone("Brazil/East"))
     # Tenta enviar a imagem
     firebase_image_url = upload_image(cia, date_tm, alerta["get_thumbnail"])
