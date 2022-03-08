@@ -244,7 +244,8 @@ export default {
       let which_camera = 0
       while (which_camera < this.num_cameras){
         this.imageParameters.push(new window.Image())
-        this.imageParameters[which_camera].src=require('@/assets/red_zones_base_img/cam'+which_camera.toString()+'.jpg')
+        axios.get('api/v1/red_zone/cam'+ which_camera.toString()).then((camera)=>{
+        this.imageParameters[which_camera].src=camera.get_base_img})
         this.stageConfig.push({
             name : which_camera,
             width : this.imageParameters[which_camera].naturalWidth,

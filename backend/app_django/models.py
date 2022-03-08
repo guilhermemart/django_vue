@@ -208,10 +208,11 @@ class alert(models.Model):
 class camera(models.Model):
     name = models.CharField(default="camx", max_length=255)
     ativa = models.BooleanField(default=True)
-    width = models.BigIntegerField(default = 100)
-    height = models.BigIntegerField(default = 100)
+    width = models.BigIntegerField(default=100)
+    height = models.BigIntegerField(default=100)
     # slug é tipo um nome mas que pode ser ajustado pra url
     slug = models.SlugField(default="camx")
+    base_img = models.ImageField(upload_to='uploads/red_zones_base_img', blank=True, null=True, max_length=255)
 
     class Meta:
         ordering = ('name',)
@@ -222,6 +223,11 @@ class camera(models.Model):
     def get_absolute_url(self):
         return f'/{self.slug}/'
 
+    def get_base_img(self):
+        if self.base_img:
+            # return 'http://192.168.0.27:8000'+self.image.url
+            return 'http://'+config('LOCAL_IP', default='127.0.0.1')+':8000' + self.base_img.url
+        return ''
 
 def default_dots():
     # criar uma default red zone

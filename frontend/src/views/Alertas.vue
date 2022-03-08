@@ -141,7 +141,7 @@ export default {
         has_next_page: false,
         CurrentPage:1,
         filter:{
-            end: new Date().getTime(),
+            end: 0,
             valids: true,
             invalids: true,
             non_classifieds: true,
@@ -206,15 +206,16 @@ export default {
     },
     async get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
-      let data= {
+      var data= {
         "end": this.filter.end,
         "valids": this.filter.valids,
         "invalids": this.filter.invalids,
         "non_classifieds": this.filter.non_classifieds,
         "start": this.filter.start,
       }
+      console.log(this.filter)
       await axios
-        .post('/api/v1/latest-alerts/'+this.page, data)
+        .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
           this.latest_alerts = response.data
         })

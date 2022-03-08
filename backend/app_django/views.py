@@ -26,11 +26,11 @@ class latest_alerts_list(APIView):
     # usada para chamar a pagina dos alertas sem filtros
     def post(self, request, page):
         print(request.data)
-        start = request.data["start"]
-        end = request.data['end']
-        thumb_up = request.data["valids"]  # mostrar thumb upeds
-        thumb_down = request.data['invalids']  # mostrar thumbdown eds
-        non_classified = request.data['non_classifieds']  # mostrar não classificados
+        start = request.data["date_start"]
+        end = request.data['date_end']
+        thumb_up = request.data["valid"]  # mostrar thumb upeds
+        thumb_down = request.data['invalid']  # mostrar thumbdown eds
+        non_classified = request.data['non_classified']  # mostrar não classificados
         # filtragem por data
         alerts = alert.objects.filter(timestamp__gte=start + 1)
         alerts = alerts.filter(timestamp__lte=end + 1)
@@ -182,13 +182,14 @@ class get_cam(APIView):
 # deve receber os dados basicos de uma redzone e criar o txt, conteudo
 class save_red_zone(APIView):
     # se nao tiver uma camera no request ou a camera nao existir essa funcao a cria
-    def create_camera(self, cam_number, width=100, height=100):
+    def create_camera(self, cam_number, img_url, width=100, height=100):
         new_camera = camera(
             ativa=True,
             name=f"cam{cam_number}",
             width=width,
             height=height,
-            slug=f"cam{cam_number}"
+            slug=f"cam{cam_number}",
+            base_image=Path().open(img_url, 'rb'),
         )
         new_camera.save()
         return new_camera
