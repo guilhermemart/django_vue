@@ -17,6 +17,7 @@ urlpatterns = [
     path("red_zone/<slug:cam>", views.get_cam.as_view()),  # retorna uma camera e um array com suas red zones
     path('cameras/update/', views.update_cameras.as_view()),
     path('cameras/get_url/', views.get_url_cameras.as_view()),
+    path('alerts/all/', views.alerts_all.as_view())
 ]
 '''path('products/search/', views.search),
     path('products/<slug:category_slug>/<slug:product_slug>/', views.ProductDetail.as_view()),

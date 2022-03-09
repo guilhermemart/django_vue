@@ -19,6 +19,7 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
+from mongo_transfer import transfer_and_update
 
 
 class latest_alerts_list(APIView):
@@ -76,6 +77,8 @@ class update_alert(APIView):
             alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
             alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
             retry_upload(alerts_not_uploaded)
+        # Snapshot no mongo
+        transfer_and_update()
         return Response(serializer.data)
         raise Http404
 
@@ -131,6 +134,8 @@ class create_alert(APIView):
         except Exception as e:
             print(e)
         serializer = alert_serializer(alerta_to_create)
+        # Snapshot no mongo
+        transfer_and_update()
         return Response(serializer.data)
 
 
@@ -340,4 +345,11 @@ class update_red_zone(APIView):
         rzone.timestamp += 1
         rzone.save()
         serializer = red_zone_serializer(rzone)
+        return Response(serializer.data)
+
+# Retorna todos os alertas do banco sql
+class alerts_all(APIView):
+    def get(self, request):
+        alerts = alert.objects.all()
+        serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)

@@ -39,7 +39,7 @@ def firebase_uploader(cia, timestamp, alerta):
     global storage
     date_tm = datetime.fromtimestamp(int(timestamp/1000), pytz.timezone("Brazil/East"))
     # Tenta enviar a imagem
-    firebase_image_url = upload_image(cia, date_tm, alerta["get_thumbnail"])
+    firebase_image_url = upload_image(cia, date_tm, alerta["get_image"])
     if type(firebase_image_url) == type("s") and len(firebase_image_url) > 30:
         # Se a resposta de certo então salva a url no alerta atual e no alerta do banco local
         alerta["firebase_image_url"] = firebase_image_url
@@ -90,3 +90,7 @@ def retry_upload(alerts):
         if attempt != "Sucesso Dev!":
             print("Não foi possível enviar alguns alertas pendentes para o Firebase")
             break
+
+
+if __name__ == '__main__':
+    print("a")
