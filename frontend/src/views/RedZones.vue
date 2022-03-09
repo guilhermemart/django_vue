@@ -239,18 +239,21 @@ export default {
         this.rzSelected=rz
       },
 
-    loadingImages(){
+    async loadingImages(){
     this.$store.commit('setIsLoading', true)
       let which_camera = 0
+      var camera_temp
       while (which_camera < this.num_cameras){
+
+        camera_temp = await axios.get('api/v1/red_zone/cam'+ which_camera.toString())
+        console.log(camera_temp.data.get_base_img)
         this.imageParameters.push(new window.Image())
-        axios.get('api/v1/red_zone/cam'+ which_camera.toString()).then((camera)=>{
-        this.imageParameters[which_camera].src=camera.get_base_img})
+        this.imageParameters[which_camera].src=camera_temp.data.get_base_img
         this.stageConfig.push({
             name : which_camera,
             width : this.imageParameters[which_camera].naturalWidth,
             height : this.imageParameters[which_camera].naturalHeight
-        })
+            })
         which_camera +=1
       }
       this.$store.commit('setIsLoading', false)

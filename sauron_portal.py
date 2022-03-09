@@ -5,7 +5,7 @@ import json
 colocar a lib na pasta do sauron\n 
 executar a funcao enviar_alerta(argumentos)\n
 com os 3 seguintes argumentos:\n
-dict: the_alerta_dict 
+dict: the_alerta_dict \n
 {\n
 alert_category: "string_com_o_tipo_do_alerta",\n
 timestamp: "int em ms de quando o alerta foi adquirido",\n
@@ -22,8 +22,11 @@ global_token = "token ce1e21f3bd4269729b917b2dd3eb81abd6ded9dc"
 fake_alerta = {
     'local_image_url': "example.png"
 }
+ip = "127.0.0.1"
+port = "8000"
 
-def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
+
+def enviar_alerta(the_alerta, backend_ip=None, backend_port=None):
     """ Dados basicos a enviar no alerta \n
     alert_category = string com o nome da categoria ex: "nonconformity" \n
     timestamp = IntegerField (timestamp em milisegundos) \n
@@ -31,6 +34,10 @@ def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
     local_image_url = TextField(default="uploads/sauron_imagens/n_avaliadas/example.png")
     """
     global global_token
+    if backend_ip is None:
+        backend_ip = ip
+    if backend_port is None:
+        backend_port = port
     to_alert = {}
     for key in the_alerta:
         to_alert[key] = the_alerta[key]
@@ -66,7 +73,7 @@ def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
     to_alert['Authorization'] = global_token
     #procura imagem localmente caso contrario usa exemplo
     local_image_url = the_alerta.get('local_image_url', "pwa_images/example.png")
-    # ToDo substituir imagem exemplo local por uma b64 salva no proprio arquivo
+    # ToDo substituir imagem exemplo por uma request
     img = open(local_image_url, 'rb')
     file = [('alert_image', img)]
     payload = to_alert
@@ -80,7 +87,7 @@ def enviar_alerta(the_alerta, backend_ip="127.0.0.1", backend_port="8000"):
         return f"alerta nao enviado erro: {result.text}"
 
 
-def get_red_zones(cam, backend_ip="127.0.0.1", backend_port="8000"):
+def get_red_zones(cam, backend_ip=None, backend_port=None):
     """
     cam --> int [0, n_cameras[
     retorna um dict com todas as redzones da respectiva camera\n
@@ -96,6 +103,10 @@ def get_red_zones(cam, backend_ip="127.0.0.1", backend_port="8000"):
      }
      """
     global global_token
+    if backend_ip is None:
+        backend_ip = ip
+    if backend_port is None:
+        backend_port = port
     url_do_django_token = f"http://{backend_ip}:{backend_port}/api/v1/token/login/"
     url_do_django_get_rz = f"http://{backend_ip}:{backend_port}/api/v1/load_rz/{cam}"
     if global_token == "":
@@ -118,6 +129,37 @@ def get_red_zones(cam, backend_ip="127.0.0.1", backend_port="8000"):
         return f"rzs nao encontradas erro: {result.text}"
 
 
+def refresh_the_picture(cam, local_image_url="pwa_images/example.png", backend_ip=None, backend_port=None):
+    ''' Le a URL da imagem local e envia pra camera correspondente no backend\
+    cam = string camera ex: "cam0" Obs: inicia na cam0 \n
+    local_image_url string path da imagem localmente ex: /home/user/sauron_images/example.png
+    Return 200 se a imagem foi enviada, outro codigo != 200 se algo deu errado
+    '''
+    global global_token
+    if backend_ip is None:
+        backend_ip = ip
+    if backend_port is None:
+        backend_port = port
+    img = open(local_image_url, 'rb')
+    file = [('base_image', img)]
+    url_do_django_token = f"http://{backend_ip}:{backend_port}/api/v1/token/login/"
+    url_do_django_save_base_image = f"http://{backend_ip}:{backend_port}/api/v1/red_zone/camera/base_img_update/"
+    if global_token == "":
+        formData = {
+            "username": 'altave',
+            "password": 'altave'
+        }
+        login = requests.post(url_do_django_token, data=formData)
+        if login.json().get("auth_token", False) is not False:
+            global_token = f"token {login.json().get('auth_token', '')}"
+        else:
+            return "Problemas para acessar o backend"
+    payload = {'Authorization': global_token, "camera": str(cam)}
+    result = requests.post(url_do_django_save_base_image, data=payload, files=file)
+    return result.status_code
+
+
 if __name__ == "__main__":
-    enviar_alerta(fake_alerta)
+    #enviar_alerta(fake_alerta)
     get_red_zones("0")
+    #refresh_the_picture("cam2")
