@@ -120,4 +120,4 @@ def get_red_zones(cam, backend_ip="127.0.0.1", backend_port="8000"):
 
 if __name__ == "__main__":
     enviar_alerta(fake_alerta)
-    get_red_zones("0")
+    #get_red_zones("0")

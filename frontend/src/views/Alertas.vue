@@ -3,15 +3,6 @@
       <harpiaBar :show_in_bar="true"/>
      <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
 
-  <!-- <div class="level-item has-text-centered mt-4">
-    <div class="calendar">
-       <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" />  
-       <button class="button has-text-light has-custom-width is-medium is-responsive is-success">Find<span class="is-family-sans-serif"></span></button>     
-    </div>
-  </div> 
-  
-  -->
-
     <div>
       <div class="control mt-1">
         <label class="radio">
@@ -86,7 +77,7 @@
     </div>
     <nav class="pagination" role="navigation" aria-label="pagination">
         <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
-        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)">Next</a>
+        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"> <button>Next</button> </a>
     </nav>
 {{page}}
   </div>
@@ -169,7 +160,8 @@ export default {
     },
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
-    this.filter = this.$store.state.filter
+ //   this.filter = this.$store.state.filter
+    this.$store.state.filter=this.filter
     this.get_latest_alerts(),
     document.title = 'Alerts | Harpia'
   },
@@ -204,28 +196,27 @@ export default {
             this.watchdog()
         })
     },
-    async get_latest_alerts() {
+    //async get_latest_alerts() {
+    get_latest_alerts() {
       this.$store.commit('setIsLoading', true)
-      let data= {
-        "end": this.filter.end,
-        "valids": this.filter.valids,
-        "invalids": this.filter.invalids,
-        "non_classifieds": this.filter.non_classifieds,
-        "start": this.filter.start,
-      }
-      await axios
-        .post('/api/v1/latest-alerts/'+this.page, data)
+      axios
+        .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
           this.latest_alerts = response.data
+            
+      if(Object.keys(this.latest_alerts).length>6){        
+        this.has_next_page = true
+        this.latest_alerts = this.latest_alerts.slice(0,6)
+        
+
+      }
+          console.log(response)
         })
         .catch(error => {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-      if(Object.keys(this.latest_alerts).length>6){
-        this.has_next_page = true
-        this.latest_alerts = this.latest_alerts.slice(0,6)
-      }
+
     },
     go_to_page(next_page){
         console.log("teste")
@@ -264,8 +255,9 @@ export default {
         //Gera o timestamp da data as 00:00:00 horas
         let timestamp= new Date(day).getTime()
         
-        // timestamp incluso no filtro
-         this.$store.state.filter.date_start =timestamp
+        // timestamp incluso no filtro        
+         this.filter.start =timestamp
+         this.filter.end= new Date(timestamp).setHours(23,59,59,999)        
         
       }else{
         //Extrai apenas a data
@@ -273,26 +265,20 @@ export default {
         let day1= new Date(this.date[1]).toDateString()
         //Gera o timestamp da data as 00:00:00 horas
         let timestamp0= new Date(day0).getTime()
-        let timestamp1= new Date(day1).getTime()
+        let timestamp1= new Date(new Date(day1).setHours(23,59,59,999)).getTime()
 
         // timestamp incluso no filtro
-
-        this.$store.state.filter.date_start=timestamp0
-        this.$store.state.filter.date_end=timestamp1       
+        this.filter.start=timestamp0
+        this.filter.end=timestamp1
+        this.$store.commit('filter.date_start', timestamp0)
+        this.$store.commit('filter.date_end', timestamp0)
         
       }
       
+      this.get_latest_alerts()
+      
 
-    },
-    toTimestamp(){
-      let justDate0=new Date(this.date[0]).toDateString()
-      this.date[0]=new Date(justDate0).getTime()
-
-      let justDate1=new Date(this.date[1]).toDateString()
-      this.date[1]=new Date(justDate1).getTime()-99
-
-      console.log(this.get_date_filtered_alerts())
-    },
+    }
   },
 }
 </script>
