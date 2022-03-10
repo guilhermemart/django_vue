@@ -19,6 +19,7 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
+from mongo_transfer import transfer_and_update
 
 
 class latest_alerts_list(APIView):
@@ -76,6 +77,8 @@ class update_alert(APIView):
             alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
             alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
             retry_upload(alerts_not_uploaded)
+        # Snapshot no mongo
+        transfer_and_update()
         return Response(serializer.data)
         raise Http404
 
@@ -132,6 +135,8 @@ class create_alert(APIView):
         except Exception as e:
             print(e)
         serializer = alert_serializer(alerta_to_create)
+        # Snapshot no mongo
+        transfer_and_update()
         return Response(serializer.data)
 
 
@@ -335,7 +340,7 @@ class alerts_report(APIView):
 
 # Se o post é feito tudo de uma vez, as 10 imagens no mesmo post
 # Nomes padronizados nos dict
-class update_camera(APIView):
+class update_cameras(APIView):
     # Recebe a imagem, salva e salva o caminho dela na classe do get
     def post(self, request):
         image = request.FILES.get('img')
@@ -346,18 +351,18 @@ class update_camera(APIView):
         img.save(path)
         img.close()
         path = os.path.join("media/cats/", str(image))
-        get_url_camera.url = path
+        get_url_cameras.url = path
         return Response({"imageURL": path})
 
 
-class get_url_camera(APIView):
+class get_url_cameras(APIView):
     # Retorna o ip do django com o caminho da imagem
     url = "a"
     def get(self, request):
         print(request.data.get("image_path"))
-        print(get_url_camera.url)
+        print(get_url_cameras.url)
         IP = request.build_absolute_uri("/")
-        return Response({"camera1": IP + get_url_camera.url})
+        return Response({"camera1": IP + get_url_cameras.url})
 
 
 class update_red_zone(APIView):
@@ -367,4 +372,11 @@ class update_red_zone(APIView):
         rzone.timestamp += 1
         rzone.save()
         serializer = red_zone_serializer(rzone)
+        return Response(serializer.data)
+
+# Retorna todos os alertas do banco sql
+class alerts_all(APIView):
+    def get(self, request):
+        alerts = alert.objects.all()
+        serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)

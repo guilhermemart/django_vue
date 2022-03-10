@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="box has-background-white mx-1">
+    <div class="box has-background-white mx-1" :class="thumb_up?'boxUp':thumb_down?'boxDown':'box'">
       <div class="is-floating-left">
         <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" >
           <span class="icon ">
@@ -17,7 +17,7 @@
             <i class="far fa-thumbs-up fa-lg" />
           </span>
         </button>
-        <button v-if="thumb_down" class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-warning" @click="invert_thumb_down" >
+        <button v-if="thumb_down" class=" button mx-1 is-rounded is-small  is-inverted is-focused is-danger" @click="invert_thumb_down" >
           <span class="icon ">
             <i class="far fa-thumbs-down fa-lg" />
           </span>
@@ -166,6 +166,17 @@
 </template>
 
 <style lang="scss">
+
+.boxDown{
+  border-color: red;
+  border-style: solid;
+  border-width: 0.05vh;
+}
+.boxUp{
+  border-color: green;
+  border-style: solid;
+  border-width: 0.05vh;
+}
 .table{
   overflow: auto;
 }

@@ -21,14 +21,23 @@
               Filtros
             </a>
             <div class="navbar-dropdown">
-              <a id="field-valid" class="navbar-item" @click="filterValid()">
-                Alertas validos
+              <a class="navbar-item" @click="filterValid()" v-if="filter.valid">
+                Alertas validos <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
               </a>
-              <a id="field-invalid" class="navbar-item" @click="filterInvalid()">
-                Alertas invalidos
+              <a class="navbar-item" @click="filterValid()" v-else>
+                Alertas validos <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
               </a>
-              <a id="field-nonclass" class="navbar-item" @click="filterNonClassified()">
-                Não classificados
+              <a class="navbar-item" @click="filterInvalid()" v-if="filter.invalid">
+                Alertas invalidos <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
+              </a>
+              <a class="navbar-item" @click="filterInvalid()" v-else>
+                Alertas invalidos <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
+              </a>
+              <a class="navbar-item" @click="filterNonClassified()" v-if="filter.non_classified">
+                Não classificados <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
+              </a>
+              <a class="navbar-item" @click="filterNonClassified()" v-else>
+                Não classificados <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
               </a>
               <hr class="navbar-divider">
               <a class="navbar-item" @click="filterClear()">
@@ -88,11 +97,11 @@ data() {
     return {
       showMobileMenu: false,
       filter: {
-      valid: true,  // true --> apresenta, false --> esconde
-      invalid: true,
-      non_classified: true,
-      date_start: 0,
-      date_end: new Date().getTime()
+        valid: true,  // true --> apresenta, false --> esconde
+        invalid: true,
+        non_classified: true,
+        date_start: 0,
+        date_end: new Date().getTime()
         }
     }
   },
@@ -112,49 +121,31 @@ data() {
       filterClear deixa 3 variáveis locais como true, atualiza a global e ativa os itens do dropdown
      ToDo: campos do filtro nao estão iniciando ativos/inativos
      */
- save_filter(){
-            this.$store.commit('save_filter', this.filter)
-        },
+    save_filter(){
+        this.$store.commit('save_filter', this.filter)
+      },
     filterValid() {
       this.filter.valid = !this.filter.valid
       this.save_filter()
-      if (this.filter.valid){
-        document.getElementById("field-valid").classList.add("is-active")
-      } else {
-        document.getElementById("field-valid").classList.remove("is-active")
-      }
     },
     filterInvalid() {
       this.filter.invalid = !this.filter.invalid
       this.save_filter()
-      if (this.filter.invalid){
-        document.getElementById("field-invalid").classList.add("is-active")
-      } else {
-        document.getElementById("field-invalid").classList.remove("is-active")
-      }
     },
     filterNonClassified() {
       this.filter.non_classified = !this.filter.non_classified
       this.save_filter()
-      if (this.filter.non_classified){
-        document.getElementById("field-nonclass").classList.add("is-active")
-      } else {
-        document.getElementById("field-nonclass").classList.remove("is-active")
-      }
     },
     filterClear() {
       this.filter.valid = true
       this.filter.invalid = true
       this.filter.non_classified = true
       this.save_filter()
-      document.getElementById("field-valid").classList.add("is-active")
-      document.getElementById("field-invalid").classList.add("is-active")
-      document.getElementById("field-nonclass").classList.add("is-active")
     }
   },
 
   mounted() {
-  this.filter = this.$store.state.filter
+    this.filter = this.$store.state.filter
   },
   computed: {
 

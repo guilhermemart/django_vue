@@ -17,7 +17,7 @@ backend_port: str porta destinada ao harpia backend\n
 '''
 
 
-global_token = "token ce1e21f3bd4269729b917b2dd3eb81abd6ded9dc"
+global_token = ""
 
 fake_alerta = {
     'local_image_url': "example.png"
