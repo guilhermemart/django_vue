@@ -139,3 +139,4 @@ backend/.env
 frontend/.env
 frontend/.env
 frontend/.env
+backend/app_django/django-test-de-firebase.json
