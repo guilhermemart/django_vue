@@ -5,7 +5,7 @@ import requests
 #backend_port -> port que o django está rodando
 #db -> nome do banco no mongo
 #collection -> nome da coleção no banco
-def transfer_and_update(backend_ip="192.168.0.46", backend_port="8000", db="valaris", collection="alerts"):
+def transfer_and_update(backend_ip="192.168.0.28", backend_port="8000", db="valaris", collection="alerts"):
     response = requests.get(f"http://{backend_ip}:{backend_port}/api/v1/alerts/all/")
     alerts = response.json()
     client = MongoClient("localhost", 27017)
