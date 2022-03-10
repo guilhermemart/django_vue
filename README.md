@@ -87,8 +87,13 @@ con# django_vue
   - cd django_vue/frontend
   - npm install  
   - npm run serve
+
+* Adicionar usuários não admin:
+  - Entre na página de admin do Django (IP:PORT/admin/)
+  - Na linha de "Usuários" clique em "+ Adicionar"
+  - Crie um usuário e desmarque as permissões para ficar somente "Ativo"
     
-* Manteiners:
+* Maintainers:
     - Guilherme Martins
     - Celso Reis
     - Devanir Ramos

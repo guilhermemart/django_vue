@@ -19,7 +19,7 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
-from mongo_transfer import transfer_and_update
+from mongo_transfer import mongo_insert_one, mongo_update_one
 
 
 class latest_alerts_list(APIView):
@@ -34,21 +34,21 @@ class latest_alerts_list(APIView):
         non_classified = request.data['non_classified']  # mostrar não classificados
         # filtragem por data
         alerts = alert.objects.filter(timestamp__gte=start + 1)
-        alerts = alerts.filter(timestamp__lte=end + 1)
+        alerts = alerts.filter(timestamp__lte=end + 1).order_by("-date_added")
         # filtragem por classificacao
         if non_classified is True:
-            non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False)
+            non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False).order_by("-date_added")
         else:
-            non_classified_alerts = alerts.none()
+            non_classified_alerts = alerts.none().order_by("-date_added")
         if thumb_up is True:
-            thumb_up_alerts = alerts.filter(thumb_up__exact=True)
+            thumb_up_alerts = alerts.filter(thumb_up__exact=True).order_by("-date_added")
         else:
-            thumb_up_alerts = alerts.none()
+            thumb_up_alerts = alerts.none().order_by("-date_added")
         if thumb_down is True:
-            thumb_down_alerts = alerts.filter(thumb_down__exact=True)
+            thumb_down_alerts = alerts.filter(thumb_down__exact=True).order_by("-date_added")
         else:
-            thumb_down_alerts = alerts.none()
-        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts)[6 * (page - 1):(6 * page) + 1]
+            thumb_down_alerts = alerts.none().order_by("-date_added")
+        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts).order_by("-date_added")[6 * (page - 1):(6 * page) + 1]
         # 6 o numero magico de alertas na pagina
         # retorna 7 valores o 7th serve para o vue definir se tem proxima pagina
         serializer = alert_serializer(alerts, many=True)
@@ -77,10 +77,14 @@ class update_alert(APIView):
             alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
             alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
             retry_upload(alerts_not_uploaded)
+        # Pega do banco o alerta após suas atualizações do witsml e firebase
+        alert_updated = alert.objects.filter(id=serializer.data["id"])[0]
+        serializer = alert_serializer(alert_updated)
         # Snapshot no mongo
-        transfer_and_update()
+        mongo_update_one(alert=serializer.data)
         return Response(serializer.data)
         raise Http404
+
 
 class create_alert(APIView):
     def create_category(self, category_name):
@@ -135,7 +139,7 @@ class create_alert(APIView):
             print(e)
         serializer = alert_serializer(alerta_to_create)
         # Snapshot no mongo
-        transfer_and_update()
+        mongo_insert_one(alert=serializer.data)
         return Response(serializer.data)
 
 
@@ -227,6 +231,8 @@ class save_red_zone(APIView):
         wich_camera = camera.objects.filter(name="cam"+str(camera_number))
         if not len(wich_camera) > 0:
             wich_camera = self.create_camera(camera_number, request.data.get('width', 100), request.data.get('height', 100))
+        else:
+            wich_camera = wich_camera[0]
         date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
         ident=date_added.timestamp()
         r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
@@ -251,13 +257,36 @@ class save_red_zone(APIView):
 
 class del_red_zone(APIView):
     def get(self, request, red_zone_name):
-        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)[0]
-        to_del_red_zone.delete()
+        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)
+        if len(to_del_red_zone) > 0:
+            to_del_red_zone[0].delete()
+        else:
+            return "Red Zone nao encontrada"
         serializer = red_zone_serializer(to_del_red_zone)
         return Response(serializer.data)
         # o serializer.data possui bem mais campos que os utilizados no front
         # nao atrapalha ter mais campos
         # name, height, width, enabled e dots são obrigatorios
+
+
+class red_zone_camera_update(APIView):
+    def post(self, request):
+        image = request.FILES.get('base_image')
+        img = ImageFile(image)
+        camera_name = request.data.get("camera")
+        the_camera = camera.objects.filter(name=camera_name)
+        if len(the_camera) > 0:
+            the_camera = the_camera[0]
+        else:
+            print(f"camera: {camera_name} nao encontrada")
+            raise Http404
+        the_camera.base_img = img
+        the_camera.save()
+        serializer = camera_serializer(the_camera)
+        return Response(serializer.data)
+
+
+
 
 # o watchdog do front deve chamar essa função e deixar ela em watch
 class wait_alert(APIView):
