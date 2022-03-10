@@ -53,6 +53,7 @@
                                 <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
                                     <div>
                                     <alert_card :Alert="alert" />
+                                    {{new Date(alert.date_added).toLocaleString()}}
                                     </div>
                                 </div>
                             </div>
@@ -132,11 +133,11 @@ export default {
         has_next_page: false,
         CurrentPage:1,
         filter:{
-            end: 0,
-            valids: true,
-            invalids: true,
-            non_classifieds: true,
-            start: 0,
+            date_end: 2500916953418,
+            valid: true,
+            invalid: true,
+            non_classified: true,
+            date_start: 0,
         }
     }
   },
@@ -184,9 +185,18 @@ export default {
             audio.play()
         }
     },
+    sortAlerts(){
+
+      console.log(this.latest_alerts)
+
+      
+
+    },
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
+           console.log(item)
             if(this.page == '1'){
+              alert('watchDog')
                 this.get_latest_alerts()
                 console.log("watchdog atuando")
             }
@@ -203,20 +213,17 @@ export default {
         .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
           this.latest_alerts = response.data
-            
+      
       if(Object.keys(this.latest_alerts).length>6){        
         this.has_next_page = true
         this.latest_alerts = this.latest_alerts.slice(0,6)
-        
-
-      }
-          console.log(response)
+        }
+          this.sortAlerts()
         })
         .catch(error => {
           console.log(error)
         })
       this.$store.commit('setIsLoading', false)
-
     },
     go_to_page(next_page){
         console.log("teste")
@@ -256,8 +263,8 @@ export default {
         let timestamp= new Date(day).getTime()
         
         // timestamp incluso no filtro        
-         this.filter.start =timestamp
-         this.filter.end= new Date(timestamp).setHours(23,59,59,999)        
+         this.filter.date_start =timestamp
+         this.filter.date_end= new Date(timestamp).setHours(23,59,59,999)        
         
       }else{
         //Extrai apenas a data
@@ -268,8 +275,8 @@ export default {
         let timestamp1= new Date(new Date(day1).setHours(23,59,59,999)).getTime()
 
         // timestamp incluso no filtro
-        this.filter.start=timestamp0
-        this.filter.end=timestamp1
+        this.filter.date_start=timestamp0
+        this.filter.date_end=timestamp1
         this.$store.commit('filter.date_start', timestamp0)
         this.$store.commit('filter.date_end', timestamp0)
         
