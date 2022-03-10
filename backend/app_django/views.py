@@ -19,7 +19,7 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
-from mongo_transfer import transfer_and_update
+from mongo_transfer import mongo_insert_one, mongo_update_one
 
 
 class latest_alerts_list(APIView):
@@ -34,21 +34,21 @@ class latest_alerts_list(APIView):
         non_classified = request.data['non_classified']  # mostrar não classificados
         # filtragem por data
         alerts = alert.objects.filter(timestamp__gte=start + 1)
-        alerts = alerts.filter(timestamp__lte=end + 1)
+        alerts = alerts.filter(timestamp__lte=end + 1).order_by("-date_added")
         # filtragem por classificacao
         if non_classified is True:
-            non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False)
+            non_classified_alerts = alerts.filter(thumb_up__exact=False).filter(thumb_down__exact=False).order_by("-date_added")
         else:
-            non_classified_alerts = alerts.none()
+            non_classified_alerts = alerts.none().order_by("-date_added")
         if thumb_up is True:
-            thumb_up_alerts = alerts.filter(thumb_up__exact=True)
+            thumb_up_alerts = alerts.filter(thumb_up__exact=True).order_by("-date_added")
         else:
-            thumb_up_alerts = alerts.none()
+            thumb_up_alerts = alerts.none().order_by("-date_added")
         if thumb_down is True:
-            thumb_down_alerts = alerts.filter(thumb_down__exact=True)
+            thumb_down_alerts = alerts.filter(thumb_down__exact=True).order_by("-date_added")
         else:
-            thumb_down_alerts = alerts.none()
-        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts)[6 * (page - 1):(6 * page) + 1]
+            thumb_down_alerts = alerts.none().order_by("-date_added")
+        alerts = non_classified_alerts.union(thumb_up_alerts).union(thumb_down_alerts).order_by("-date_added")[6 * (page - 1):(6 * page) + 1]
         # 6 o numero magico de alertas na pagina
         # retorna 7 valores o 7th serve para o vue definir se tem proxima pagina
         serializer = alert_serializer(alerts, many=True)
@@ -77,8 +77,11 @@ class update_alert(APIView):
             alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
             alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
             retry_upload(alerts_not_uploaded)
+        # Pega do banco o alerta após suas atualizações do witsml e firebase
+        alert_updated = alert.objects.filter(id=serializer.data["id"])[0]
+        serializer = alert_serializer(alert_updated)
         # Snapshot no mongo
-        transfer_and_update()
+        mongo_update_one(alert=serializer.data)
         return Response(serializer.data)
         raise Http404
 
@@ -135,7 +138,7 @@ class create_alert(APIView):
             print(e)
         serializer = alert_serializer(alerta_to_create)
         # Snapshot no mongo
-        transfer_and_update()
+        mongo_insert_one(alert=serializer.data)
         return Response(serializer.data)
 
 
