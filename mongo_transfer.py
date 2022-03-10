@@ -1,39 +1,48 @@
 from pymongo import MongoClient
 import requests
 
-#backend_ip -> ip que o django está rodando
-#backend_port -> port que o django está rodando
-#db -> nome do banco no mongo
-#collection -> nome da coleção no banco
-def transfer_and_update(backend_ip="192.168.0.46", backend_port="8000", db="valaris", collection="alerts"):
-    response = requests.get(f"http://{backend_ip}:{backend_port}/api/v1/alerts/all/")
-    alerts = response.json()
-    client = MongoClient("localhost", 27017)
+# user -> user do mongo
+# password -> senha do mongo
+# db -> nome do banco no mongo
+# collection -> nome da coleção no banco
+# alert -> alerta, um dict
+def mongo_insert_one(user="", password="", db="", collection="", alert=None):
+    # Insere um novo alerta no mongo
+    client = MongoClient(host="localhost", port=27017, username=user, password=password)
     db = client[db]
     collection = db[collection]
-    docs = collection.find()
-    # Salva os docs sem o '_id' que o mongo coloca
-    docs_to_compare = []
-    for doc in docs:
-        doc.pop("_id", None)
-        docs_to_compare.append(doc)
+    collection.insert_one(alert)
+    client.close()
+    print(f"INSERTED - ID {alert['id']}")
 
-    for alert in alerts:
-        # Verifica se o alerta tem algum valor diferente do banco
-        if alert not in docs_to_compare:
-            # Verifica se o alerta está no banco (pelo id)
-            if next((item for item in docs_to_compare if item["id"] == alert["id"]), None):
-                # Tem no banco, então irá atualizar
-                collection.update_one({"id": alert["id"]}, {"$set": {
-                    "anotacoes": alert["anotacoes"],
-                    "thumb_up": alert["thumb_up"],
-                    "thumb_down": alert["thumb_down"],
-                    "firebase_image_url": alert["firebase_image_url"],
-                    "get_opsreport": alert["get_opsreport"],
-                    "get_attachment": alert["get_attachment"],
-                    "witsml_confirm": alert["witsml_confirm"]}})
-                print(f"UPDATED - ID: {alert['id']}")
-            else:
-                # Não tem no banco, então inserta
-                collection.insert_one(alert)
-                print(f"INSERTED - ID: {alert['id']}")
+
+def mongo_update_one(user="", password="", db="", collection="", alert=None):
+    # Pesquisa pelo alerta no mongo e atualiza algumas informações
+    client = MongoClient(host="localhost", port=27017, username=user, password=password)
+    db = client[db]
+    collection = db[collection]
+    collection.update_one({"id": alert["id"]}, {"$set": {
+        "anotacoes": alert["anotacoes"],
+        "thumb_up": alert["thumb_up"],
+        "thumb_down": alert["thumb_down"],
+        "firebase_image_url": alert["firebase_image_url"],
+        "get_opsreport": alert["get_opsreport"],
+        "get_attachment": alert["get_attachment"],
+        "witsml_confirm": alert["witsml_confirm"]
+        }})
+    client.close()
+    print(f"UPDATED - ID: {alert['id']}")
+
+
+# backend_ip -> ip que o django está rodando
+# backend_port -> port que o django está rodando
+def mongo_all(user="", password="", db="valaris", collection="alerts", backend_ip="127.0.0.1", backend_port="8000"):
+    # Pega todos os dados do banco sql e salva no mongo. Cria o banco mongo
+    response = requests.get(f"http://{backend_ip}:{backend_port}/api/v1/alerts/all/")
+    alerts = response.json()
+    client = MongoClient(host="localhost", port=27017, username=user, password=password)
+    db = client[db]
+    collection = db[collection]
+    collection.insert_many(alerts)
+    client.close()
+    print("MONGO DATABASE CREATED!")

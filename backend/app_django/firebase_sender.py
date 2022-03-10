@@ -4,6 +4,7 @@ from datetime import datetime
 import pytz
 import requests
 from .models import alert
+from mongo_transfer import mongo_update_one
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 json_ = os.path.join(dir_path, "django-test-de-firebase.json")
@@ -46,6 +47,8 @@ def firebase_uploader(cia, timestamp, alerta):
         alert_from_db = alert.objects.filter(id=alerta["id"])[0]
         alert_from_db.firebase_image_url = firebase_image_url
         alert_from_db.save()
+        # Snapshot no mongo, para tentativas de alertas não enviados
+        mongo_update_one(alert=alerta)
         alerta["date"] = {"%date": alerta["date_added"]}
         alerta.pop("date_added")
         alerta["timestamp"] = {"%numberLong": alerta["timestamp"]}
@@ -90,7 +93,3 @@ def retry_upload(alerts):
         if attempt != "Sucesso Dev!":
             print("Não foi possível enviar alguns alertas pendentes para o Firebase")
             break
-
-
-if __name__ == '__main__':
-    print("a")
