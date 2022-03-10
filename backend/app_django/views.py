@@ -85,6 +85,7 @@ class update_alert(APIView):
         return Response(serializer.data)
         raise Http404
 
+
 class create_alert(APIView):
     def create_category(self, category_name):
         new_category = category(
@@ -230,6 +231,8 @@ class save_red_zone(APIView):
         wich_camera = camera.objects.filter(name="cam"+str(camera_number))
         if not len(wich_camera) > 0:
             wich_camera = self.create_camera(camera_number, request.data.get('width', 100), request.data.get('height', 100))
+        else:
+            wich_camera = wich_camera[0]
         date_added=datetime.now(tz=timezone(timedelta(hours=-3)))
         ident=date_added.timestamp()
         r_zone_file_path= path  # r_zone_file_path = save_path nao aceitou o metodo File()
@@ -254,13 +257,36 @@ class save_red_zone(APIView):
 
 class del_red_zone(APIView):
     def get(self, request, red_zone_name):
-        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)[0]
-        to_del_red_zone.delete()
+        to_del_red_zone = red_zone.objects.filter(name=red_zone_name)
+        if len(to_del_red_zone) > 0:
+            to_del_red_zone[0].delete()
+        else:
+            return "Red Zone nao encontrada"
         serializer = red_zone_serializer(to_del_red_zone)
         return Response(serializer.data)
         # o serializer.data possui bem mais campos que os utilizados no front
         # nao atrapalha ter mais campos
         # name, height, width, enabled e dots são obrigatorios
+
+
+class red_zone_camera_update(APIView):
+    def post(self, request):
+        image = request.FILES.get('base_image')
+        img = ImageFile(image)
+        camera_name = request.data.get("camera")
+        the_camera = camera.objects.filter(name=camera_name)
+        if len(the_camera) > 0:
+            the_camera = the_camera[0]
+        else:
+            print(f"camera: {camera_name} nao encontrada")
+            raise Http404
+        the_camera.base_img = img
+        the_camera.save()
+        serializer = camera_serializer(the_camera)
+        return Response(serializer.data)
+
+
+
 
 # o watchdog do front deve chamar essa função e deixar ela em watch
 class wait_alert(APIView):
