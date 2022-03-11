@@ -14,7 +14,7 @@
           period
         </label>
       </div>
-    </div>
+    
     <div class="has-addons level-item has-text-centered ">    
       <div class="control calendar" v-if="isRange">  
         <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
@@ -30,41 +30,47 @@
         </span>
           <span class="is-family-sans-serif">Confirm</span></button>     
       </div>
-      <div class="control">    
+      <!-- <div class="control">    
           <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
               <span class="icon">
           <i class="fas fa-sync"></i>
         </span>
           <span class="is-family-sans-serif">Refresh</span></button>     
-      </div>
-    
+      </div> -->
+    </div>
   </div>
       
-        <div class="home">
+  <div class="home">
 
-    <div class="columns mt-4 is-centered">
-                        <div class="column">
-                            <button size="is-large" @click="CurrentPage -= 1" icon-right="chevron-left" type="is-primary" :disabled="CurrentPage <= 1" outlined />
-                        </div>
-                            <div class="column is-12">
-                            <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
-                            <div class="columns has-text-black is-multiline mr-2" v-if="true">
-                              <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
-                                <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
-                                    <div>
-                                    <alert_card :Alert="alert" />
-                                    {{new Date(alert.date_added).toLocaleString()}}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="column is-12 has-text-centered is-half-screen-height is-flex has-vertical-centered-text" v-else>
-                                <i icon="alert" size="is-large" type="is-dark"></i>
-                                <p class="title">
-                                    Não há alertas disponíveis.
-                                </p>
-                            </div>
-                        </div>
-    
+    <div class="columns mt-4 is-vcentered">
+      <div class="column is-multiline is-mobile">     
+          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
+      </div>
+          <div class="column is-10">
+          page {{page}}
+          <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
+          <div class="columns has-text-black is-multiline mr-2 mt-1" v-if="true">
+            <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
+              <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
+                  <div>
+                  <alert_card :Alert="alert" />
+                  <!-- {{new Date(alert.date_added).toLocaleString()}}
+                  {{alert.anotacoes}} -->
+                  </div>
+              </div>
+          </div>
+          <div class="column is-12 has-text-centered is-half-screen-height is-flex has-vertical-centered-text" v-else>
+              <i icon="alert" size="is-large" type="is-dark"></i>
+              <p class="title">
+                  Não há alertas disponíveis.
+              </p>
+          </div>
+      </div>
+<div class="column is-multiline is-mobile">     
+          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)+1)">
+           <i class="fas fa-angles-right fa-2x" />
+          </button>
+      </div>
     </div>
 
 
@@ -76,11 +82,11 @@
         v-bind:key="alert.id"
         v-bind:Alert="alert" />
     </div>
-    <nav class="pagination" role="navigation" aria-label="pagination">
+    <!-- <nav class="pagination" role="navigation" aria-label="pagination">
         <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
         <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"> <button>Next</button> </a>
-    </nav>
-{{page}}
+    </nav> -->
+
   </div>
   
     </div>
