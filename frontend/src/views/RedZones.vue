@@ -211,9 +211,11 @@ export default {
       rzSelected:''
     };
   },
+
   created() {
     this.loadingImages()  // le as imagens base onde os pontos serão desenhados
     this.load_red_zones()
+    
   },
   watch:{
     cam_selected:{
@@ -238,26 +240,28 @@ export default {
         this.points=rz.dots
         this.rzSelected=rz
       },
-
     async loadingImages(){
-    this.$store.commit('setIsLoading', true)
-      let which_camera = 0
-      var camera_temp
-      while (which_camera < this.num_cameras){
-
-        camera_temp = await axios.get('api/v1/red_zone/cam'+ which_camera.toString())
-        console.log('temp')
-        console.log(camera_temp.data.get_base_img)
-        this.imageParameters.push(new window.Image())
-        this.imageParameters[which_camera].src=camera_temp.data.get_base_img
-        this.stageConfig.push({
-            name : which_camera,
-            width : this.imageParameters[which_camera].naturalWidth,
-            height : this.imageParameters[which_camera].naturalHeight
-            })
-        which_camera +=1
+      this.$store.commit('setIsLoading', true)
+        let which_camera = 0
+        //var camera_temp
+        while (which_camera < 9){
+          await axios.get('api/v1/red_zone/cam'+ which_camera.toString()).then((resp)=>{               
+            let img = new window.Image()        
+            img.src=resp.data.get_base_img
+            img.onload=()=>{
+              this.imageParameters[which_camera]=img
+              this.imageParameters.push(img)
+              this.stageConfig.push({ 
+                  name : which_camera,
+                  width : this.imageParameters[which_camera].naturalWidth,
+                  height : this.imageParameters[which_camera].naturalHeight
+                  })
+                which_camera +=1        
+          }          
+        })       
+          this.$store.commit('setIsLoading', false)
       }
-      this.$store.commit('setIsLoading', false)
+      
     },
     // precisa colocar isso no watch
     load_red_zones(){
@@ -393,6 +397,7 @@ export default {
     }
 
 }
+
 }
 //bloquear a possibilidade de nomes duplicados para as redzones
 

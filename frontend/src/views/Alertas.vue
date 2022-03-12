@@ -3,7 +3,16 @@
       <harpiaBar :show_in_bar="true"/>
      <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
 
-    <div>
+    
+      
+  <div class="home mb-2">
+
+    <div class="columns is-vcentered">
+      <div class="column is-multiline is-mobile">     
+          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
+      </div>
+          <div class="column is-10">
+          <div>
       <div class="control mt-1">
         <label class="radio">
           <input v-model="isRange" v-bind:value="true" type="radio" name="day">
@@ -39,17 +48,9 @@
       </div> -->
     </div>
   </div>
-      
-  <div class="home">
-
-    <div class="columns mt-4 is-vcentered">
-      <div class="column is-multiline is-mobile">     
-          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
-      </div>
-          <div class="column is-10">
           page {{page}}
           <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
-          <div class="columns has-text-black is-multiline mr-2 mt-1" v-if="true">
+          <div class="columns has-text-black is-multiline mr-2 mt-3" v-if="true">
             <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
               <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
                   <div>
@@ -106,7 +107,6 @@
 .btn{
   border-radius: 5vh;
 }
-
 
 
 </style>
@@ -170,7 +170,7 @@ export default {
  //   this.filter = this.$store.state.filter
     this.$store.state.filter=this.filter
     this.get_latest_alerts(),
-    document.title = 'Alerts | Harpia'
+    document.title = 'ALTAVE HARPIA'
   },
   created(){
     this.watchdog()
@@ -201,10 +201,8 @@ export default {
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
            console.log(item)
-            if(this.page == '1'){
-              alert('watchDog')
+            if(this.page == '1'){              
                 this.get_latest_alerts()
-                console.log("watchdog atuando")
             }
             if(this.$store.state.audio.is_instantaneo == true){
                 this.play_audio(1)

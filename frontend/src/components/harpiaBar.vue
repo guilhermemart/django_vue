@@ -49,24 +49,25 @@
         <div class="navbar-end">
           <div class="navbar-item">
             <div class="buttons">
-              <template v-if="$store.state.isAuthenticated">
-                <button @click="logout()" class="button is-danger">Log out</button>
-              </template>
-              <template v-else>
-                <router-link to="/log-in" class="button is-light">Log in</router-link>
-              </template>
               <template v-if="true">
-                <router-link to="/audio" class="button is-success">
-                    <span class="icon"><img alt="sound_logo" src="../assets/sound_logo.png"></span>
-                    <span>Audio</span>
+                <router-link to="/audio" class="button is-primary is-inverted is-outlined" title="Sound off">
+                <i class="fas fa-volume-high" />                    
                 </router-link>
               </template>
               <template v-else>
-                <router-link to="/config-som" class="button is-success">
-                    <span class="icon"><img alt="sound_off_logo" src="../assets/sound_off_logo.png"></span>
-                    <span>Audio</span>
+                <router-link to="/config-som" class="button is-dark is-inverted is-outlined" title="Sound on">
+                <i class="fas fa-volume-xmark" />                    
                 </router-link>
               </template>
+              <template v-if="$store.state.isAuthenticated">
+                <button @click="logout()" class="button is-danger is-outlined " title="Logout">
+                <i class="fas fa-right-from-bracket" />
+                </button>
+              </template>
+              <template v-else>
+                <router-link to="/log-in" class="button is-success is-outlined" title="Login"><i class="fas fa-right-to-bracket" /></router-link>
+              </template>
+            
             </div>
           </div>
         </div>
