@@ -81,7 +81,8 @@
             <button type="button" class="delete" @click="commentModal=false" />
           </header>
            <section class="modal-card-body">             
-            <table :data="Alert" class="mb-3 table  is-bordered is-striped is-hoverable is-fullwidth" >
+           
+            <table :data="Alert" class="mb-3 table  is-bordered is-striped is-hoverable is-fullwidth" v-if="comments.length" >
               <thead>
                 <tr>
                   <th>Date</th>
@@ -90,62 +91,29 @@
                   <th>User</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody v-for="comment in comments" :key="comment">
                 <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
+                  <!-- <th>{{new Date(JSON.parse(comment).timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(JSON.parse(comment).timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> {{JSON.parse(comment).comment}}</th>                  -->
+                  <th>{{comment}}</th> 
                            
                 </tr>
-                    <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
-                           
-                </tr>
-                    <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
-                           
-                </tr>
-                    <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
-                           
-                </tr>
-                  <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
-                           
-                </tr>
-                  <tr>
-                  <th>{{new Date(Alert.timestamp).toLocaleDateString('en-US')}}</th>
-                  <th>{{new Date(Alert.timestamp).toLocaleTimeString('en-US')}}</th>
-                  <th> Notes here</th>
-                  <th>User Login</th>
-                           
-                </tr>
+               
               </tbody>
         
               
-            </table> 
+            </table>
+            <p v-else class="has-text-danger is-size-4">This alert has no comments entered.</p> 
            <br>
            <hr>
           <footer>
             <div class="field has-addons">
               <div class="control is-expanded">
-               <input class="input is-rounded" type="text" placeholder="Find a repository">
+               <input class="input is-rounded" v-model="note.comment" type="text" placeholder="Insert comment">
               </div>
               <div class="control">
-                <button class="button is-info is-rounded">
+                <button class="button is-info is-rounded" :disabled='note.comment==""' @click="insert_notes()">
                Save
                 </button>
               </div>
@@ -234,10 +202,12 @@ export default {
         thumb_up: false,
         thumb_down: false,
         modal: true,
-        notes: "0",
+        note:{comment:'',timestamp:'',user:localStorage.getItem('harpiaUser')},
         local_audio_enable: true,
         imageModal:false,
-        commentModal:false
+        commentModal:false,
+        comments:''
+        
         }
   },
   components: {
@@ -287,8 +257,31 @@ export default {
                 })
         return this.thumb_down
     },
-    insert_notes(){
-        this.modal = !this.modal
+    insert_notes(){      
+      this.note.timestamp= new Date().getTime()
+      let anotacao =JSON.stringify(this.note)
+      console.log(anotacao)
+      const formData = {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down,
+                anotacoes: JSON.stringify(this.note)
+            }
+            axios
+                .post("/api/v1/update_alert_by_identificador/", formData)
+                .then(response => {
+                  console.log(response)
+                  alert('foi')
+                  this.commentModal=false
+                  this.note.comment=''
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+  
+      
+
+
     },
     preencher_card(){
         this.thumb_up=this.Alert.thumb_up
@@ -317,8 +310,14 @@ export default {
             audio.play()
         }
     },
-    
-    },
+    reading_notes(){
+      this.comments= this.Alert.anotacoes.split("}{")
+    }    
+  },
+  created() {
+    this.reading_notes() //carregar as anotações
+  },
+  
   computed: {
         continuous_out_of_time: function (){  // fica verificando se estourou o tempo limite de observação
             return this.out_of_time()

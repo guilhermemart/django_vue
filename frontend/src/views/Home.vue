@@ -35,7 +35,7 @@ export default {
 
   mounted() {
     this.get_latest_alerts()
-    document.title = 'Alerts | Harpia'
+    document.title = 'ALTAVE HARPIA'
   },
     methods: {
     async get_latest_alerts() {
