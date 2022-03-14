@@ -37,6 +37,7 @@ export default {
   methods: {
     /* Pega os dados do 'alerts/report' e salva em variáveis separadas, uma pra cada card */
     async getAlerts() {
+      this.$store.commit('setIsLoading', true)
       await axios
           .get('/api/v1/alerts/report/')
           .then(response => {
@@ -47,6 +48,7 @@ export default {
       .catch(error => {
         console.log(error)
       })
+      this.$store.commit('setIsLoading', false)
     },
 
 

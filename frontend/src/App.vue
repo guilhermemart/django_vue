@@ -1,7 +1,7 @@
 <template>
-    <div class="is-loading-bar has-text-centered" v-bind:class="{'is-loading': $store.state.isLoading }">
+    <!-- <div class="is-loading-bar has-text-centered" v-bind:class="{'is-loading': $store.state.isLoading }">
       <div class="lds-dual-ring"></div>
-    </div>
+    </div> -->
     <section>
     <router-view/>
     </section>
@@ -58,6 +58,7 @@ $animationDuration: 0.35s;
   text-align: center;
   color: #2c3e50;
 }
+
 
 #nav {
   padding: 30px;

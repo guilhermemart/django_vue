@@ -10,8 +10,8 @@
                          <label for="cam"> cam{{(cam.name+1)}}</label>
                 </div>
                 <!--botões -->
-                <!--Limpar -->
-                <button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="clear()" >
+                <!--Limpar -->                
+                <button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="clear()" :disabled='this.points.length<1'>
                   <span class="icon">
                     <i class="fas fa-broom" />
                   </span>
@@ -19,14 +19,14 @@
                 </button>
 
                 <!--Desfazer -->
-                <button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="undo()" >
+                <button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="undo()" :disabled='this.points.length<1'>
                   <span class="icon">
                     <i class="fas fa-undo" />
                   </span>
                   <span>UNDO</span>
                 </button>
                 <!--Salvar, exibe o modal -->
-                <button class="button is-success is-outlined is-fullwidth focus mt-1" @click="saveModal=!saveModal" >
+                <button class="button is-success is-outlined is-fullwidth focus mt-1" @click="saveModal=!saveModal" :disabled='this.points.length<6' >
                   <span class="icon">
                     <i class="fas fa-save" />
                     </span>
@@ -36,7 +36,7 @@
                 <!--LOAD, carrega as redzones salvas -->                
             <div class="dropdown  is-hoverable my-1">
               <div class="dropdown-trigger ">
-                <button class="button is-dark is-outlined fullWidth" aria-haspopup="true" aria-controls="dropdown-menu">
+                <button class="button is-dark is-outlined fullWidth" aria-haspopup="true" aria-controls="dropdown-menu3">
                 
                 <span class="icon is-small">
                   <i class="fas fa-upload" aria-hidden="true"></i>
@@ -47,14 +47,14 @@
               <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
                   <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
-                    <div class="column">
-                      <button @click="deleteRZ(rd)" class="button is-danger is-outlined" >
+                    <div class="column is-1 ml-1">
+                      <button @click="deleteRZ(rd)" class="button is-danger is-outlined has-text-right" >
                         <span class="icon ">
                           <i class="fas fa-trash" aria-hidden="true"></i>
                         </span>
                       </button>
                     </div>
-                    <div class="column mt-2" @click="selectRedZone(rd)">{{rd.name.toUpperCase()}}</div>
+                    <div class="column is-11 mt-2" @click="selectRedZone(rd)">{{rd.name.toUpperCase()}}</div>
                   </a>
                 </div>
               </div>
@@ -103,7 +103,7 @@
                 <ul class="is-size-4 mx-2 my-2 " v-for="rz in red_zones_ativas" :key='rz.name'><hr>
                   <button class="button is-outlined is-danger is-fullwidth " outlined rounded   @click="disabledRZ(rz)">
                     <span class="icon mt-1">
-                      <i class="fas fa-stop" />
+                      <i class="fas fa-trash" />
                     </span> 
                     <span >{{rz.name}}</span> 
                   </button>                   
@@ -211,9 +211,11 @@ export default {
       rzSelected:''
     };
   },
+
   created() {
     this.loadingImages()  // le as imagens base onde os pontos serão desenhados
     this.load_red_zones()
+    
   },
   watch:{
     cam_selected:{
@@ -238,25 +240,28 @@ export default {
         this.points=rz.dots
         this.rzSelected=rz
       },
-
     async loadingImages(){
-    this.$store.commit('setIsLoading', true)
-      let which_camera = 0
-      var camera_temp
-      while (which_camera < this.num_cameras){
-
-        camera_temp = await axios.get('api/v1/red_zone/cam'+ which_camera.toString())
-        console.log(camera_temp.data.get_base_img)
-        this.imageParameters.push(new window.Image())
-        this.imageParameters[which_camera].src=camera_temp.data.get_base_img
-        this.stageConfig.push({
-            name : which_camera,
-            width : this.imageParameters[which_camera].naturalWidth,
-            height : this.imageParameters[which_camera].naturalHeight
-            })
-        which_camera +=1
+      this.$store.commit('setIsLoading', true)
+        let which_camera = 0
+        //var camera_temp
+        while (which_camera < 9){
+          await axios.get('api/v1/red_zone/cam'+ which_camera.toString()).then((resp)=>{               
+            let img = new window.Image()        
+            img.src=resp.data.get_base_img
+            img.onload=()=>{
+              this.imageParameters[which_camera]=img
+              this.imageParameters.push(img)
+              this.stageConfig.push({ 
+                  name : which_camera,
+                  width : this.imageParameters[which_camera].naturalWidth,
+                  height : this.imageParameters[which_camera].naturalHeight
+                  })
+                which_camera +=1        
+          }          
+        })       
+          this.$store.commit('setIsLoading', false)
       }
-      this.$store.commit('setIsLoading', false)
+      
     },
     // precisa colocar isso no watch
     load_red_zones(){
@@ -339,9 +344,9 @@ export default {
         .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
         .then(response => {         
           console.log(response)
+          this.saveModal=false
+          
           this.load_red_zones() // para recarregar a redzones no botão load
-
-          // red_zone_output = JSON.parse(response.data)
           
         })
         .catch(error => {
@@ -392,6 +397,7 @@ export default {
     }
 
 }
+
 }
 //bloquear a possibilidade de nomes duplicados para as redzones
 
