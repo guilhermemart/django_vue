@@ -56,37 +56,6 @@ const routes = [
     name: 'Audio',
     component: Audio
   },
-  /*{
-    path: '/my-account',
-    name: 'MyAccount',
-    component: MyAccount,
-    meta: {
-        requireLogin: true
-    }
-  },
-  {
-    path: '/search',
-    name: 'Search',
-    component: Search
-  },
-  {
-    path: '/cart',
-    name: 'Cart',
-    component: Cart
-  },
-  {
-    path: '/cart/success',
-    name: 'Success',
-    component: Success
-  },
-  {
-    path: '/cart/checkout',
-    name: 'Checkout',
-    component: Checkout,
-    meta: {
-        requireLogin: true
-    }
-  },*/
   {
     path: '/:category_slug/:alert_slug',
     name: 'Alerta',
@@ -102,11 +71,11 @@ const routes = [
     name: 'latest_alerts',
     component: Alertas
   },
-  /*{
+  {
     path: '/:category_slug',
     name: 'Category',
     component: Category
-  }*/
+  },
   {
     path: '/cameras',
     name: 'Cameras',
