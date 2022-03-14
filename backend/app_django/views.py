@@ -81,7 +81,7 @@ class update_alert(APIView):
         alert_updated = alert.objects.filter(id=serializer.data["id"])[0]
         serializer = alert_serializer(alert_updated)
         # Snapshot no mongo
-        mongo_update_one(alert=serializer.data)
+        # mongo_update_one(alert=serializer.data)
         return Response(serializer.data)
         raise Http404
 
