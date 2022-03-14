@@ -184,7 +184,8 @@ class load_red_zones(APIView):
 # retorna uma camera e dentro dela um array com todas as red zones
 class get_cam(APIView):
     def get(self, request, cam):
-        the_camera = camera.objects.filter(slug=f"{cam}")[0]
+        print(cam)
+        the_camera = camera.objects.filter(slug=f"{cam}")[0]        
         serializer = camera_serializer(the_camera)
         return Response(serializer.data)
 
