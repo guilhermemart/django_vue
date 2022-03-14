@@ -11,5 +11,5 @@ python-decouple
 psycopg2
 pgpubsub
 requests
-pyrebase
+pyrebase <= 3.0.27
 pytz

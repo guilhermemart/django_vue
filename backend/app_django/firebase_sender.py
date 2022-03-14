@@ -48,7 +48,7 @@ def firebase_uploader(cia, timestamp, alerta):
         alert_from_db.firebase_image_url = firebase_image_url
         alert_from_db.save()
         # Snapshot no mongo, para tentativas de alertas não enviados
-        mongo_update_one(alert=alerta)
+        # mongo_update_one(alert=alerta)
         alerta["date"] = {"%date": alerta["date_added"]}
         alerta.pop("date_added")
         alerta["timestamp"] = {"%numberLong": alerta["timestamp"]}
@@ -84,7 +84,10 @@ def upload_image(cia, dt, image_path):
     storage_path = f"Alerts_{cia}/{dt.year}/{dt.month}/{image_name}"
     storage.child(storage_path).put(image_path)
     # Retorna a url da imagem
-    return storage.child(storage_path).get_url(None)
+    try:
+        return storage.child(storage_path).get_url(None)
+    except:
+        return storage.child(storage_path).get_url()
 
 # Tenta upar os alertas pendentes. Chama a função de upar para cada alerta
 def retry_upload(alerts):

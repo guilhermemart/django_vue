@@ -1,3 +1,5 @@
+<!--Pagina de resumo de cada camera, nessa view é possível verificar a imagem base de cada camera-->
+<!-- um resumo das red zones conectadas aquela camera-->
 <template>
     <div class="camera_page">
     {{camera}}
@@ -38,7 +40,7 @@ import axios from 'axios'
 import { toast } from 'bulma-toast'
 
 export default {
-    name: 'Alerta',
+    name: 'Camera',
     data() {
         return {
             camera: {
@@ -69,9 +71,7 @@ export default {
                 })
             this.$store.commit('setIsLoading', false)
         },
-        addToCart() {
-            this.quantity += 1
-        }
+
     }
 }
 </script>

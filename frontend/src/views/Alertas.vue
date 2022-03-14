@@ -167,8 +167,8 @@ export default {
     },
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
- //   this.filter = this.$store.state.filter
-    this.$store.state.filter=this.filter
+    this.filter = this.$store.state.filter
+    //this.$store.state.filter=this.filter
     this.get_latest_alerts(),
     document.title = 'ALTAVE HARPIA'
   },
