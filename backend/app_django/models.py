@@ -154,6 +154,7 @@ class alert(models.Model):
     opsreport = models.FileField(upload_to="witsml_opsreports/", default="witsml/opsreport.xml")
     attachment = models.FileField(upload_to="witsml_attachments/", default="witsml/attachment.xml")
     witsml_confirm = models.TextField(default="witsml_not_sent")
+    mongo_confirm = models.TextField(default="mongo_not_sent")
 
     class Meta:
         ordering = ('-date_added',)

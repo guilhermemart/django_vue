@@ -19,7 +19,7 @@ import pgpubsub
 from decouple import config
 from dateutil.relativedelta import *
 import PIL.Image
-from mongo_transfer import mongo_insert_one, mongo_update_one
+from mongo_transfer import mongo_insert_one, mongo_update_one, mongo_get_firebase
 
 
 class latest_alerts_list(APIView):
@@ -74,16 +74,40 @@ class update_alert(APIView):
         # firebase_uploader retorna algo diferee de success
         firebase_try = firebase_uploader("Valaris", serializer.data["timestamp"], serializer.data)
         if firebase_try == "Sucesso Dev!":
-            alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
-            alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
-            retry_upload(alerts_not_uploaded)
-        # Pega do banco o alerta após suas atualizações do witsml e firebase
+            try:
+                alerts_not_uploaded = alert.objects.filter(firebase_image_url="image_not_sent")
+                alerts_not_uploaded = alert_serializer(alerts_not_uploaded, many=True).data
+                retry_upload(alerts_not_uploaded)
+            except Exception as e:
+                print(f"Erro ao tentar reenviar alertas antigos pro firebase {e}")
+        # Pega do banco o alerta após suas atualizações do witsml, firebase
         alert_updated = alert.objects.filter(id=serializer.data["id"])[0]
         serializer = alert_serializer(alert_updated)
-        # Snapshot no mongo
-        # mongo_update_one(alert=serializer.data)
+        # Snapshot no mongo. Tenta salvar e atualizar alertas que ainda não estão lá
+        #mongo_update_one(serializer.data)
+        #self.mongo_updater()
         return Response(serializer.data)
         raise Http404
+
+
+    # Função que atualiza o mongo
+    def mongo_updater(self):
+        try:
+            # Insere os alertas que ainda não estão no mongo
+            alerts_not_in_mongo = alert.objects.filter(mongo_confirm="mongo_not_sent")
+            for alert_ in alert_serializer(alerts_not_in_mongo, many=True).data:
+                mongo_update_one(alert=alert_)
+            # Verifica no mongo os alertas sem link do firebase
+            firebase_not_in_mongo = mongo_get_firebase()
+            # Busca no sql o alerta e verifica o link do firebase
+            for item in firebase_not_in_mongo:
+                alert_ = alert.objects.filter(id=item["id"])[0]
+                alert_ = alert_serializer(alert_).data
+                if alert_["firebase_image_url"] != "image_not_sent":
+                    mongo_update_one(alert_)
+        except Exception as e:
+            print(f"Erro ao atualizar o mongo {e}")
+        return "a"
 
 
 class create_alert(APIView):
@@ -138,8 +162,11 @@ class create_alert(APIView):
         except Exception as e:
             print(e)
         serializer = alert_serializer(alerta_to_create)
-        # Snapshot no mongo
-        mongo_insert_one(alert=serializer.data)
+        print(serializer.data)
+        # Snapshot no mongo. E salva o _id do mongo no alerta
+        #mongo = mongo_insert_one(alert=serializer.data)
+        #alerta_to_create.mongo_confirm = mongo
+        alerta_to_create.save()
         return Response(serializer.data)
 
 
