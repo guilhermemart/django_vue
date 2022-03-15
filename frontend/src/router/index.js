@@ -6,7 +6,7 @@ import Home from '../views/Home.vue'
 
 import Alertas from '../views/Alertas.vue'
 import Alerta from '../views/Alerta.vue'
-//import Category from '../views/Category.vue'
+import Categoria from '../views/Categoria.vue'
 //import Search from '../views/Search.vue'
 //import Cart from '../views/Cart.vue'
 import SignUp from '../views/SignUp.vue'
@@ -73,8 +73,8 @@ const routes = [
   },
   {
     path: '/:category_slug',
-    name: 'Category',
-    component: Category
+    name: 'Categoria',
+    component: Categoria
   },
   {
     path: '/cameras',
