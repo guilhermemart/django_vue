@@ -52,7 +52,7 @@
         <div class="column is-4">          
           <figure class="image">
             <!--img src "imagem aqui" -->
-            <img :src="Alert.get_thumbnail " class="has-pointer-cursor" @click="imageModal=!imageModal">
+            <img :src="Alert.get_thumbnail " class="has-pointer-cursor thumbnail" @click="imageModal=!imageModal">
           </figure>
         </div>
 
@@ -96,7 +96,10 @@
                   <!-- <th>{{new Date(JSON.parse(comment).timestamp).toLocaleDateString('en-US')}}</th>
                   <th>{{new Date(JSON.parse(comment).timestamp).toLocaleTimeString('en-US')}}</th>
                   <th> {{JSON.parse(comment).comment}}</th>                  -->
-                  <th>{{comment}}</th> 
+                  <th>{{new Date(comment.timestamp).toLocaleDateString('en-US')}}</th> 
+                  <th>{{new Date(comment.timestamp).toLocaleTimeString('en-US')}}</th> 
+                  <th>{{comment.comment}}</th> 
+                  <th>{{comment.user}}</th> 
                            
                 </tr>
                
@@ -134,7 +137,13 @@
 </template>
 
 <style lang="scss">
+.thumbnail{
+  min-height: 25%;
+  max-height: 25%;
 
+  
+  
+}
 .boxDown{
   border-color: red;
   border-style: solid;
@@ -261,19 +270,22 @@ export default {
       this.note.timestamp= new Date().getTime()
       let anotacao =JSON.stringify(this.note)
       console.log(anotacao)
-      const formData = {
+      let formData = {
                 identificador: this.Alert.identificador,
                 thumb_up: this.thumb_up,
                 thumb_down: this.thumb_down,
                 anotacoes: JSON.stringify(this.note)
             }
-            axios
-                .post("/api/v1/update_alert_by_identificador/", formData)
+            axios.post("/api/v1/update_alert_by_identificador/", {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down,
+                anotacoes: this.Alert.anotacoes==''?JSON.stringify(this.note):this.Alert.anotacoes+'/n'+ JSON.stringify(this.note)})
                 .then(response => {
                   console.log(response)
-                  alert('foi')
                   this.commentModal=false
-                  this.note.comment=''
+                  this.note.comment=''                 
+                  
                 })
                 .catch(error => {
                     console.log(error)
@@ -311,7 +323,13 @@ export default {
         }
     },
     reading_notes(){
-      this.comments= this.Alert.anotacoes.split("}{")
+      this.comments=[]
+      if(this.Alert.anotacoes!==''){
+      this.Alert.anotacoes.split("/n").forEach(note => {
+        this.comments.push(JSON.parse(note))        
+      });    
+      
+      }
     }    
   },
   created() {
