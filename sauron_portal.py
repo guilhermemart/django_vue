@@ -20,9 +20,12 @@ backend_port: str porta destinada ao harpia backend\n
 global_token = ""
 
 fake_alerta = {
-    'local_image_url': "example.png"
+    'local_image_url': "example.png",
+    'alert_category': "nonconformity",
+    'timestamp': int(datetime.now().timestamp()*1000),
+    'quantidade': 1
 }
-ip = "127.0.0.1"
+ip = "10.0.2.15"
 port = "8000"
 
 
@@ -50,7 +53,7 @@ def enviar_alerta(the_alerta, backend_ip=None, backend_port=None):
     else:
         timestamp = int(1000*timestamp)
     print("campo timestamp nao encontrado, usando atual")
-    to_alert['categoria'] = the_alerta.get('categoria', 'not_defined')
+    to_alert['alert_category'] = the_alerta.get("alert_category", 'not_defined')
     to_alert['identificador'] = the_alerta.get('identificador', f"sauron_{timestamp}")
     to_alert['timestamp'] = timestamp
     to_alert['quantidade'] = the_alerta.get('quantidade', 1)
@@ -160,6 +163,6 @@ def refresh_the_picture(cam, local_image_url="pwa_images/example.png", backend_i
 
 
 if __name__ == "__main__":
-    #enviar_alerta(fake_alerta)
-    get_red_zones("0")
+    enviar_alerta(fake_alerta)
+    #get_red_zones("0")
     #refresh_the_picture("cam2")
