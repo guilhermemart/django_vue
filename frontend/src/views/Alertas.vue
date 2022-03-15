@@ -1,53 +1,47 @@
 <template>
     <div>
       <harpiaBar :show_in_bar="true"/>
-     <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
-
-    
-      
-  <div class="home mb-2">
-
-    <div class="columns is-vcentered">
-      <div class="column is-multiline is-mobile">     
-          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
-      </div>
-          <div class="column is-10">
-          <div>
-      <div class="control mt-1">
-        <label class="radio">
-          <input v-model="isRange" v-bind:value="true" type="radio" name="day">
-          day
-        </label>
-        <label class="radio">
-          <input v-model="isRange" v-bind:value="false" type="radio" name="period">
-          period
-        </label>
-      </div>
-    
-    <div class="has-addons level-item has-text-centered ">    
-      <div class="control calendar" v-if="isRange">  
-        <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />   
-      </div>
-      <div class="control calendar" v-else>
-        <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
-      </div>
-
-      <div class="control">    
+        <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
+        <div class="home mb-2">
+        <div class="columns is-vcentered">
+        <div class="column is-multiline is-mobile">
+            <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
+        </div>
+        <div class="column is-10">
+        <div>
+        <div class="control mt-1">
+            <label class="radio">
+            <input v-model="isRange" v-bind:value="true" type="radio" name="day">
+            day
+            </label>
+            <label class="radio">
+            <input v-model="isRange" v-bind:value="false" type="radio" name="period">
+            period
+            </label>
+        </div>
+        <div class="has-addons level-item has-text-centered ">
+        <div class="control calendar" v-if="isRange">
+            <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />
+        </div>
+        <div class="control calendar" v-else>
+            <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
+        </div>
+        <div class="control">
           <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">
-          <span class="icon">
-          <i class="fas fa-search"></i>
-        </span>
+            <span class="icon">
+                <i class="fas fa-search"></i>
+            </span>
           <span class="is-family-sans-serif">Confirm</span></button>     
-      </div>
-      <!-- <div class="control">    
+        </div>
+        <!-- <div class="control">
           <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
-              <span class="icon">
+          <span class="icon">
           <i class="fas fa-sync"></i>
-        </span>
+          </span>
           <span class="is-family-sans-serif">Refresh</span></button>     
-      </div> -->
+        </div> -->
+        </div>
     </div>
-  </div>
           page {{page}}
           <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
           <div class="columns has-text-black is-multiline mr-2 mt-3" v-if="true">
@@ -66,17 +60,13 @@
                   Não há alertas disponíveis.
               </p>
           </div>
-      </div>
-<div class="column is-multiline is-mobile">     
-          <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)+1)">
-           <i class="fas fa-angles-right fa-2x" />
-          </button>
-      </div>
+        </div>
+        <div class="column is-multiline is-mobile">
+            <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)+1)">
+            <i class="fas fa-angles-right fa-2x" />
+            </button>
+        </div>
     </div>
-
-
-
-
     <div class="columns is-multiline" v-if="false">
       <alert_card
         v-for="alert in latest_alerts"
@@ -87,42 +77,43 @@
         <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
         <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"> <button>Next</button> </a>
     </nav> -->
-
   </div>
-  
     </div>
     </div>
 </template>
+
+
 <style lang="scss">
 
 .dp-custom-cell {
   border-radius: 50%;
-  
 };
+
 .calendar input{
   width: 250px;
   height: 50px;  
   text-align: center;  
 };
+
 .btn{
   border-radius: 5vh;
 }
 
-
 </style>
-<script>
-import alert_card from '@/components/alert_card.vue'
-import axios from 'axios'
-import harpiaBar from '@/components/harpiaBar.vue'
 
+
+<script>
+
+import axios from 'axios'
 import { ref } from "vue";
 import Datepicker from "vue3-date-time-picker";
 import "vue3-date-time-picker/dist/main.css";
-
+// componentes customizados
+import alert_card from '@/components/alert_card.vue'
+import harpiaBar from '@/components/harpiaBar.vue'
 
 export default {
     name: 'Alerts',
-
   components:{
     harpiaBar,
     alert_card,
@@ -148,8 +139,6 @@ export default {
     }
   },
     computed: {
- 
-
   },
    setup() {
         const date = ref();
@@ -170,7 +159,7 @@ export default {
     this.filter = this.$store.state.filter
     //this.$store.state.filter=this.filter
     this.get_latest_alerts(),
-    document.title = 'ALTAVE HARPIA'
+    document.title = 'Alertas | Harpia' //  titulo do documento para diferenciar dos outros .vue
   },
   created(){
     this.watchdog()
@@ -180,7 +169,12 @@ export default {
   isRange:{
     handler(){      
       this.date=""
-    }  
+    },
+  watchdog: {
+    handler(){
+        this.watchdog
+    }
+  }
   }  
   },
   methods: {
@@ -192,11 +186,7 @@ export default {
         }
     },
     sortAlerts(){
-
       console.log(this.latest_alerts)
-
-      
-
     },
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
@@ -210,54 +200,33 @@ export default {
             this.watchdog()
         })
     },
-    //async get_latest_alerts() {
     get_latest_alerts() {
-      this.$store.commit('setIsLoading', true)
       axios
         .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
           this.latest_alerts = response.data
-      
       if(Object.keys(this.latest_alerts).length>6){        
-        this.has_next_page = true
+        this.has_next_page = true  // usado para paginacao
         this.latest_alerts = this.latest_alerts.slice(0,6)
         }
-          this.sortAlerts()
+          this.sortAlerts()  // nao entendi
         })
         .catch(error => {
           console.log(error)
         })
-      this.$store.commit('setIsLoading', false)
     },
-    go_to_page(next_page){
+    go_to_page(next_page){ // usada na paginacao
         console.log("teste")
         // router push nao reloada a pagina se mudar apenas o parametro
         this.$router.push("/latest-alerts/"+next_page.toString()).then(
-        ()=> {
-        this.$router.go()  // forca o reload da pagina
-        }
-        )
-
+        ()=> {  // push manda pra proxima pagina --> similar router-link
+        this.$router.go()  // forca o reload da pagina --> router.push tem problema nisso
+        })
     },
-    /*async get_date_filtered_alerts() {
-      this.$store.commit('setIsLoading', true)
-      var path='/api/v1/'+this.date[0]+'/'+this.date[1]+'/'+this.page
-      alert(path)
-      await axios
-        .get('/api/v1/alert_search/'+this.date[0]+'/'+this.date[1]+'/'+this.page)
-        .then(response => {
-          this.latest_alerts = response.data
-        })
-        .catch(error => {
-          console.log(error)
-        })
-      this.$store.commit('setIsLoading', false)
-    },*/
-
     refreshPage(){
-       this.watchdog()
-    this.date=''
-    this.get_latest_alerts()
+        this.watchdog()
+        this.date=''
+        this.get_latest_alerts()
     },
     findALerts(){      
       if(this.isRange){
@@ -282,13 +251,9 @@ export default {
         this.filter.date_start=timestamp0
         this.filter.date_end=timestamp1
         this.$store.commit('filter.date_start', timestamp0)
-        this.$store.commit('filter.date_end', timestamp0)
-        
+        this.$store.commit('filter.date_end', timestamp1)  // estava timestamp0 mudei certo
       }
-      
       this.get_latest_alerts()
-      
-
     }
   },
 }
