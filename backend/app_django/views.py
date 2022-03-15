@@ -26,7 +26,7 @@ class latest_alerts_list(APIView):
     # devolve alertas sem filtro
     # usada para chamar a pagina dos alertas sem filtros
     def post(self, request, page):
-        print(request.data)
+        #print(request.data)
         start = request.data["date_start"]
         end = request.data['date_end']
         thumb_up = request.data["valid"]  # mostrar thumb upeds
