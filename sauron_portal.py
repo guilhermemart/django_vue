@@ -25,7 +25,7 @@ fake_alerta = {
     'timestamp': int(datetime.now().timestamp()*1000),
     'quantidade': 1
 }
-ip = "10.0.2.15"
+ip = "192.168.0.28"
 port = "8000"
 
 
@@ -53,7 +53,7 @@ def enviar_alerta(the_alerta, backend_ip=None, backend_port=None):
     else:
         timestamp = int(1000*timestamp)
     print("campo timestamp nao encontrado, usando atual")
-    to_alert['alert_category'] = the_alerta.get("alert_category", 'not_defined')
+    to_alert['alert_category'] = the_alerta.get("alert_category", 'Nonconformity')
     to_alert['identificador'] = the_alerta.get('identificador', f"sauron_{timestamp}")
     to_alert['timestamp'] = timestamp
     to_alert['quantidade'] = the_alerta.get('quantidade', 1)
