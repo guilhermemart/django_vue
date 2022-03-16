@@ -13,7 +13,8 @@ export default createStore({
         invalid: true,
         non_classified: true,
         date_start: 0,
-        date_end:new Date().getTime()
+        //date_end:new Date().getTime(),
+        date_end:2500916953418
     },
     isAuthenticated: false,
     token: '',

@@ -61,6 +61,10 @@ class update_alert(APIView):
     def post(self, request):
         # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
         # main.update_alert_by_identificador
+        # Para o front atualizar quando tiver atualização (like/dislike)
+        pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'),
+                                  host=config('db_host'))
+        pubsub.notify('canal_1', 'mensagem_atualizada')
         serializer = update_alert_by_identificador(request)
         if str(serializer.data['thumb_up']).lower() == "true":
             try:
@@ -125,7 +129,7 @@ class create_alert(APIView):
         print(str(image.name))
         simple_media_path = Path().joinpath("~", "media", "uploads", "sauron_imagens", "n_avaliadas")
         fields = request.data
-        category_name = fields.get('categoria', "fake_category")
+        category_name = fields.get("category")
         categoria_input = category.objects.filter(name=category_name)
         if categoria_input.count() > 0:
             categoria = categoria_input[0]
@@ -220,8 +224,10 @@ class get_cam(APIView):
 class save_red_zone(APIView):
     # se nao tiver uma camera no request ou a camera nao existir essa funcao a cria
     def create_camera(self, cam_number, img_url, width=100, height=100):
+
+        #confirmar essa função
         new_camera = camera(
-            ativa=True,
+            ativa=False,
             name=f"cam{cam_number}",
             width=width,
             height=height,
@@ -232,7 +238,6 @@ class save_red_zone(APIView):
         return new_camera
 
     def post(self, request):
-        print(request.data)
         # cria a string que vai ser salva como txt
         output = request.data
         output_string = f"nome: {output['name']}, largura: {output['width']}, altura: {output['height']},  pontos: "
@@ -271,9 +276,11 @@ class save_red_zone(APIView):
                 slug=f"red_zone_cam{camera_number}_{ident}",
                 timestamp=int(1000*ident),
                 date_added=date_added,
-                name=f"red_zone_cam{camera_number+1}_{int(ident)}",
+                #name=f"red_zone_cam{camera_number+1}_{int(ident)}",
+                name=output['name'],
                 dots=output['dots'],
-                enabled=True,
+                #enabled=True,
+                enabled=False,
                 dots_txt=File(f,name=r_zone_file_path.name),
                 conteudo=output_string,
                 local_dots_url=simple_path
