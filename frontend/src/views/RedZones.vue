@@ -117,7 +117,7 @@
 <br>
 
 <!--v-stage e v-layer são classes do vue-konva -->
-                <v-stage ref="stage" :config="stageConfig[cam_selected]">
+    <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
         <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: scale,scaleY: scale,}"/>
@@ -344,8 +344,8 @@ export default {
         .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
         .then(response => {         
           console.log(response)
-          this.saveModal=false
-          
+          this.newRedzone=''
+          this.saveModal=false          
           this.load_red_zones() // para recarregar a redzones no botão load
           
         })
@@ -366,33 +366,31 @@ export default {
       this.anchors.pop();
     },
     deleteRZ(rz){
-       this.$buefy.dialog.confirm({
-        message: `Deseja excluir a redzone: `+rz.nome+'?',
-        type:'is-success',
-        size:'is-large',
-        confirmTest:'Confirmar',
-        trapFocus: true,
-        onConfirm: () => {
-          //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
-            console.log(r)
-            this.load_red_zones()
-          })
-        }
-      })
+      console.log(rz)
+        axios.get('api/v1/deldots/'+ rz.name).then((response)=>{
+          console.log(response)
+          this.load_red_zones()
+
+        })
     },
     enableRZ(rz){
       //Vai setar o enabled na redzone.
       // Precisa configurar para ir como disabled quando salva.
       console.log(rz)
-      
-       
-
+        axios.get('api/v1/update_red_zone/'+ rz.name+'/True').then((response)=>{
+          console.log(response)
+          this.load_red_zones()
+        })
+        
         //  axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
 
     disabledRZ(rz){
       console.log(rz)
+        axios.get('api/v1/update_red_zone/'+ rz.name+'/False').then((response)=>{
+          console.log(response)
+          this.load_red_zones()
+        })
           //axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: false}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     }
 

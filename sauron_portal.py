@@ -53,7 +53,7 @@ def enviar_alerta(the_alerta, backend_ip=None, backend_port=None):
     else:
         timestamp = int(1000*timestamp)
     print("campo timestamp nao encontrado, usando atual")
-    to_alert['alert_category'] = the_alerta.get("alert_category", 'Nonconformity')
+    to_alert['category'] = the_alerta.get("category", 'Nonconformity')
     to_alert['identificador'] = the_alerta.get('identificador', f"sauron_{timestamp}")
     to_alert['timestamp'] = timestamp
     to_alert['quantidade'] = the_alerta.get('quantidade', 1)

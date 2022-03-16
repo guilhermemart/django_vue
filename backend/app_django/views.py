@@ -1,3 +1,4 @@
+from ast import If
 from django.http import Http404
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -404,10 +405,14 @@ class get_url_cameras(APIView):
 
 
 class update_red_zone(APIView):
-    def post(self, request, red_zone_name):
-        rzone = red_zone.objects.filter(name=red_zone_name)[0]
-        rzone.enabled = request.data['is_active'] == 'true'
-        rzone.timestamp += 1
+    def get(self, request, red_zone_name,status):        
+        rzone = red_zone.objects.filter(name=red_zone_name)[0]        
+        #rzone.enabled = request.data['is_active'] == 'true'
+        print(status)
+        if status=='True':
+            rzone.enabled = True
+        else:
+            rzone.enabled = False
         rzone.save()
         serializer = red_zone_serializer(rzone)
         return Response(serializer.data)
