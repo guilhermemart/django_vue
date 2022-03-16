@@ -9,8 +9,10 @@ def wait_for_new_alert():
     for e in pubsub.events():  # esse looping fica travado nesse ponto até haver algum evento no bd
         if e.payload == "mensagem_enviada":
             print("mensagem_recebida")
+            return "1"
         elif e.payload == "mensagem_atualizada":
             print("atualizado")
+            return "0"
         else:
             print(e.payload)
         return e.payload

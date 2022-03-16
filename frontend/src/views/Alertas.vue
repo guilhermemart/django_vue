@@ -21,10 +21,10 @@
         </div>
         <div class="has-addons level-item has-text-centered ">
         <div class="control calendar" v-if="isRange">
-            <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />
+            <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
         </div>
         <div class="control calendar" v-else>
-            <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
+            <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
         </div>
         <div class="control">
           <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">
@@ -33,13 +33,13 @@
             </span>
           <span class="is-family-sans-serif">Confirm</span></button>     
         </div>
-        <!-- <div class="control">
+        <div class="control">
           <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
           <span class="icon">
           <i class="fas fa-sync"></i>
           </span>
-          <span class="is-family-sans-serif">Refresh</span></button>     
-        </div> -->
+          <span class="is-family-sans-serif">Reset</span></button>
+        </div>
         </div>
     </div>
           page {{page}}
@@ -123,7 +123,7 @@ export default {
     return {
         latest_alerts: [],
         page: "1",
-        date:'',
+        date:'DATA SET',
         last_date: new Date(),
         isRange:true,
         format:'',
@@ -157,18 +157,31 @@ export default {
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.filter = this.$store.state.filter
+    if (this.filter.date_start === 0) {
+      this.date = "Select a date"
+    } else if (this.filter.date_end - this.filter.date_start !== 86399999) {
+      this.isRange = false
+      let date_0 = new Date(this.filter.date_start)
+      this.date =  date_0.getDay() + "/" + " - " + (new Date(this.filter.date_end).toString())
+      console.log(this.date)
+    }
+    else {
+      this.date = new Date(this.filter.date_start)
+    }
+
+
     //this.$store.state.filter=this.filter
-    this.get_latest_alerts(),
+    this.get_latest_alerts()
     document.title = 'Alertas | Harpia' //  titulo do documento para diferenciar dos outros .vue
   },
   created(){
     this.watchdog()
-    this.date=''
+
   },
   watch:{    
   isRange:{
-    handler(){      
-      this.date=""
+    handler(){
+      //this.date=""
     },
   watchdog: {
     handler(){
@@ -189,10 +202,11 @@ export default {
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
            console.log(item)
+            console.log(item.data == false)
             if(this.page == '1'){              
                 this.get_latest_alerts()
             }
-            if(this.$store.state.audio.is_instantaneo == true){
+            if(item.data && this.$store.state.audio.is_instantaneo == true){
                 this.play_audio(1)
             }
             this.watchdog()
@@ -222,9 +236,13 @@ export default {
         })
     },
     refreshPage(){
-        this.watchdog()
-        this.date=''
-        this.get_latest_alerts()
+        this.filter.date_start = 0
+        this.filter.date_end = 2500916953418
+        this.page = "1"
+        this.$store.commit("save_filter", this.filter)
+        this.$router.push("/latest-alerts/1").then(()=> {
+            this.$router.go()
+        })
     },
     findALerts(){      
       if(this.isRange){
@@ -234,9 +252,9 @@ export default {
         let timestamp= new Date(day).getTime()
         
         // timestamp incluso no filtro        
-         this.filter.date_start =timestamp
-         this.filter.date_end= new Date(timestamp).setHours(23,59,59,999)        
-        
+        this.filter.date_start =timestamp
+        this.filter.date_end= new Date(timestamp).setHours(23,59,59,999)
+        this.$store.commit('save_filter', this.filter)
       }else{
         //Extrai apenas a data
         let day0= new Date(this.date[0]).toDateString()
@@ -248,8 +266,7 @@ export default {
         // timestamp incluso no filtro
         this.filter.date_start=timestamp0
         this.filter.date_end=timestamp1
-        this.$store.commit('filter.date_start', timestamp0)
-        this.$store.commit('filter.date_end', timestamp1)  // estava timestamp0 mudei certo
+        this.$store.commit('save_filter', this.filter)
       }
       this.get_latest_alerts()
     }
