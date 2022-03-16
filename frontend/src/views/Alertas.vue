@@ -185,9 +185,7 @@ export default {
             audio.play()
         }
     },
-    sortAlerts(){
-      console.log(this.latest_alerts)
-    },
+   
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
            console.log(item)
@@ -204,12 +202,12 @@ export default {
       axios
         .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
+          console.log(this.filter)
           this.latest_alerts = response.data
       if(Object.keys(this.latest_alerts).length>6){        
         this.has_next_page = true  // usado para paginacao
         this.latest_alerts = this.latest_alerts.slice(0,6)
         }
-          this.sortAlerts()  // nao entendi
         })
         .catch(error => {
           console.log(error)
