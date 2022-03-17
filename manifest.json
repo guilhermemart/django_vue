@@ -1,0 +1,43 @@
+{
+  "short_name": "Harpia",
+  "name": "Harpia version Beholder",
+  "icons": [
+    {
+      "src": "/pwa_images/icons-vector.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512"
+    },
+    {
+      "src": "/pwa_images/icons-192.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    },
+    {
+      "src": "/pwa_images/icons-512.png",
+      "type": "image/png",
+      "sizes": "512x512"
+    }
+  ],
+  "start_url": "/?source=pwa",
+  "background_color": "#3367D6",
+  "display": "standalone",
+  "scope": "/",
+  "theme_color": "#3367D6",
+  "shortcuts": [
+    {
+      "name": "Alerts",
+      "short_name": "Alerts",
+      "description": "View latest alerts",
+      "url": "/today?source=pwa",
+      "icons": [{ "src": "/pwa_images/today.png", "sizes": "192x192" }]
+    }
+  ],
+  "description": "Alert information",
+  "screenshots": [
+    {
+      "src": "/pwa_images/screenshot1.png",
+      "type": "image/png",
+      "sizes": "540x720"
+    }
+  ]
+}

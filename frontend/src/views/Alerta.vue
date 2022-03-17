@@ -58,6 +58,7 @@ export default {
 
         console.log("iniciando")
         this.getAlert()
+        document.title = 'Alerta | Harpia'
     },
     methods: {
         get_thumb() {
@@ -75,7 +76,6 @@ export default {
         },
         async getAlert() {
             this.$store.commit('setIsLoading', true)
-
             const category_slug = this.$route.params.category_slug
             const alert_slug = this.$route.params.alert_slug
             await axios
@@ -86,7 +86,6 @@ export default {
                     document.title = this.Alert.id + ' | Harpia'
                 })
                 .catch(error => {
-
                     console.log("erro de axios")
                     console.log(error)
                 })

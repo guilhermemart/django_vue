@@ -2,48 +2,125 @@
     <div>
     <harpiaBar />
         <div class="columns">
+        <!--radios -->
           <div class="column is-2 mx-4">
               <p class="subtitle mt-4">Selecione a camera:</p>
-                <div v-for="cam in cameras" :key="cam">
-                        <input type="radio" id="cam" :value="cam" v-model="camSelected"/>
-                         <label for="cam">{{cam}}</label>
+                <div v-for="cam in stageConfig" :key="cam.name" class="radios">
+                        <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"  />
+                         <label for="cam"> cam{{(cam.name+1)}}</label>
                 </div>
+                <!--botões -->
+                <!--Limpar -->                
+                <button class="button is-danger is-outlined is-fullwidth focus mt-1" @click="clear()" :disabled='this.points.length<1'>
+                  <span class="icon">
+                    <i class="fas fa-broom" />
+                  </span>
+                  <span>Clean</span>
+                </button>
+
+                <!--Desfazer -->
+                <button class="button is-warning is-outlined is-fullwidth focus mt-1" @click="undo()" :disabled='this.points.length<1'>
+                  <span class="icon">
+                    <i class="fas fa-undo" />
+                  </span>
+                  <span>UNDO</span>
+                </button>
+                <!--Salvar, exibe o modal -->
+                <button class="button is-success is-outlined is-fullwidth focus mt-1" @click="saveModal=!saveModal" :disabled='this.points.length<6' >
+                  <span class="icon">
+                    <i class="fas fa-save" />
+                    </span>
+                  <span>SAVE</span>
+                </button>
+
+                <!--LOAD, carrega as redzones salvas -->                
+            <div class="dropdown  is-hoverable my-1">
+              <div class="dropdown-trigger ">
+                <button class="button is-dark is-outlined fullWidth" aria-haspopup="true" aria-controls="dropdown-menu3">
+                
+                <span class="icon is-small">
+                  <i class="fas fa-upload" aria-hidden="true"></i>
+                </span>
+                <span>LOAD</span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content">
+                  <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
+                    <div class="column is-1 ml-1">
+                      <button @click="deleteRZ(rd)" class="button is-danger is-outlined has-text-right" >
+                        <span class="icon ">
+                          <i class="fas fa-trash" aria-hidden="true"></i>
+                        </span>
+                      </button>
+                    </div>
+                    <div class="column is-11 mt-2" @click="selectRedZone(rd)">{{rd.name.toUpperCase()}}</div>
+                  </a>
+                </div>
+              </div>
+            </div>
+
+
+            <!--ACTIVE-->    
+            <button class="button is-success is-outlined is-fullwidth focus mt-1" :disabled='this.points.length<6' @click="enableRZ(rzSelected) " >
+              <span class="icon">
+                <i class="fas fa-play" />
+              </span>
+              <span>ACTIVE</span>
+            </button>
+                
+
+              <div v-if="false">
               <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
               <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
               <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Salvar</button>
-            <dropdown expanded  v-model="rdSelected" aria-role="list">
-              <template #trigger>
-              <button class="is-dark mb-2"  icon-left="upload" :disabled='redzones.length<1' expanded outlined >Carregar</button>
-              </template>
-              <dropdown-item v-for="rd in redzones" :key="rd.nome" :value="rd" aria-role="listitem" class="columns">
-                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted ></button>
-                  </div><div class="column my-4">{{rd.nome.toUpperCase()}}</div>
-              </dropdown-item>
-            </dropdown>
-            <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Ativar RedZone</button>
+            <div class="dropdown is-hoverable">
+              <div class="dropdown-trigger">
+                <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
+                  <span>Carregar</span>
+                  <span class="icon is-small">
+                    <i class="fas fa-angle-down" aria-hidden="true"></i>
+                  </span>
+                </button>
+              </div>
+              <div class="dropdown-menu" id="dropdown-menu" role="menu">
+                <div class="dropdown-content">
+                  <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
+                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >delete icon</button></div>
+                  <div class="column my-4">{{rd.name.toUpperCase()}}</div>
+                  </a>
+                </div>
+              </div>
+            </div>
 
-            <div class="card">
+            <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Ativar RedZone</button>
+              </div>
+
+
+            <div class="card mt-2 glass">
               <p class="title is-size-4">Red Zones Ativas:</p>
-              <div v-if="redzonesAtivas.length">
-              <ul class="is-size-4 mx-2 my-2" v-for="rz in redzonesAtivas" :key='rz.nome'><hr> <button class=" mb-2 is-danger" outlined rounded   @click="disabledRZ(rz)">Desabilitar</button> <b class="my-4">{{rz.nome}}</b> </ul>
+              <div v-if="red_zones_ativas.length">
+                <ul class="is-size-4 mx-2 my-2 " v-for="rz in red_zones_ativas" :key='rz.name'><hr>
+                  <button class="button is-outlined is-danger is-fullwidth " outlined rounded   @click="disabledRZ(rz)">
+                    <span class="icon mt-1">
+                      <i class="fas fa-trash" />
+                    </span> 
+                    <span >{{rz.name}}</span> 
+                  </button>                   
+                </ul>
               </div>
               <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
             </div>
-
-
             </div>
             <div class=" cams column is-10 mt-4 " >
 
+<br>
 
-                <v-stage ref="stage" :config="stageConfig">
+<!--v-stage e v-layer são classes do vue-konva -->
+                <v-stage ref="stage" :config="stageConfig[cam_selected]">
 
       <v-layer ref="layer">
-        <v-image v-if="camSelected=='cam1'" @click="handleMouseClick" :config="{image: imageParameters1,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam2'" @click="handleMouseClick" :config="{image: imageParameters2,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam3'" @click="handleMouseClick" :config="{image: imageParameters3,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam4'" @click="handleMouseClick" :config="{image: imageParameters4,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam5'" @click="handleMouseClick" :config="{image: imageParameters5,scaleX: 0.75,scaleY: 0.75,}"/>
-        <v-image v-if="camSelected=='cam6'" @click="handleMouseClick" :config="{image: imageParameters6,scaleX: 0.75,scaleY: 0.75,}"/>
+        <v-image @click="handleMouseClick" :config="{image: imageParameters[cam_selected],scaleX: scale,scaleY: scale,}"/>
         <v-line
           :config="{
             fill:'hsla(0, 100%, 50%, 0.5)',
@@ -51,7 +128,7 @@
             tension: 0,
             closed: close,
             stroke: 'black'}"/>
-
+        <!-- circulinho vermelho que aparece qdo clicamos -->
         <v-circle
           @dragmove="updatePoly"
           v-for="item in anchors"
@@ -68,12 +145,37 @@
         />
       </v-layer>
     </v-stage>
-
+    
             </div>
         </div>
+        <div class="modal"  :class="{'is-active': saveModal}" >
+  
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Redzone name</p>
+      <button class="delete" @click="saveModal=!saveModal" aria-label="close"></button>
+    </header>
+    <section class="modal-card-body">
+      <input class="input is-focused" v-model="newRedzone" type="text" placeholder="Insert Redzone name" pattern="[A-Za-z0-9]+">
+
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" :disabled="newRedzone==''" @click="save">Save Redzone</button>
+      <button class="button is-danger isRight" @click="saveModal=!saveModal">Cancel</button>
+    </footer>
+  </div>
+</div>
     </div>
 </template>
 <style lang="scss">
+.lft{
+  margin-left: 20%;
+}
+.fullWidth{  
+  width: 15vw;
+  margin-left: 0vw;  
+}
+
 
 </style>
 
@@ -90,89 +192,106 @@ export default {
     },
   data() {
     return {
-      stageConfig: {
-        width: '',
-        height: '',
-      },
-      rdSelected:'',
-      redzones:[],
-      redzonesAtivas:[],
-      cameras:["cam1","cam2","cam3","cam4","cam5","cam6",],
-      camSelected:'cam1',
-      image: null,
+      scale:0.5,  // a escala das imagens deve ser fixa pois os pontos são pegos em relação a posição do mouse
+      stageConfig: [],  // array onde as caracteristicas das imagens são armazenadas
+      rdSelected:'',  // variavel watchada para mostrar o poligono qdo clica na rz
+      redzones:[],  // array de redzones
+      red_zones_ativas:[],  //array de redzones ativas
+      cam_selected: 0,  // camera em operação
       anchors: [],
       points: [],
       close:true,
-      imageParameters1: new window.Image(),
-      imageParameters2: new window.Image(),
-      imageParameters3: new window.Image(),
-      imageParameters4: new window.Image(),
-      imageParameters5: new window.Image(),
-      imageParameters6: new window.Image()
+      num_cameras: 10,  // selecionar o numero de cameras para parametrizar o looping
+      imageParameters: [],  // array para armazenar as imagens base
+
+      form:'',
+      saveModal:false,
+      selected:'LOAD',
+      newRedzone:'',
+      rzSelected:''
     };
   },
-  created() {
-    this.loadingImages()
-    this.loadRedZones()
 
+  created() {
+    this.loadingImages()  // le as imagens base onde os pontos serão desenhados
+    this.load_red_zones()
+    
   },
   watch:{
-    camSelected:{
+    cam_selected:{
       handler(){
         this.clear()
       }
     },
+
     rdSelected:{
       handler(){
         this.clear()
         this.points=this.rdSelected.pontos
       }
     }
-  },methods: {
+  },
+  methods: {
     get_ip(){
       return process.env.VUE_APP_IP
       },
-    /*user() {
-      return localStorage.harpiaUser
+    selectRedZone(rz){
+        this.clear()
+        this.points=rz.dots
+        this.rzSelected=rz
       },
-    key() {
-      return localStorage.harpiaPassword
-      },*/
-    loadingImages(){
-      let whichcam = String(1)
-      this.imageParameters1.src=require('@/assets/cam'+ whichcam +".jpg")
-      this.imageParameters1.onload = () => {
-      this.image=this.imageParameters1
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters2.src=require('@/assets/cam2.jpg')
-      this.imageParameters2.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters3.src=require('@/assets/cam3.jpg')
-      this.imageParameters3.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters4.src=require('@/assets/cam4.jpg')
-      this.imageParameters4.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters5.src=require('@/assets/cam5.jpg')
-      this.imageParameters5.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-      this.imageParameters6.src=require('@/assets/cam6.jpg')
-      this.imageParameters6.onload = () => {
-      this.stageConfig.width = 1980 ;
-      this.stageConfig.height = 1080 ;
-        };
-
+    async loadingImages(){
+      this.$store.commit('setIsLoading', true)
+        let which_camera = 0
+        //var camera_temp
+        while (which_camera < 9){
+          await axios.get('api/v1/red_zone/cam'+ which_camera.toString()).then((resp)=>{               
+            let img = new window.Image()        
+            img.src=resp.data.get_base_img
+            img.onload=()=>{
+              this.imageParameters[which_camera]=img
+              this.imageParameters.push(img)
+              this.stageConfig.push({ 
+                  name : which_camera,
+                  width : this.imageParameters[which_camera].naturalWidth,
+                  height : this.imageParameters[which_camera].naturalHeight
+                  })
+                which_camera +=1        
+          }          
+        })       
+          this.$store.commit('setIsLoading', false)
+      }
+      
     },
+    // precisa colocar isso no watch
+    load_red_zones(){
+        this.redzones=[]
+        this.red_zones_ativas=[]
+        //let rz_cadastradas = []
+        /* campos minimos esperados de red zones
+        name:
+        width:
+        heigth:
+        enabled:
+        dots: [] */
+        // feito o get pro django retorna um objeto javascript --> magia do rest_api
+        axios.get('api/v1/load_rz/'+ this.cam_selected).then((rzones)=>{
+          
+        // todas as redzones da camera atual retornarão na forma de uma lista de objetos
+            for(let i=0; i < rzones.data.length; i = i + 1){
+                this.redzones.push(rzones.data[i])
+                console.log(this.redzones)
+                this.redzones[i].dots = this.redzones[i].dots.map(Number)
+                console.log(this.redzones)
+                if (this.redzones[i].enabled == true){
+                    this.red_zones_ativas.push(this.redzones[i])
+                }
+            }
+        }).catch((error)=>{
+            console.log(error)
+        })
+    },
+
     handleMouseClick() {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
       const x = mousePos.x;
@@ -184,6 +303,7 @@ export default {
       });
       this.points.push(x);
       this.points.push(y);
+      console.log(x)
     },
     updatePoly(event) {
       const mousePos = this.$refs.stage.getNode().getPointerPosition();
@@ -192,87 +312,53 @@ export default {
       const id = event.target.id();
       const item = this.anchors.find((i) => i.id === id);
       const index = this.anchors.indexOf(item);
+      //o que isso faz?
       this.points[index * 2] = x;
       this.points[index * 2 + 1] = y;
     },
-    loadRedZones(){
-      this.redzones=[]
-      axios.get('loaddots/'+ this.camSelected).then((resp)=>{
-        let rzCadastradas = resp.data.conteudo.split('\n')
-        console.log(resp.data.conteudo)
-        rzCadastradas.pop()
-        rzCadastradas.forEach(element => {
 
-          let pontos=element.split(',').splice(3,element.split(',').length-1)
-          pontos[0]=pontos[0].replace(' pontos: ',"")
-          pontos.pop()
-          let r ={}
-          r.nome=element.split(',')[0].replace('nome: ',''),
-          r.largura=element.split(',')[1].replace('largura: ',''),
-          r.altura=element.split(',')[2].replace('altura: ',''),
-          r.pontos=pontos.map(Number)
-          this.redzones.push(r)
-        });
-      })
-
-
-
-      this.redzonesAtivas=[]
-      axios.get('loaddots_ativos/'+ this.camSelected ).then((resp)=>{
-        let rzAtivas = resp.data.conteudo.split('\n')
-        rzAtivas.pop()
-        rzAtivas.forEach(element => {
-
-          let pontos=element.split(',').splice(3,element.split(',').length-1)
-          pontos[0]=pontos[0].replace(' pontos: ',"")
-          pontos.pop()
-          let r ={}
-          r.nome=element.split(',')[0].replace('nome: ',''),
-          r.largura=element.split(',')[1].replace('largura: ',''),
-          r.altura=element.split(',')[2].replace('altura: ',''),
-          r.pontos=pontos.map(Number)
-          this.redzonesAtivas.push(r)
-        });
-      }).catch(error=>{
-      console.log(error)
-      })
-    },
-    save(){
-    // precisa ser substituido por algo sem buefy --> pensei num componente
-      this.$buefy.dialog.prompt({
-        message: `Nome desta redzone:`,
-        type:'is-success',
-        size:'is-large',
-        inputAttrs: {
-          placeholder: 'Nome da redzone',
-          maxlength: 20
-        },
-        confirmTest:'Salvar',
-        trapFocus: true,
-        onConfirm: (rdName) => {
-          //var FileSaver = require('file-saver');
-          var x_y=[]
-          x_y.push('nome: '+rdName)
-          x_y.push(', largura: '+this.stageConfig.width)
-          x_y.push(', altura: '+ this.stageConfig.height+', pontos: ')
-          this.points.forEach(p => {
+    // async save(){
+    save(){      
+      console.log(this.points)
+        var x_y=[]        
+        // x_y.push('nome: '+(new Date()).toString())
+        // x_y.push(', largura: '+this.stageConfig[this.cam_selected].width)
+        // x_y.push(', altura: '+ this.stageConfig[this.cam_selected].height+', pontos: ')
+        this.points.forEach(p => {
             x_y.push(p)
-            x_y.push(',')
-          });
+        });
+        var red_zone_output = {
+            cam: this.cam_selected,
+            // name: "cam" + this.cam_selected.toString() + "_" + (new Date().getTime()).toString(),
+            name: this.newRedzone,
+            width: this.stageConfig[this.cam_selected].width,
+            height: this.stageConfig[this.cam_selected].height,
+            dots: x_y}
+       // this.$store.commit('setIsLoading', true)
+     
 
-          // cria o blob com a resolucao da imagem nos dois primeiros elementos do array
-          var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
-          var myformData = new FormData();
-          myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.camSelected + "/" + this.key(), myformData, {
-            headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.loadRedZones())
-            }
-          })
+
+     // não esta salvando no django, na pasta esta normal.
+      // await axios
+      axios
+        .post('/api/v1/save_red_zone/', JSON.stringify(red_zone_output), {headers:{'Content-Type': 'application/json'}})
+        .then(response => {         
+          console.log(response)
+          this.saveModal=false
+          
+          this.load_red_zones() // para recarregar a redzones no botão load
+          
+        })
+        .catch(error => {
+          console.log(error)
+        })
+     // this.$store.commit('setIsLoading', false)
     },
     clear() {
+    
       this.points = [];
       this.anchors = [];
-      this.loadRedZones()
+      this.load_red_zones()
     },
     undo() {
       this.points.pop();
@@ -288,53 +374,30 @@ export default {
         trapFocus: true,
         onConfirm: () => {
           //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.camSelected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
+          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.cam_selected + "/" + this.key()+ "/" + rz.nome).then((r)=>{
             console.log(r)
-            this.loadRedZones()
+            this.load_red_zones()
           })
         }
       })
     },
     enableRZ(rz){
-      alert(rz.nome)
-      var x_y=[]
-          x_y.push('nome: '+rz.nome)
-          x_y.push(', largura: '+rz.largura)
-          x_y.push(', altura: '+ rz.altura+', pontos: ')
-          rz.pontos.forEach(p => {
-            x_y.push(p)
-            x_y.push(',')
-          });
+      //Vai setar o enabled na redzone.
+      // Precisa configurar para ir como disabled quando salva.
+      console.log(rz)
+      
+       
 
-          // cria o blob com a resolucao da imagem nos dois primeiros elementos do array
-          var blob = new Blob(x_y, {type: "text/plain;charset=utf-8"});
-          var myformData = new FormData();
-          myformData.append("txt", blob, "1.txt")
-          axios.post('http://' + this.get_ip() + ':8085/savedots/'+ this.camSelected + "-ativas/" + this.key(), myformData, {
-            headers: {'Content-Type': 'text/plain; charset=UTF-8'}}).then(()=>this.loadRedZones())
-
-
+        //  axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: true}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     },
-    disabledRZ(rz){
-       this.$buefy.dialog.confirm({
-        message: `Deseja desabilitar a redzone `+rz.nome+'?',
-        type:'is-danger',
-        size:'is-large',
-        confirmText:'SIM',
-        cancelText:'Não',
-        trapFocus: true,
-        onConfirm: () => {
-          //codigo para excluir uma redzone ainda em construção.
-          axios.post('http://' + this.get_ip() + ':8085/deldots/'+ this.camSelected +"-ativas/" + this.key()+ "/" + rz.nome).then((r)=>{
-            console.log(r)
-            this.loadRedZones()
-          })
-        }
-      })
 
+    disabledRZ(rz){
+      console.log(rz)
+          //axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: false}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
     }
 
 }
+
 }
 //bloquear a possibilidade de nomes duplicados para as redzones
 

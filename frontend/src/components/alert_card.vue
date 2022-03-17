@@ -1,121 +1,169 @@
 <template>
-  <div class="card">
-  <nav class="breadcrumb is-right" aria-label="breadcrumbs">
-    <ul>
-      <li v-if="thumb_up"><button class="button" @click="invert_thumb_up()" >thumbup_on </button></li>
-      <li v-else><button class="button" @click="invert_thumb_up()">thumbup_off </button></li>
-      <li v-if="thumb_down"><button class="button" @click="invert_thumb_down()" >thumbdown_on </button></li>
-      <li v-else><button class="button" @click="invert_thumb_down()">thumbdown_off </button></li>
-      <li><button class="button" @click="insert_notes()">notes {{modal}}</button></li>
-    </ul>
-  </nav>
-    <div class="card-content">
-            <div class="media">
-              <div class="media-left">
-                <figure class="image">
-                  <!--img src "imagem aqui" -->
-                  <img :src="Alert.get_thumbnail">
-                </figure>
-                Alert id: {{Alert.id}}
+  <div>
+    <div class="box has-background-white mx-1" :class="thumb_up?'boxUp':thumb_down?'boxDown':'box'">
+      <div class="is-floating-left">
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" >
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button v-if="thumb_up" class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-success" @click="invert_thumb_up" >
+          <span class="icon ">
+            <i class="far fa-thumbs-up fa-lg" />
+          </span>
+        </button>
+        <button v-else class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="invert_thumb_up" >
+          <span class="icon ">
+            <i class="far fa-thumbs-up fa-lg" />
+          </span>
+        </button>
+        <button v-if="thumb_down" class=" button mx-1 is-rounded is-small  is-inverted is-focused is-danger" @click="invert_thumb_down" >
+          <span class="icon ">
+            <i class="far fa-thumbs-down fa-lg" />
+          </span>
+        </button>
+        <button v-else class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused"  @click="invert_thumb_down">
+          <span class="icon ">
+            <i class="far fa-thumbs-down fa-lg" />
+          </span>
+        </button>
+      </div>
+            
+      <div class="columns column mt-1">
+        <div class="column is-4 mt-4">    
+            <div class=" has-text-left">
+              <div class="container has-text-underlined mb-4">
+                <icon  class="ml-2 " icon="hard-hat" type="is-primary"></icon>
+                <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
               </div>
-            <div class="media-content is-right">
-              <!-- Obs: os ':' servem para passar variavel, sem eles passa string --> 
-              <alert_card_box v-if="Alert.data_1" :label="Alert.label_1" :data="Alert.data_1" />
-              <alert_card_box v-if="Alert.data_2" :label="Alert.label_2" :data="Alert.data_2" />
-              <alert_card_box v-if="Alert.data_3" :label="Alert.label_3" :data="Alert.data_3" />
-              <alert_card_box v-if="Alert.data_4" :label="Alert.label_4" :data="Alert.data_4" />
+              <div class="container has-text-underlined">
+                <icon class="ml-2" icon="exclamation-thick" type="is-primary"></icon>
+                <span class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} Red Zone</span>
+              </div>
+              <span class="has-text-grey-light is-custom-size">ID: {{ Alert.identificador }}</span>
             </div>
-<router-link v-bind:to="Alert.get_absolute_url" class="button is-dark mt-4">View details</router-link>
-        </div>
-    </div>
-
-  </div>
-  <!-- card antigo
-    <div class="has-text-right mb-4">
-      <button v-if= "get_thumb_up() == 'true'" size="is-small" icon-right="thumb-up" class="is-floating-right" rounded inverted type= 'is-success' @click="invert_thumb_up()" />
-      <button v-else size="is-small" icon-right="thumb-up" class="is-floating-right"  rounded inverted  @click="invert_thumb_up()"/>
-      <button v-if= "get_thumb_down() == 'true'" size="is-small" icon-right="thumb-down" class="is-floating-left" rounded inverted  type= 'is-danger' @click="invert_thumb_down()"/>
-      <button v-else size="is-small" icon-right="thumb-down" class="is-floating-left"  rounded inverted  @click="invert_thumb_down()" />
-      <button size="is-small" icon-right="message" class="is-observation" rounded inverted
-      :type="{'is-link':Alert.notes,'is-dark':!Alert.notes}" @click="insertObservation()" /> 
-      
-    </div>
-    <div class="columns is-paddingless">
-      <div class="column is-4 has-text-left">
-        <div class="container has-text-underlined">
-          <b-icon  class="has-right-space" icon="hard-hat" type="is-primary"></b-icon>
-          <span  class="is-size-6 has-text-weight-bold has-text-primary">{{ Alert.alerts[0] }} EPI</span>
         </div>
 
-        <div class="container has-text-underlined">
-          <b-icon class="has-right-space" icon="exclamation-thick" type="is-primary"></b-icon>
-          <span class="is-size-6 has-text-weight-bold has-text-primary">{{ Alert.alerts[1] }} Red Zone</span>
+        <div class="column is-4 ">
+          <p class="dates mb-3"><p>Date:</p>{{new Date(Alert.timestamp).toLocaleDateString("en-US")}}</p>
+          <p class="dates"> <p>Time:</p>{{new Date(Alert.timestamp).toLocaleTimeString("en-US")}}</p>
         </div>
 
-        <span class="has-text-grey-light is-custom-size">ID: {{ Object.values(this.Alert._id)[0] }}</span>
-      </div>
-      <div class="column is-3">
-        <alert_card_box :Label="'Data'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleDateString('pt-BR')"/>
-        <alert_card_box :Label="'Hora'" :Data="new Date(Object.values(Alert.datetime)[0]).toLocaleTimeString('pt-BR')"/>
+        <div class="column is-4">          
+          <figure class="image">
+            <!--img src "imagem aqui" -->
+            <img :src="Alert.get_thumbnail " class="has-pointer-cursor thumbnail" @click="imageModal=!imageModal">
+          </figure>
+        </div>
 
-        
-      </div>
-      
-      <div class="column is-5">
-        <img id="file" @click="IsImageModalActive = true" class="has-pointer-cursor" :src="get_alert_image()"/>
-      </div>
-    </div>
-    <b-modal v-model="IsImageModalActive">
-      <img :src="get_alert_image()" alt="Imagem do alerta"/>
-    </b-modal>
-    <b-modal v-model="showObservationModal" has-modal-card trap-focus>
-        <div class="modal-card" style="width: 120vh">
-          <header class="modal-card-head">
-            <p class="modal-card-title">Observações  <span class="is-size-6">  (ID: {{ Object.values(this.Alert._id)[0] }})</span></p>
-            <button type="button" class="delete" @click="showObservationModal=false"/>
+    
+        <div class="modal" @click="imageModal=!imageModal" :class="{'is-active': imageModal}">
+          <div class="modal-background"> </div>
+          <!--
+          Para fazer depois:
+          Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
+          <div class="modal-content fullImage">
+            <p class="image is-16by9 ">
+              <img :src="Alert.get_image" alt="">
+            </p>
+          </div>      
+        </div>
+
+        <div class="modal"  :class="{'is-active': commentModal}">
+            
+          <div class="modal-background"> </div>
+          <!--
+          Para fazer depois:
+          Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
+          <div class="modal-content">
+            <header class="modal-card-head">
+            <p class="modal-card-title">Information </p>
+            <button type="button" class="delete" @click="commentModal=false" />
           </header>
-          <section class="modal-card-body">             
-            <b-table :data="is_notes_Empty() ? [] : Alert.notes" striped narrowed hoverable focusable class="mb-3" >
-                <b-table-column field="date" label="Data" centered v-slot="props">                
-                        {{ new Date(Object.values(props.row.date)[0]).toLocaleDateString() }}                
-                </b-table-column>
-                <b-table-column field="date" label="Hora"  centered v-slot="props">                
-                        {{ new Date(Object.values(props.row.date)[0]).toLocaleTimeString() }}                
-                </b-table-column>
-                <b-table-column field="note" label="Observação"  v-slot="props" >
-                    {{ props.row.note }}
-                </b-table-column>
-                <b-table-column field="user" label="Autor"  v-slot="props">
-                    {{ props.row.user }}
-                </b-table-column>
-                <template #empty>
-                    <div class="has-text-centered">Sem observações inseridas</div>
-                </template>
-            </b-table> 
+           <section class="modal-card-body">             
+           
+            <table :data="Alert" class="mb-3 table  is-bordered is-striped is-hoverable is-fullwidth" v-if="comments.length" >
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Hour</th>
+                  <th>Notes</th>
+                  <th>User</th>
+                </tr>
+              </thead>
+              <tbody v-for="comment in comments" :key="comment">
+                <tr>
+                  <!-- <th>{{new Date(JSON.parse(comment).timestamp).toLocaleDateString('en-US')}}</th>
+                  <th>{{new Date(JSON.parse(comment).timestamp).toLocaleTimeString('en-US')}}</th>
+                  <th> {{JSON.parse(comment).comment}}</th>                  -->
+                  <th>{{new Date(comment.timestamp).toLocaleDateString('en-US')}}</th> 
+                  <th>{{new Date(comment.timestamp).toLocaleTimeString('en-US')}}</th> 
+                  <th>{{comment.comment}}</th> 
+                  <th>{{comment.user}}</th> 
+                           
+                </tr>
+               
+              </tbody>
+        
+              
+            </table>
+            <p v-else class="has-text-danger is-size-4">This alert has no comments entered.</p> 
            <br>
-          <footer >
-            <b-field label="Nova Observação" label-position="on-border">
-              <b-input expanded v-model='notes' ></b-input>
-              <p class="control" >
-                  <b-button rounded class="is-success" @click="insertNotes()" >Inserir</b-button>
-              </p>
-            </b-field>
-
+           <hr>
+          <footer>
+            <div class="field has-addons">
+              <div class="control is-expanded">
+               <input class="input is-rounded" v-model="note.comment" type="text" placeholder="Insert comment">
+              </div>
+              <div class="control">
+                <button class="button is-info is-rounded" :disabled='note.comment==""' @click="insert_notes()">
+               Save
+                </button>
+              </div>
+            </div> 
+                     
           </footer>
           </section>
+          </div>      
         </div>
-        </b-modal>
-  </div>-->
- 
+        
+
+        
+      </div>  
+    </div>
+    
+  </div>
+
 </template>
 
 <style lang="scss">
-.is-observation {   
-    float: right;
-    margin-top: -30px;
-    margin-right: 50px;
-    display: inline-block;
+.thumbnail{
+  min-height: 25%;
+  max-height: 25%;
+
+  
+  
 }
+.boxDown{
+  border-color: red;
+  border-style: solid;
+  border-width: 0.05vh;
+}
+.boxUp{
+  border-color: green;
+  border-style: solid;
+  border-width: 0.05vh;
+}
+.table{
+  overflow: auto;
+}
+.fullImage{
+  
+      display: block; 
+      min-width: 160vh;
+      height: auto;
+}
+
 #alerta_nao_classificado {
     font-size: 100%;
     color: rgb(245, 46, 11);
@@ -124,33 +172,30 @@
 .has-text-underlined {
   border-bottom: 2px solid rgba(42, 157, 143, 0.3);
 }
-img {
-  display: block;
-}
+
 
 .is-custom-size{
     font-size: 1.2vh;
 }
 
-.has-right-space {
-  margin-right: 0.5vw;
-}
 
 .has-pointer-cursor {
   cursor: pointer;
 }
 .is-floating-left {
   float: right;
-  margin-top: -30px;
+  margin-top: -35px;
   margin-right: -30px;
   display: inline-block;
 }
 
-.is-floating-right {
-  float: right;
-  margin-top: -30px;
-  margin-right: 10px;
-  display: inline-block;
+.dates{
+    padding: .01vh .10vw .01vh;
+    border: .5px solid rgb(82, 82, 82);
+    border-radius: 8px;
+    margin-top: 1vh;
+    font-size: 2vh;
+  
 }
 </style>
 <script>
@@ -164,9 +209,14 @@ export default {
   data() {
     return {
         thumb_up: false,
-        thumb_down: true,
+        thumb_down: false,
         modal: true,
-        notes: "0"
+        note:{comment:'',timestamp:'',user:localStorage.getItem('harpiaUser')},
+        local_audio_enable: true,
+        imageModal:false,
+        commentModal:false,
+        comments:''
+        
         }
   },
   components: {
@@ -178,7 +228,7 @@ export default {
   methods: {
     invert_thumb_up(){
         this.thumb_up = !this.thumb_up
-        if(this.thumb_up){
+        if (this.thumb_up == true){
             this.thumb_down = false
         }
         const formData = {
@@ -187,7 +237,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -199,7 +248,7 @@ export default {
     },
     invert_thumb_down(){
         this.thumb_down = !this.thumb_down
-        if(this.thumb_down){
+        if(this.thumb_down==true){
             this.thumb_up = false
         }
         const formData = {
@@ -208,7 +257,6 @@ export default {
                 thumb_down: this.thumb_down
                 // to do notes:this.notes
             }
-
             axios
                 .post("/api/v1/update_alert_by_identificador/", formData)
                 .then(response => {
@@ -218,17 +266,80 @@ export default {
                 })
         return this.thumb_down
     },
-    insert_notes(){
-        this.modal = !this.modal
+    insert_notes(){      
+      this.note.timestamp= new Date().getTime()
+      let anotacao =JSON.stringify(this.note)
+      console.log(anotacao)
+      let formData = {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down,
+                anotacoes: JSON.stringify(this.note)
+            }
+            axios.post("/api/v1/update_alert_by_identificador/", {
+                identificador: this.Alert.identificador,
+                thumb_up: this.thumb_up,
+                thumb_down: this.thumb_down,
+                anotacoes: this.Alert.anotacoes==''?JSON.stringify(this.note):this.Alert.anotacoes+'/n'+ JSON.stringify(this.note)})
+                .then(response => {
+                  console.log(response)
+                  this.commentModal=false
+                  this.note.comment=''                 
+                  
+                })
+                .catch(error => {
+                    console.log(error)
+                })
+  
+      
+
+
     },
     preencher_card(){
         this.thumb_up=this.Alert.thumb_up
         this.thumb_down=this.Alert.thumb_down
-    }
+    },
+    get_delta_time(){
+      return Date.now()-parseInt(this.Alert.timestamp);
+    },
+    out_of_time(){  // alerta chegou e não atualizou o thumb ainda
+      if (this.$store.state.audio.has_delay == true){
+      if(this.get_delta_time()>300000 && (this.thumb_up=='false') && (this.thumb_down=='false') && (this.local_audio_enable == true)){
+          this.Play_audio(1);
+          if(this.$store.state.audio.is_recorrente == false) {
+              this.local_audio_enable = false  //caso tenha atraso e nao for recorrente esse if desabilita até dar reload na pagina
+          }
+          return "Atenção, classificar alerta!"  // alertar
+      }
+      else{
+          return ""
+      }}
+    },
+    play_audio(vol){
+        if(this.$store.state.audio.is_on==true){
+            var audio = new Audio(require("../assets/beep-12.wav"))
+            audio.volume = vol
+            audio.play()
+        }
+    },
+    reading_notes(){
+      this.comments=[]
+      if(this.Alert.anotacoes!==''){
+      this.Alert.anotacoes.split("/n").forEach(note => {
+        this.comments.push(JSON.parse(note))        
+      });    
+      
+      }
+    }    
   },
+  created() {
+    this.reading_notes() //carregar as anotações
+  },
+  
   computed: {
+        continuous_out_of_time: function (){  // fica verificando se estourou o tempo limite de observação
+            return this.out_of_time()
+        },
+  },}
 
-  },
-
-}
 </script>

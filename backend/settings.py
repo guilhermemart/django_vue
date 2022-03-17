@@ -27,6 +27,7 @@ SECRET_KEY = config('SECRET_KEY')
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+
 STRIPE_SECRET_KEY = config('STRIPE_SECRET_KEY')
 LOCAL_IP = config('LOCAL_IP', default='192.168.0.28')
 #LOCAL_IP = config('LOCAL_IP', default='127.0.0.1')
@@ -92,11 +93,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-        'NAME': 'altave',
-        'USER': 'altave',
-        'PASSWORD': 'altave',
-        'HOST': 'localhost',
-        'PORT': '',
+        'NAME': config("NAME"),
+        'USER': config("usuario"),
+        'PASSWORD': config('PASSWORD'),
+        'HOST': config("HOST"),
+        'PORT': config("PORT"),
     }
 }
 

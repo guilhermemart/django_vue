@@ -131,6 +131,15 @@ dmypy.json
 # Pyre type checker
 .pyre/
 frontend_old
-/backend/app_django/migrations/
+/backend/app_django/migrations/*
+/backend/app_django/.env
 frontend/.env
 backend/.env
+*.env
+frontend/.env
+frontend/.env
+frontend/.env
+backend/app_django/django-test-de-firebase.json
+
+# Json com keys do firebase
+django-test-de-firebase.json

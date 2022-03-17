@@ -1,57 +1,258 @@
 <template>
     <div>
-        <harpiaBar />
-        <calendar_search/>
-        <div class="home">
-
-    <div class="columns is-multiline">
+      <harpiaBar :show_in_bar="true"/>
+        <div class="hero has-background-grey-lighter is-fullheight-with-navbar">
+        <div class="home mb-2">
+        <div class="columns is-vcentered">
+        <div class="column is-multiline is-mobile">
+            <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)-1)" :disabled="page<2" > <i class="fas fa-angles-left fa-2x" /></button>
+        </div>
+        <div class="column is-10">
+        <div>
+        <div class="control mt-1">
+            <label class="radio">
+            <input v-model="isRange" v-bind:value="true" type="radio" name="day">
+            day
+            </label>
+            <label class="radio">
+            <input v-model="isRange" v-bind:value="false" type="radio" name="period">
+            period
+            </label>
+        </div>
+        <div class="has-addons level-item has-text-centered ">
+        <div class="control calendar" v-if="isRange">
+            <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a Date" />
+        </div>
+        <div class="control calendar" v-else>
+            <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" placeholder="Select a period" />
+        </div>
+        <div class="control">
+          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">
+            <span class="icon">
+                <i class="fas fa-search"></i>
+            </span>
+          <span class="is-family-sans-serif">Confirm</span></button>     
+        </div>
+        <!-- <div class="control">
+          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
+          <span class="icon">
+          <i class="fas fa-sync"></i>
+          </span>
+          <span class="is-family-sans-serif">Refresh</span></button>     
+        </div> -->
+        </div>
+    </div>
+          page {{page}}
+          <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
+          <div class="columns has-text-black is-multiline mr-2 mt-3" v-if="true">
+            <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
+              <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.timestamp">
+                  <div>
+                  <alert_card :Alert="alert" />
+                  <!-- {{new Date(alert.date_added).toLocaleString()}}
+                  {{alert.anotacoes}} -->
+                  </div>
+              </div>
+          </div>
+          <div class="column is-12 has-text-centered is-half-screen-height is-flex has-vertical-centered-text" v-else>
+              <i icon="alert" size="is-large" type="is-dark"></i>
+              <p class="title">
+                  Não há alertas disponíveis.
+              </p>
+          </div>
+        </div>
+        <div class="column is-multiline is-mobile">
+            <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)+1)">
+            <i class="fas fa-angles-right fa-2x" />
+            </button>
+        </div>
+    </div>
+    <div class="columns is-multiline" v-if="false">
       <alert_card
         v-for="alert in latest_alerts"
         v-bind:key="alert.id"
         v-bind:Alert="alert" />
     </div>
+    <!-- <nav class="pagination" role="navigation" aria-label="pagination">
+        <a v-if="page>1" class="pagination-previous" @click="go_to_page(parseInt(page)-1)">Previous</a>
+        <a v-if="has_next_page == true" class="pagination-next" @click="go_to_page(parseInt(page)+1)"> <button>Next</button> </a>
+    </nav> -->
   </div>
     </div>
-    
+    </div>
 </template>
 
+
+<style lang="scss">
+
+.dp-custom-cell {
+  border-radius: 50%;
+};
+
+.calendar input{
+  width: 250px;
+  height: 50px;  
+  text-align: center;  
+};
+
+.btn{
+  border-radius: 5vh;
+}
+
+</style>
+
+
 <script>
-import alert_card from '@/components/alert_card.vue'
+
 import axios from 'axios'
+import { ref } from "vue";
+import Datepicker from "vue3-date-time-picker";
+import "vue3-date-time-picker/dist/main.css";
+// componentes customizados
+import alert_card from '@/components/alert_card.vue'
 import harpiaBar from '@/components/harpiaBar.vue'
-import calendar_search from '@/components/calendar_search.vue'
 
 export default {
     name: 'Alerts',
   components:{
-    calendar_search,
     harpiaBar,
-    alert_card
+    alert_card,
+    Datepicker,
   },
   data() {
     return {
         latest_alerts: [],
-        page: "1"
+        page: "1",
+        date:'',
+        last_date: new Date(),
+        isRange:true,
+        format:'',
+        has_next_page: false,
+        CurrentPage:1,
+        filter:{
+            date_end: 2500916953418,
+            valid: true,
+            invalid: true,
+            non_classified: true,
+            date_start: 0,
+        }
     }
   },
-  
-  mounted() {
-    this.get_latest_alerts()
-    document.title = 'Alerts | Harpia'
+    computed: {
   },
-    methods: {
-    async get_latest_alerts() {
-      this.$store.commit('setIsLoading', true)
-      await axios
-        .get('/api/v1/latest-alerts/1')
+   setup() {
+        const date = ref();
+        // In case of a range picker, you'll receive [Date, Date]
+        const format = (date) => {
+            const day = String(date.getDate()).length <2? '0'+String(date.getDate()):String(date.getDate())
+            const month = String(date.getMonth() + 1).length <2? '0'+String(date.getMonth() + 1):String(date.getMonth() + 1);
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+        return {
+            date,
+            format,
+        }
+    },
+  mounted() {
+    this.page=this.$route.params.page  // armazena em qual pagina está
+    this.filter = this.$store.state.filter
+    //this.$store.state.filter=this.filter
+    this.get_latest_alerts(),
+    document.title = 'Alertas | Harpia' //  titulo do documento para diferenciar dos outros .vue
+  },
+  created(){
+    this.watchdog()
+    this.date=''
+  },
+  watch:{    
+  isRange:{
+    handler(){      
+      this.date=""
+    },
+  watchdog: {
+    handler(){
+        this.watchdog
+    }
+  }
+  }  
+  },
+  methods: {
+    play_audio(vol){
+        if(this.$store.state.audio.is_on==true){
+            var audio = new Audio(require("../assets/beep-12.wav"));
+            audio.volume = vol
+            audio.play()
+        }
+    },
+   
+    watchdog(){
+        axios.get('/api/v1/watchdog').then( item => {
+           console.log(item)
+            if(this.page == '1'){              
+                this.get_latest_alerts()
+            }
+            if(this.$store.state.audio.is_instantaneo == true){
+                this.play_audio(1)
+            }
+            this.watchdog()
+        })
+    },
+    get_latest_alerts() {
+      axios
+        .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {
+          console.log(this.filter)
           this.latest_alerts = response.data
+      if(Object.keys(this.latest_alerts).length>6){        
+        this.has_next_page = true  // usado para paginacao
+        this.latest_alerts = this.latest_alerts.slice(0,6)
+        }
         })
         .catch(error => {
           console.log(error)
         })
-      this.$store.commit('setIsLoading', false)
+    },
+    go_to_page(next_page){ // usada na paginacao
+        console.log("teste")
+        // router push nao reloada a pagina se mudar apenas o parametro
+        this.$router.push("/latest-alerts/"+next_page.toString()).then(
+        ()=> {  // push manda pra proxima pagina --> similar router-link
+        this.$router.go()  // forca o reload da pagina --> router.push tem problema nisso
+        })
+    },
+    refreshPage(){
+        this.watchdog()
+        this.date=''
+        this.get_latest_alerts()
+    },
+    findALerts(){      
+      if(this.isRange){
+        //Extrai apenas a data
+        let day= new Date(this.date).toDateString()
+        //Gera o timestamp da data as 00:00:00 horas
+        let timestamp= new Date(day).getTime()
+        
+        // timestamp incluso no filtro        
+         this.filter.date_start =timestamp
+         this.filter.date_end= new Date(timestamp).setHours(23,59,59,999)        
+        
+      }else{
+        //Extrai apenas a data
+        let day0= new Date(this.date[0]).toDateString()
+        let day1= new Date(this.date[1]).toDateString()
+        //Gera o timestamp da data as 00:00:00 horas
+        let timestamp0= new Date(day0).getTime()
+        let timestamp1= new Date(new Date(day1).setHours(23,59,59,999)).getTime()
+
+        // timestamp incluso no filtro
+        this.filter.date_start=timestamp0
+        this.filter.date_end=timestamp1
+        this.$store.commit('filter.date_start', timestamp0)
+        this.$store.commit('filter.date_end', timestamp1)  // estava timestamp0 mudei certo
+      }
+      this.get_latest_alerts()
     }
-  }
+  },
 }
 </script>

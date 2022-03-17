@@ -6,5 +6,10 @@ pillow
 stripe
 gevent
 pymongo
+python-dateutil
 python-decouple
 psycopg2
+pgpubsub
+requests
+pyrebase <= 3.0.27
+pytz
