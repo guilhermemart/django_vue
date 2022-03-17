@@ -20,29 +20,29 @@
             </label>
         </div>
         <div class="has-addons level-item has-text-centered ">
-        <div class="control calendar" v-if="isRange">
-            <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
-        </div>
-        <div class="control calendar" v-else>
-            <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
-        </div>
-        <div class="control">
-          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="date==''" @click="findALerts()">
+          <div class="control calendar" v-if="isRange">
+              <Datepicker v-model="date" :format="format" autoApply :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
+          </div>
+          <div class="control calendar" v-else>
+              <Datepicker v-model="date" autoApply range :enableTimePicker="false" calendarCellClassName="dp-custom-cell" :placeholder="date" />
+          </div>
+          <div class="control">
+            <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" :disabled="placeHolder==date" @click="findALerts()">
+              <span class="icon">
+                  <i class="fas fa-search"></i>
+              </span>
+            <span class="is-family-sans-serif">Confirm</span></button>
+          </div>
+          <div class="control">
+            <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
             <span class="icon">
-                <i class="fas fa-search"></i>
+            <i class="fas fa-sync"></i>
             </span>
-          <span class="is-family-sans-serif">Confirm</span></button>     
-        </div>
-        <div class="control">
-          <button class="button ml-2 has-text-light has-custom-width is-medium is-responsive is-primary" @click="refreshPage()">
-          <span class="icon">
-          <i class="fas fa-sync"></i>
-          </span>
-          <span class="is-family-sans-serif">Reset</span></button>
-        </div>
+            <span class="is-family-sans-serif">Reset</span></button>
+          </div>
         </div>
     </div>
-          page {{page}}
+          <div class="mt-4">Page {{page}}</div>
           <!--div class="columns has-text-black is-multiline" v-if="GetCurrentPageAlerts.length 0"-->
           <div class="columns has-text-black is-multiline mr-2 mt-3" v-if="true">
             <!--  <div class="column is-6" v-for="alert in latest_alerts" v-bind:key="alert.id"> -->
@@ -135,7 +135,9 @@ export default {
             invalid: true,
             non_classified: true,
             date_start: 0,
-        }
+        },
+        confirmDisable: true,
+        placeHolder: ""
     }
   },
     computed: {
@@ -160,15 +162,18 @@ export default {
     // para mostrar a data/periodo selecionado
     if (this.filter.date_start === 0) {
       this.date = "Filter by date"
+      this.placeHolder = this.date
     } else if (this.filter.date_end - this.filter.date_start !== 86399999) {
       this.isRange = false
       let date_0 = new Date(this.filter.date_start)
       let date_1 = new Date(this.filter.date_end)
       this.date =  (date_0.getMonth() + 1) + "/" + date_0.getDate() + "/" + date_0.getFullYear() + " - "
       this.date = this.date + (date_1.getMonth() + 1) + "/" + date_1.getDate() + "/" + date_1.getFullYear()
+      this.placeHolder = this.date
     }
     else {
       this.date = new Date(this.filter.date_start)
+      this.placeHolder = this.date
     }
 
 
@@ -186,17 +191,22 @@ export default {
       // para mostrar as datas selecionadas ou "filter by date" quando troca pra day/period
       if (this.filter.date_start === 0) {
         this.date = "Filter by date"
+        this.placeHolder = this.date
       } else if (this.isRange && this.filter.date_end - this.filter.date_start !== 86399999) {
         this.date = "Filter by date"
+        this.placeHolder = this.date
       } else if (!this.isRange && this.filter.date_end - this.filter.date_start !== 86399999) {
         let date_0 = new Date(this.filter.date_start)
         let date_1 = new Date(this.filter.date_end)
         this.date =  (date_0.getMonth() + 1) + "/" + date_0.getDate() + "/" + date_0.getFullYear() + " - "
         this.date = this.date + (date_1.getMonth() + 1) + "/" + date_1.getDate() + "/" + date_1.getFullYear()
+        this.placeHolder = this.date
       } else if (!this.isRange && this.filter.date_end - this.filter.date_start === 86399999) {
         this.date = "Filter by date"
+        this.placeHolder = this.date
       } else if (this.isRange && this.filter.date_end - this.filter.date_start === 86399999) {
         this.date = new Date(this.filter.date_start)
+        this.placeHolder = this.date
       }
 
       //this.date=""
@@ -219,12 +229,10 @@ export default {
    
     watchdog(){
         axios.get('/api/v1/watchdog').then( item => {
-           console.log(item)
-            console.log(item.data == false)
             if(this.page == '1'){              
                 this.get_latest_alerts()
             }
-            if(item.data && this.$store.state.audio.is_instantaneo == true){
+            if(item.data == "1" && this.$store.state.audio.is_instantaneo === true){
                 this.play_audio(1)
             }
             this.watchdog()
@@ -256,7 +264,6 @@ export default {
     refreshPage(){
         this.filter.date_start = 0
         this.filter.date_end = 2500916953418
-        this.page = "1"
         this.$store.commit("save_filter", this.filter)
         this.$router.push("/latest-alerts/1").then(()=> {
             this.$router.go()
@@ -286,6 +293,10 @@ export default {
         this.filter.date_end=timestamp1
         this.$store.commit('save_filter', this.filter)
       }
+
+      this.$router.push("/latest-alerts/1").then(()=> {
+            this.$router.go()
+        })
       this.get_latest_alerts()
     }
   },

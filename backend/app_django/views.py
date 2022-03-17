@@ -330,10 +330,11 @@ class red_zone_camera_update(APIView):
 class wait_alert(APIView):
     def get(self, request):
         # o for abaixo fica travado esperando um novo alerta chegar
-        for alert_ in wait_for_new_alert():
-            serializer = alert_serializer(alert_, many=True)
+        wait_alert = wait_for_new_alert()
+        print(f"WAIT ALERT HERE {wait_alert}")
+        if wait_alert == 1:
             print("novo alerta recebido: " + datetime.now().isoformat())
-            return Response(alert_)
+        return Response(wait_alert)
 
 
 # Monthly Report - Dados mensais (dia atual, esse mês e mês passado)
