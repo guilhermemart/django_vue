@@ -157,13 +157,15 @@ export default {
   mounted() {
     this.page=this.$route.params.page  // armazena em qual pagina está
     this.filter = this.$store.state.filter
+    // para mostrar a data/periodo selecionado
     if (this.filter.date_start === 0) {
-      this.date = "Select a date"
+      this.date = "Filter by date"
     } else if (this.filter.date_end - this.filter.date_start !== 86399999) {
       this.isRange = false
       let date_0 = new Date(this.filter.date_start)
-      this.date =  date_0.getDay() + "/" + " - " + (new Date(this.filter.date_end).toString())
-      console.log(this.date)
+      let date_1 = new Date(this.filter.date_end)
+      this.date =  (date_0.getMonth() + 1) + "/" + date_0.getDate() + "/" + date_0.getFullYear() + " - "
+      this.date = this.date + (date_1.getMonth() + 1) + "/" + date_1.getDate() + "/" + date_1.getFullYear()
     }
     else {
       this.date = new Date(this.filter.date_start)
@@ -181,6 +183,22 @@ export default {
   watch:{    
   isRange:{
     handler(){
+      // para mostrar as datas selecionadas ou "filter by date" quando troca pra day/period
+      if (this.filter.date_start === 0) {
+        this.date = "Filter by date"
+      } else if (this.isRange && this.filter.date_end - this.filter.date_start !== 86399999) {
+        this.date = "Filter by date"
+      } else if (!this.isRange && this.filter.date_end - this.filter.date_start !== 86399999) {
+        let date_0 = new Date(this.filter.date_start)
+        let date_1 = new Date(this.filter.date_end)
+        this.date =  (date_0.getMonth() + 1) + "/" + date_0.getDate() + "/" + date_0.getFullYear() + " - "
+        this.date = this.date + (date_1.getMonth() + 1) + "/" + date_1.getDate() + "/" + date_1.getFullYear()
+      } else if (!this.isRange && this.filter.date_end - this.filter.date_start === 86399999) {
+        this.date = "Filter by date"
+      } else if (this.isRange && this.filter.date_end - this.filter.date_start === 86399999) {
+        this.date = new Date(this.filter.date_start)
+      }
+
       //this.date=""
     },
   watchdog: {
