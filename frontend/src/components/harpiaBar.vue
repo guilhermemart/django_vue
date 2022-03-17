@@ -2,7 +2,9 @@
   <div class="vertical-horizontal-center">
     <nav class="navbar is-primary" role="navigation">
       <div class="navbar-brand">
-        <router-link to="/" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
+        <div class="mt-1" @click="logout()">
+          <router-link to="/" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
+        </div>
         <a class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu" @click="showMobileMenu = !showMobileMenu">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -110,7 +112,7 @@ data() {
     logout() {
             axios.defaults.headers.common["Authorization"] = ""
             localStorage.removeItem("token")
-            localStorage.removeItem("username")
+            localStorage.removeItem("harpiaUser")
             localStorage.removeItem("userid")
             this.$store.commit('removeToken')
             this.$router.push('/log-in')
