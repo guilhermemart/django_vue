@@ -113,7 +113,7 @@
           <footer>
             <div class="field has-addons">
               <div class="control is-expanded">
-               <input class="input is-rounded" v-model="note.comment" type="text" placeholder="Insert comment">
+               <input class="input is-rounded" v-model="note.comment" type="text" placeholder="Insert comment" v-on:keyup.enter="insert_notes()">
               </div>
               <div class="control">
                 <button class="button is-info is-rounded" :disabled='note.comment==""' @click="insert_notes()">
@@ -327,10 +327,10 @@ export default {
       if(this.Alert.anotacoes!==''){
       this.Alert.anotacoes.split("/n").forEach(note => {
         this.comments.push(JSON.parse(note))        
-      });    
+      });
       
       }
-    }    
+    }
   },
   created() {
     this.reading_notes() //carregar as anotações

@@ -63,9 +63,12 @@ class update_alert(APIView):
         # a funcao update_alert_by_identificador usa os dados do request para alterar o alerta
         # main.update_alert_by_identificador
         # Para o front atualizar quando tiver atualização (like/dislike)
-        pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'),
+        try:
+            pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'),
                                   host=config('db_host'))
-        pubsub.notify('canal_1', 'mensagem_atualizada')
+            pubsub.notify('canal_1', 'mensagem_atualizada')
+        except Exception as e:
+            print(e)
         serializer = update_alert_by_identificador(request)
         if str(serializer.data['thumb_up']).lower() == "true":
             try:
@@ -328,10 +331,11 @@ class red_zone_camera_update(APIView):
 class wait_alert(APIView):
     def get(self, request):
         # o for abaixo fica travado esperando um novo alerta chegar
-        for alert_ in wait_for_new_alert():
-            serializer = alert_serializer(alert_, many=True)
+        wait_alert = wait_for_new_alert()
+        print(f"WAIT ALERT HERE {wait_alert}")
+        if wait_alert == 1:
             print("novo alerta recebido: " + datetime.now().isoformat())
-            return Response(serializer.data)
+        return Response(wait_alert)
 
 
 # Monthly Report - Dados mensais (dia atual, esse mês e mês passado)
