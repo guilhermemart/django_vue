@@ -62,7 +62,7 @@
           </div>
         </div>
         <div class="column is-multiline is-mobile">
-            <button class="button is-outlined is-rounded is-large is-inverted" @click="go_to_page(parseInt(page)+1)">
+            <button class="button is-outlined is-rounded is-large is-inverted" :disabled="has_next_page !== true" @click="go_to_page(parseInt(page)+1)">
             <i class="fas fa-angles-right fa-2x" />
             </button>
         </div>
@@ -182,6 +182,7 @@ export default {
     document.title = 'Alertas | Harpia' //  titulo do documento para diferenciar dos outros .vue
   },
   created(){
+    
     this.watchdog()
 
   },
@@ -239,6 +240,7 @@ export default {
         })
     },
     get_latest_alerts() {
+   
       axios
         .post('/api/v1/latest-alerts/'+this.page, this.filter)
         .then(response => {

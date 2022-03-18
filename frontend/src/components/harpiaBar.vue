@@ -14,10 +14,11 @@
       </div>
       <div class="navbar-menu" id="navbar-menu" v-bind:class="{'is-active': showMobileMenu }">
         <div class="navbar-start">
-            <router-link to="/latest-alerts/1" class="navbar-item">Alertas</router-link>
+            <router-link to="/latest-alerts/1" @click="refresh()" class="navbar-item">Alertas</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
             <router-link to="/resumo" class="navbar-item">Resumo</router-link>
+            {
           <div v-if="show_in_bar == true" class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
               Filtros
@@ -50,6 +51,11 @@
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
+          <template v-if="true">
+                <span>
+                <i class="fas fa-user-circle" /></span>
+                <span>Meu Pau</span>
+              </template>
             <div class="buttons">
               <template v-if="true">
                 <router-link to="/audio" class="button is-primary is-inverted is-outlined" title="Sound off">
@@ -109,6 +115,14 @@ data() {
     }
   },
   methods:{
+    refresh(){
+       this.filter.date_start = 0
+        this.filter.date_end = 2500916953418
+        this.$store.commit("save_filter", this.filter)
+       this.$router.push("/latest-alerts/1").then(()=> {
+            this.$router.go()
+        })
+    },
     logout() {
             axios.defaults.headers.common["Authorization"] = ""
             localStorage.removeItem("token")
