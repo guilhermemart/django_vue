@@ -48,11 +48,11 @@
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
-          <template v-if="true">
-                <span>
+          <div class="mx-3" v-if="true">
+                <span class="mx-2">
                 <i class="fas fa-user-circle" /></span>
-                <span>Meu Pau</span>
-              </template>
+                <span>{{usuario}}</span>
+              </div>
             <div class="buttons">
               <template v-if="$store.state.audio.is_on">
                 <div class="button is-primary is-inverted is-outlined" title="Sound off" @click="audioSwitch()">
@@ -107,7 +107,8 @@ data() {
         invalid: true,
         non_classified: true,
         date_start: 0,
-        date_end: new Date().getTime()
+        date_end: new Date().getTime(),
+        usuario: ""
         }
     }
   },
@@ -167,6 +168,7 @@ data() {
 
   mounted() {
     this.filter = this.$store.state.filter
+    this.usuario = localStorage.getItem("harpiaUser")
   },
   computed: {
 
