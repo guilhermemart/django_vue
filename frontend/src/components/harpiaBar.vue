@@ -48,11 +48,7 @@
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
-          <template v-if="true">
-                <span>
-                <i class="fas fa-user-circle" /></span>
-                <span>Meu Pau</span>
-              </template>
+      
             <div class="buttons">
               <template v-if="$store.state.audio.is_on">
                 <div class="button is-primary is-inverted is-outlined" title="Sound off" @click="audioSwitch()">
