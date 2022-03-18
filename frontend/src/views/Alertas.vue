@@ -57,7 +57,7 @@
           <div class="column is-12 has-text-centered is-half-screen-height is-flex has-vertical-centered-text" v-else>
               <i icon="alert" size="is-large" type="is-dark"></i>
               <p class="title">
-                  Não há alertas disponíveis.
+                  No alerts available.
               </p>
           </div>
         </div>
@@ -179,7 +179,7 @@ export default {
 
     //this.$store.state.filter=this.filter
     this.get_latest_alerts()
-    document.title = 'Alertas | Harpia' //  titulo do documento para diferenciar dos outros .vue
+    document.title = 'Alerts | Harpia' //  titulo do documento para diferenciar dos outros .vue
   },
   created(){
     

@@ -2,9 +2,7 @@
   <div class="vertical-horizontal-center">
     <nav class="navbar is-primary" role="navigation">
       <div class="navbar-brand">
-        <div class="mt-1" @click="logout()">
-          <router-link to="/" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
-        </div>
+        <router-link to="" @click="goAltave()" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
         <a class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu" @click="showMobileMenu = !showMobileMenu">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -14,37 +12,36 @@
       </div>
       <div class="navbar-menu" id="navbar-menu" v-bind:class="{'is-active': showMobileMenu }">
         <div class="navbar-start">
-            <router-link to="/latest-alerts/1" @click="refresh()" class="navbar-item">Alertas</router-link>
+            <router-link to="/latest-alerts/1" @click="refresh()"  class="navbar-item">Alerts</router-link>
             <router-link to="/cameras" class="navbar-item">Cameras</router-link>
             <router-link to="/red_zones" class="navbar-item">Red Zones</router-link>
-            <router-link to="/resumo" class="navbar-item">Resumo</router-link>
-            {
+            <router-link to="/overview" class="navbar-item">Overview</router-link>
           <div v-if="show_in_bar == true" class="navbar-item has-dropdown is-hoverable">
             <a class="navbar-link">
-              Filtros
+              Filters
             </a>
             <div class="navbar-dropdown">
               <a class="navbar-item" @click="filterValid()" v-if="filter.valid">
-                Alertas validos <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
+                Valid Alerts<a class="ml-2"><i class="fa-regular fa-eye"></i></a>
               </a>
               <a class="navbar-item" @click="filterValid()" v-else>
-                Alertas validos <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
+                Valid Alerts<a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
               </a>
               <a class="navbar-item" @click="filterInvalid()" v-if="filter.invalid">
-                Alertas invalidos <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
+                Invalid Alerts<a class="ml-2"><i class="fa-regular fa-eye"></i></a>
               </a>
               <a class="navbar-item" @click="filterInvalid()" v-else>
-                Alertas invalidos <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
+                Invalid Alerts<a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
               </a>
               <a class="navbar-item" @click="filterNonClassified()" v-if="filter.non_classified">
-                Não classificados <a class="ml-2"><i class="fa-regular fa-eye"></i></a>
+                Unclassified<a class="ml-2"><i class="fa-regular fa-eye"></i></a>
               </a>
               <a class="navbar-item" @click="filterNonClassified()" v-else>
-                Não classificados <a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
+                Unclassified<a class="ml-2"><i class="fa-regular fa-eye-slash"></i></a>
               </a>
               <hr class="navbar-divider">
               <a class="navbar-item" @click="filterClear()">
-                Limpar filtros
+                Clear
               </a>
             </div>
           </div>
@@ -57,15 +54,15 @@
                 <span>Meu Pau</span>
               </template>
             <div class="buttons">
-              <template v-if="true">
-                <router-link to="/audio" class="button is-primary is-inverted is-outlined" title="Sound off">
+              <template v-if="$store.state.audio.is_on">
+                <div class="button is-primary is-inverted is-outlined" title="Sound off" @click="audioSwitch()">
                 <i class="fas fa-volume-high" />                    
-                </router-link>
+                </div>
               </template>
               <template v-else>
-                <router-link to="/config-som" class="button is-dark is-inverted is-outlined" title="Sound on">
+                <div class="button is-dark is-inverted is-outlined" title="Sound on" @click="audioSwitch()">
                 <i class="fas fa-volume-xmark" />                    
-                </router-link>
+                </div>
               </template>
               <template v-if="$store.state.isAuthenticated">
                 <button @click="logout()" class="button is-danger is-outlined " title="Logout">
@@ -158,7 +155,14 @@ data() {
       this.filter.invalid = true
       this.filter.non_classified = true
       this.save_filter()
-    }
+    },
+    audioSwitch() {
+      this.$store.state.audio.is_on = !this.$store.state.audio.is_on
+      console.log(this.$store.state.audio.is_on)
+    },
+    goAltave() {
+      window.open("https://www.altave.com.br/")
+    },
   },
 
   mounted() {

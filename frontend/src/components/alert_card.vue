@@ -2,7 +2,17 @@
   <div>
     <div class="box has-background-white mx-1" :class="thumb_up?'boxUp':thumb_down?'boxDown':'box'">
       <div class="is-floating-left">
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" >
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary" @click="commentModal=!commentModal" v-if="comments.length > 5">
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary-dark" @click="commentModal=!commentModal" v-else-if="comments.length > 0">
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" v-else-if="comments.length == 0">
           <span class="icon ">
             <i class="far fa-comment-alt fa-lg" />
           </span>
@@ -34,7 +44,7 @@
             <div class=" has-text-left">
               <div class="container has-text-underlined mb-4">
                 <icon  class="ml-2 " icon="hard-hat" type="is-primary"></icon>
-                <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} EPI</span>
+                <span  class="is-size-5 has-text-weight-bold has-text-primary">{{ Alert.quantidade }} PPE</span>
               </div>
               <div class="container has-text-underlined">
                 <icon class="ml-2" icon="exclamation-thick" type="is-primary"></icon>

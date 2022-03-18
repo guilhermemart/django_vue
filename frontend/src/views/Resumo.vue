@@ -33,6 +33,7 @@ export default {
   },
   mounted() {
     this.getAlerts()
+    document.title = 'Overview | Harpia'
   },
   methods: {
     /* Pega os dados do 'alerts/report' e salva em variáveis separadas, uma pra cada card */
