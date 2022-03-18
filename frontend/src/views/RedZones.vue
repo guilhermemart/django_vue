@@ -4,7 +4,7 @@
         <div class="columns">
         <!--radios -->
           <div class="column is-2 mx-4">
-              <p class="subtitle mt-4">Selecione a camera:</p>
+              <p class="subtitle mt-4">Select a camera:</p>
                 <div v-for="cam in stageConfig" :key="cam.name" class="radios">
                         <input type="radio" id="cam.name" :value="cam.name" v-model="cam_selected"  />
                          <label for="cam"> cam{{(cam.name+1)}}</label>
@@ -71,13 +71,13 @@
                 
 
               <div v-if="false">
-              <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Limpar</button>
-              <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Desfazer</button>
-              <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Salvar</button>
+              <button class="is-danger my-2" icon-left="broom"  expanded outlined @click="clear">Clear</button>
+              <button class="is-warning mb-2" icon-left="undo" :disabled='this.points.length<2' expanded outlined @click="undo">Undo</button>
+              <button class="is-success mb-2"  icon-left="content-save" :disabled='this.points.length<6' expanded outlined @click="save">Save</button>
             <div class="dropdown is-hoverable">
               <div class="dropdown-trigger">
                 <button class="button" aria-haspopup="true" aria-controls="dropdown-menu">
-                  <span>Carregar</span>
+                  <span>Load</span>
                   <span class="icon is-small">
                     <i class="fas fa-angle-down" aria-hidden="true"></i>
                   </span>
@@ -86,19 +86,19 @@
               <div class="dropdown-menu" id="dropdown-menu" role="menu">
                 <div class="dropdown-content">
                   <a v-for="rd in redzones" :key="rd.name" :value="rd" aria-role="listitem" class="columns">
-                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >delete icon</button></div>
+                  <div class="column"><button @click="deleteRZ(rd)" icon-left="delete" size='is-large' class="is-danger" inverted >Delete icon</button></div>
                   <div class="column my-4">{{rd.name.toUpperCase()}}</div>
                   </a>
                 </div>
               </div>
             </div>
 
-            <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Ativar RedZone</button>
+            <button class="is-info mb-4"  icon-left="play" :disabled='this.points.length<6' expanded outlined @click="enableRZ(rdSelected)">Enable Red Zone</button>
               </div>
 
 
             <div class="card mt-2 glass">
-              <p class="title is-size-4">Red Zones Ativas:</p>
+              <p class="title is-size-4">Active Red zones:</p>
               <div v-if="red_zones_ativas.length">
                 <ul class="is-size-4 mx-2 my-2 " v-for="rz in red_zones_ativas" :key='rz.name'><hr>
                   <button class="button is-outlined is-danger is-fullwidth " outlined rounded   @click="disabledRZ(rz)">
@@ -109,7 +109,7 @@
                   </button>                   
                 </ul>
               </div>
-              <div v-else class="is-size-4 card"> <p><i>Sem redzones ativas no momento.</i></p></div>
+              <div v-else class="is-size-4 card"> <p><i>No Red Zone active</i></p></div>
             </div>
             </div>
             <div class=" cams column is-10 mt-4 " >
@@ -215,6 +215,7 @@ export default {
   created() {
     this.loadingImages()  // le as imagens base onde os pontos serão desenhados
     this.load_red_zones()
+    document.title = 'Red Zones | Harpia'
     
   },
   watch:{

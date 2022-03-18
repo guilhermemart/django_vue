@@ -82,8 +82,8 @@ const routes = [
     component: Cameras
   },
   {
-    path: '/resumo',
-    name: 'Resumo',
+    path: '/overview',
+    name: 'Overview',
     component: Resumo
   },
   {

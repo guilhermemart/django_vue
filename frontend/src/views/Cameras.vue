@@ -9,17 +9,17 @@
           <ul>
             <li class="is-active mr-4" @click="tabSwitcher('1')">
               <a id="tabs">
-                <span>Área A</span>
+                <span>Area A</span>
               </a>
             </li>
             <li class="mr-4" @click="tabSwitcher('2')">
               <a id="tabs">
-                <span>Área B</span>
+                <span>Area B</span>
               </a>
             </li>
             <li @click="tabSwitcher('3')">
               <a id="tabs">
-                <span>Área C</span>
+                <span>Area C</span>
               </a>
             </li>
           </ul>
@@ -209,6 +209,7 @@ export default {
     created() {
         this.updateCamera()
         this.timer()
+        document.title = 'Cameras | Harpia'
     },
     watch: {
       cameraA1(newImg) {
