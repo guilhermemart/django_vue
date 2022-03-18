@@ -2,9 +2,7 @@
   <div class="vertical-horizontal-center">
     <nav class="navbar is-primary" role="navigation">
       <div class="navbar-brand">
-        <div class="mt-1" @click="logout()">
-          <router-link to="/" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
-        </div>
+        <router-link to="" @click="goAltave()" class="navbar-item"><img src="@/assets/harpia_logo.png"></router-link>
         <a class="navbar-burger" aria-label="menu" aria-expanded="false" data-target="navbar-menu" @click="showMobileMenu = !showMobileMenu">
           <span aria-hidden="true"></span>
           <span aria-hidden="true"></span>
@@ -51,15 +49,15 @@
         <div class="navbar-end">
           <div class="navbar-item">
             <div class="buttons">
-              <template v-if="true">
-                <div class="button is-primary is-inverted is-outlined" title="Sound off">
+              <template v-if="$store.state.audio.is_on">
+                <div class="button is-primary is-inverted is-outlined" title="Sound off" @click="audioSwitch()">
                 <i class="fas fa-volume-high" />                    
                 </div>
               </template>
               <template v-else>
-                <router-link to="/config-som" class="button is-dark is-inverted is-outlined" title="Sound on">
+                <div class="button is-dark is-inverted is-outlined" title="Sound on" @click="audioSwitch()">
                 <i class="fas fa-volume-xmark" />                    
-                </router-link>
+                </div>
               </template>
               <template v-if="$store.state.isAuthenticated">
                 <button @click="logout()" class="button is-danger is-outlined " title="Logout">
@@ -144,7 +142,14 @@ data() {
       this.filter.invalid = true
       this.filter.non_classified = true
       this.save_filter()
-    }
+    },
+    audioSwitch() {
+      this.$store.state.audio.is_on = !this.$store.state.audio.is_on
+      console.log(this.$store.state.audio.is_on)
+    },
+    goAltave() {
+      window.open("https://www.altave.com.br/")
+    },
   },
 
   mounted() {

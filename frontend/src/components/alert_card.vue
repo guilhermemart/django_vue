@@ -2,7 +2,17 @@
   <div>
     <div class="box has-background-white mx-1" :class="thumb_up?'boxUp':thumb_down?'boxDown':'box'">
       <div class="is-floating-left">
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" >
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary" @click="commentModal=!commentModal" v-if="comments.length > 5">
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary-dark" @click="commentModal=!commentModal" v-else-if="comments.length > 0">
+          <span class="icon ">
+            <i class="far fa-comment-alt fa-lg" />
+          </span>
+        </button>
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused" @click="commentModal=!commentModal" v-else-if="comments.length == 0">
           <span class="icon ">
             <i class="far fa-comment-alt fa-lg" />
           </span>
