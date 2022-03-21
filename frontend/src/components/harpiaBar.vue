@@ -48,20 +48,20 @@
         </div>
         <div class="navbar-end">
           <div class="navbar-item">
-          <template v-if="true">
-                <span>
+          <div class="mx-3" v-if="true">
+                <span class="mx-2">
                 <i class="fas fa-user-circle" /></span>
-                <span>Meu Pau</span>
-              </template>
+                <span>{{usuario}}</span>
+              </div>
             <div class="buttons">
               <template v-if="$store.state.audio.is_on">
                 <div class="button is-primary is-inverted is-outlined" title="Sound off" @click="audioSwitch()">
-                <i class="fas fa-volume-high" />                    
+                <i class="fas fa-volume-high" />
                 </div>
               </template>
               <template v-else>
                 <div class="button is-dark is-inverted is-outlined" title="Sound on" @click="audioSwitch()">
-                <i class="fas fa-volume-xmark" />                    
+                <i class="fas fa-volume-xmark" />
                 </div>
               </template>
               <template v-if="$store.state.isAuthenticated">
@@ -72,7 +72,7 @@
               <template v-else>
                 <router-link to="/log-in" class="button is-success is-outlined" title="Login"><i class="fas fa-right-to-bracket" /></router-link>
               </template>
-            
+
             </div>
           </div>
         </div>
@@ -84,8 +84,8 @@
     </div>
 
 
-  </div> 
-  
+  </div>
+
 </template>
 
 <script>
@@ -107,7 +107,8 @@ data() {
         invalid: true,
         non_classified: true,
         date_start: 0,
-        date_end: new Date().getTime()
+        date_end: new Date().getTime(),
+        usuario: ""
         }
     }
   },
@@ -167,9 +168,10 @@ data() {
 
   mounted() {
     this.filter = this.$store.state.filter
+    this.usuario = localStorage.getItem("harpiaUser")
   },
   computed: {
 
-  } 
+  }
 }
 </script>
