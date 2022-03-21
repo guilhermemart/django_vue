@@ -93,6 +93,10 @@ con# django_vue
   - Na linha de "Usuários" clique em "+ Adicionar"
   - Crie um usuário e desmarque as permissões para ficar somente "Ativo"
     
+* Configurar no oracule.py a pasta que vai ser usada como deposito de imagens para as cameras realtime
+* Configurar ip e porta no oracle.py
+* Rodar python -m oracle.py
+
 * Maintainers:
     - Guilherme Martins
     - Celso Reis

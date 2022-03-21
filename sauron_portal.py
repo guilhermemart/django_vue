@@ -1,6 +1,10 @@
 from datetime import datetime
 import requests
 import json
+import base64
+import websockets
+import asyncio
+
 '''funcionamento\n
 colocar a lib na pasta do sauron\n 
 executar a funcao enviar_alerta(argumentos)\n
@@ -162,7 +166,20 @@ def refresh_the_picture(cam, local_image_url="pwa_images/example.png", backend_i
     return result.status_code
 
 
+async def send_the_picture(picture_url, backend_ip=None, backend_port=None):
+    global global_token
+    if backend_ip is None:
+        backend_ip = ip
+    if backend_port is None:
+        backend_port = port
+    with open(picture_url, 'rb') as img:
+        img64 = base64.encodebytes(img.read())
+    async with websockets.connect("ws://localhost:8765") as websocket:
+        await websocket.send(img64)
+
 if __name__ == "__main__":
-    enviar_alerta(fake_alerta)
+    #send_the_picture("example.png"))  # rodar a funcao de forma asyncio
+    #enviar_alerta(fake_alerta)
     #get_red_zones("0")
     #refresh_the_picture("cam2")
+    pass
