@@ -100,12 +100,11 @@ export default {
                     axios.defaults.headers.common["Authorization"] = "Token " + token
 
                     localStorage.setItem("token", token)
+                    localStorage.setItem("harpiaUser", formData.username)
 
                     this.play_audio(0.05)
 
-                    const toPath = this.$route.query.to || '/latest-alerts/1'
-
-                    this.$router.push(toPath)
+                    this.$router.push("/latest-alerts/1")
                 })
                 .catch(error => {
                     this.errors=[]
