@@ -49,7 +49,7 @@
         <div class="navbar-end">
           <div class="navbar-item">
           <div class="mx-3" v-if="true">
-                <span class="mx-2">
+                <span class="mx-2 is-size-4">
                 <i class="fas fa-user-circle" /></span>
                 <span>{{usuario}}</span>
               </div>
