@@ -2,12 +2,12 @@
   <div>
     <div class="box has-background-white mx-1" :class="thumb_up?'boxUp':thumb_down?'boxDown':'box'">
       <div class="is-floating-left">
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary" @click="commentModal=!commentModal" v-if="comments.length > 5">
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-link" @click="commentModal=!commentModal" v-if="comments.length > 5">
           <span class="icon ">
             <i class="far fa-comment-alt fa-lg" />
           </span>
         </button>
-        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused has-background-primary-dark" @click="commentModal=!commentModal" v-else-if="comments.length > 0">
+        <button class=" button mx-1 is-rounded is-small is-dark is-inverted is-focused is-info" @click="commentModal=!commentModal" v-else-if="comments.length > 0">
           <span class="icon ">
             <i class="far fa-comment-alt fa-lg" />
           </span>
@@ -86,7 +86,7 @@
           Para fazer depois:
           Aumentar o modal, talvez a solução seja o  https://postare.github.io/bulma-modal-fx/ -->
           <div class="modal-content">
-            <header class="modal-card-head">
+            <header class="modal-card-head has-background-primary">
             <p class="modal-card-title">Information </p>
             <button type="button" class="delete" @click="commentModal=false" />
           </header>
@@ -117,7 +117,7 @@
         
               
             </table>
-            <p v-else class="has-text-danger is-size-4">This alert has no comments entered.</p> 
+            <p v-else class="has-text-danger is-size-4">This alert has no comments.</p>
            <br>
            <hr>
           <footer>

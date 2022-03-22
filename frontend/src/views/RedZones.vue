@@ -151,7 +151,7 @@
         <div class="modal"  :class="{'is-active': saveModal}" >
   
   <div class="modal-card">
-    <header class="modal-card-head">
+    <header class="modal-card-head has-background-primary">
       <p class="modal-card-title">Redzone name</p>
       <button class="delete" @click="saveModal=!saveModal" aria-label="close"></button>
     </header>
