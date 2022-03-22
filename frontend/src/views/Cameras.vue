@@ -48,40 +48,40 @@
         <div id="tab-content" class="columns">
             <div id="camGroupA" v-if="group==='1'" class="columns is-multiline is-gapless">
                 <div class="column is-half">
-                    <img id="camA1" :src="cameraA1" width="980" alt="camera 1"/>
+                    <img id="cam1" :src='cameraA1' width="980" alt=""/>
                 </div>
                 <div class="column is-half">
-                    <img id="camA2" src="@/assets/valaris2.jpg" width="980" alt="camera 2"/>
+                    <img id="cam2" :src='cameraA2' width="980" alt="camera 2"/>
                 </div>
                 <div class="column is-half ">
-                    <img id="camA3" src="@/assets/valaris3.jpg" width="980" alt="camera 3"/>
+                    <img id="cam3" :src='cameraA3' width="980" alt="camera 3"/>
                 </div>
                 <div class="column is-half">
-                    <img id="camA4" :src="cameraA4" width="980" alt="camera 4"/>
+                    <img id="cam4" :src='cameraA4' width="980" alt="camera 4"/>
                 </div>
             </div>
 
             <div id="camGroupB" v-if="group==='2'" class="columns is-multiline">
                 <div id="B1" class="column is-half is-offset-3">
-                    <img id="camB1" src="@/assets/valaris1.jpg" width="980" alt="camera 5"/>
+                    <img id="cam5" :src='cameraA5' width="980" alt="camera 5"/>
                 </div>
                 <div id="B2" class="column is-half is-offset-3">
-                    <img id="camB2" src="@/assets/valaris3.jpg" width="980" alt="camera 6"/>
+                    <img id="cam6" :src='cameraA6' width="980" alt="camera 6"/>
                 </div>
             </div>
 
             <div id="camGroupC" v-if="group==='3'" class="columns is-multiline is-gapless">
                 <div class="column is-half">
-                    <img id="camC1" src="@/assets/red_zones_base_img/cam1.jpg" width="980" alt="camera 7"/>
+                    <img id="cam7" :src='cameraA7' width="980" alt="camera 7"/>
                 </div>
                 <div class="column is-half">
-                    <img id="camC2" src="@/assets/valaris3.jpg" width="980" alt="camera 8"/>
+                    <img id="cam8" :src='cameraA8' width="980" alt="camera 8"/>
                 </div>
                 <div class="column is-half">
-                    <img id="camC3" src="@/assets/valaris1.jpg" width="980" alt="camera 9"/>
+                    <img id="cam9" :src='cameraA9' width="980" alt="camera 9"/>
                 </div>
                 <div class="column is-half">
-                    <img id="camC4" src="@/assets/valaris4.jpg" width="980" alt="camera 10"/>
+                    <img id="cam10" :src='cameraA10' width="980" alt="camera 10"/>
                 </div>
             </div>
         </div>
@@ -191,7 +191,7 @@ input:checked + .slider:before {
 
 <script>
 import harpiaBar from '@/components/harpiaBar.vue'
-import axios from "axios";
+//import axios from "axios";
 
 export default {
     name: 'Cameras',
@@ -203,7 +203,15 @@ export default {
             counter: '',
             group: '1',
             cameraA1: '',
+            cameraA2: '',
+            cameraA3: '',
             cameraA4: '',
+            cameraA5: '',
+            cameraA6: '',
+            cameraA7: '',
+            cameraA8: '',
+            cameraA9: '',
+            cameraA10: '',
         }
     },
     created() {
@@ -211,30 +219,24 @@ export default {
         this.timer()
         document.title = 'Cameras | Harpia'
     },
-    watch: {
-      cameraA1(newImg) {
+    // watch: {
+    //   cameraA1(newImg) {
 
-      }
-    },
+    //   }
+    // },
     methods: {
-        getImageUrl() {
-          //return require('/home/devanir/img/valaris2.jpg')
-            return
+        updateCamera() {
+            this.cameraA1 = 'http://'+process.env.VUE_APP_IP+':8001/cam1.jpg' +`?v=${new Date().getTime()}`
+            this.cameraA2 = 'http://'+process.env.VUE_APP_IP+':8001/cam2.jpg' + "?" + new Date().getTime()
+            this.cameraA3 = 'http://'+process.env.VUE_APP_IP+':8001/cam3.jpg' + "?" + new Date().getTime()
+            this.cameraA4 = 'http://'+process.env.VUE_APP_IP+':8001/cam4.jpg' + "?" + new Date().getTime()
+            this.cameraA5 = 'http://'+process.env.VUE_APP_IP+':8001/cam5.jpg' + "?" + new Date().getTime()
+            this.cameraA6 = 'http://'+process.env.VUE_APP_IP+':8001/cam6.jpg' + "?" + new Date().getTime()
+            this.cameraA7 = 'http://'+process.env.VUE_APP_IP+':8001/cam7.jpg' + "?" + new Date().getTime()
+            this.cameraA8 = 'http://'+process.env.VUE_APP_IP+':8001/cam8.jpg' + "?" + new Date().getTime()
+            this.cameraA9 = 'http://'+process.env.VUE_APP_IP+':8001/cam9.jpg' + "?" + new Date().getTime()
+            this.cameraA10 = 'http://'+process.env.VUE_APP_IP+':8001/cam10.jpg' + "?" + new Date().getTime()
         },
-
-        async updateCamera() {
-          let ip = document.location.href.split("cameras")[0].slice(0, -5) + '8000/'
-          let image = ip + 'media/cat.jpg'
-          console.log(image)
-          await axios
-          .get('api/v1/cameras/get_url/')
-          .then(response => {
-            console.log(response.data.camera1)
-            this.cameraA1 = response.data.camera1 + "?" + new Date().getTime()
-            this.cameraA4 = response.data.camera4 + "?" + new Date().getTime()
-          })
-        },
-
 
         /* Salva as li em 'tabs', desativa todas,
         ativa a tab selecionada e ajusta o height do div para não conflitar */
