@@ -216,6 +216,7 @@ export default {
     this.loadingImages()  // le as imagens base onde os pontos serão desenhados
     this.load_red_zones()
     document.title = 'Red Zones | Harpia'
+    this.watchdog()
     
   },
   watch:{
@@ -393,6 +394,13 @@ export default {
           this.load_red_zones()
         })
           //axios.post('api/v1/update_red_zone/'+ rz.name,JSON.stringify({is_active: false}), {headers:{'Content-Type': 'application/json'}}).then(()=>this.load_red_zones())
+    },
+
+    watchdog() {
+      axios.get("api/v1/watchdog/red_zone").then( item => {
+        console.log(item.data)
+        this.watchdog()
+      })
     }
 
 }

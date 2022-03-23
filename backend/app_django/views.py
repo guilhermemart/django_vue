@@ -66,7 +66,7 @@ class update_alert(APIView):
         try:
             pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'),
                                   host=config('db_host'))
-            pubsub.notify('canal_1', 'mensagem_atualizada')
+            pubsub.notify('canal_2', 'mensagem_atualizada')
         except Exception as e:
             print(e)
         serializer = update_alert_by_identificador(request)
@@ -419,6 +419,12 @@ class update_red_zone(APIView):
             rzone.enabled = False
         rzone.save()
         serializer = red_zone_serializer(rzone)
+        try:  # abre conexão com o bd pro pgpubsub perceber a chegada de um alerta novo
+            pubsub = pgpubsub.connect(dbname=config('db'), user=config('user'), password=config('password'), host=config('db_host'))
+            print(serializer.data)
+            pubsub.notify('canal_2', str(serializer.data["id"]))
+        except Exception as e:
+            print(e)
         return Response(serializer.data)
 
 # Retorna todos os alertas do banco sql
@@ -427,3 +433,11 @@ class alerts_all(APIView):
         alerts = alert.objects.all()
         serializer = alert_serializer(alerts, many=True)
         return Response(serializer.data)
+
+#watchdog para atualizações de redzones
+class wait_red_zone(APIView):
+    def get(self, request):
+        wait_event = wait_for_new_alert()
+        if wait_event[0] == "canal_2":
+            redzone = red_zone.objects.filter(id=int(wait_event[1]))[0]
+        return red_zone_serializer(redzone).data

@@ -18,7 +18,8 @@ urlpatterns = [
     path('red_zone/camera/base_img_update/', views.red_zone_camera_update.as_view()),
     path('cameras/update/', views.update_cameras.as_view()),
     path('cameras/get_url/', views.get_url_cameras.as_view()),
-    path('alerts/all/', views.alerts_all.as_view())
+    path('alerts/all/', views.alerts_all.as_view()),
+    path('watchdog/red_zone/', views.wait_red_zone.as_view()),
 ]
 '''path('products/search/', views.search),
     path('products/<slug:category_slug>/<slug:product_slug>/', views.ProductDetail.as_view()),
